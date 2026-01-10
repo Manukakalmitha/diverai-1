@@ -125,31 +125,35 @@ export const STOCK_MAP = {
 export const detectPrice = (text) => {
     if (!text) return null;
 
-    // 1. Look for numbers with decimals (most likely prices)
-    // Regex: Match numbers like 102,434.50 or 1.2345
-    const decimalMatches = text.match(/\d{1,3}(?:,\d{3})*(?:\.\d+)/g);
-    if (decimalMatches) {
-        const candidates = decimalMatches
-            .map(m => parseFloat(m.replace(/,/g, '')))
-            .filter(n => n > 0.0001 && n < 10000000);
-        if (candidates.length > 0) {
-            // Usually the most prominent price is the largest one in the top area or the last one (current price)
-            // But for high-cap assets like BTC, the largest is usually the correct price.
-            // For now, let's take the first valid match as it's often the current price in titles/headers.
-            return candidates[0];
-        }
-    }
+    // 1. Precise Match: Search for numbers with decimal places (common in trading)
+    const decimalMatches = text.match(/\d{1,3}(?:,\d{3})*\.\d{1,8}/g);
 
-    // 2. Fallback to large integers if no decimals found
-    const intMatches = text.match(/\b\d{2,7}\b/g);
-    if (intMatches) {
-        const candidates = intMatches
-            .map(m => parseInt(m))
-            .filter(n => n > 10 && n < 1000000);
-        if (candidates.length > 0) return candidates[0];
-    }
+    // 2. Integer Match: Potential large-cap price or indices (e.g. BTC at 102434)
+    const intMatches = text.match(/\b\d{3,7}\b/g);
 
-    return null;
+    const allMatches = [...(decimalMatches || []), ...(intMatches || [])];
+
+    const candidates = allMatches
+        .map(m => parseFloat(m.replace(/,/g, '')))
+        .filter(n => {
+            // Filter out obviously wrong numbers
+            if (n >= 2020 && n <= 2030) return false; // Likely a year
+            if (n === 24 || n === 1 || n === 7) return false; // Timeframes
+            return n > 0.0001 && n < 20000000;
+        });
+
+    if (candidates.length === 0) return null;
+
+    // Heuristic: Prefer decimals, then larger numbers
+    const sorted = candidates.sort((a, b) => {
+        const aHasDecimal = a % 1 !== 0;
+        const bHasDecimal = b % 1 !== 0;
+        if (aHasDecimal && !bHasDecimal) return -1;
+        if (!aHasDecimal && bHasDecimal) return 1;
+        return b - a;
+    });
+
+    return sorted[0];
 };
 
 export const detectTicker = (text) => {
@@ -157,10 +161,10 @@ export const detectTicker = (text) => {
 
     const upper = text.toUpperCase();
 
-    // 0. Blacklist / Filter
-    const blacklist = ['USD', 'USDT', 'VOL', '24H', 'HIGH', 'LOW', 'PRICE', 'INDEX', 'STOCK', 'CRYPTO', 'CHART'];
+    // 0. Blacklist / Filter common noise
+    const blacklist = ['USD', 'USDT', 'VOL', '24H', 'HIGH', 'LOW', 'PRICE', 'INDEX', 'STOCK', 'CRYPTO', 'CHART', 'MARKET', 'TRADE', 'BUY', 'SELL'];
 
-    // Normalize: Remove all non-alphanumeric characters
+    // Normalize: Remove noise
     const cleanText = upper.replace(/[^A-Z0-9]/g, ' ');
     const words = cleanText.split(/\s+/).filter(w => w.length >= 2 && !blacklist.includes(w));
 
@@ -169,8 +173,8 @@ export const detectTicker = (text) => {
         if (COIN_MAP[word] || STOCK_MAP[word]) return word;
     }
 
-    // 2. Pair Strategy (e.g., BTCUSDT, BTC/USD)
-    const pairMatch = upper.match(/([A-Z]{2,10})[\/\-\\]?(?:USDT|USD|BUSD|USDC|PERP)/);
+    // 2. Pair Strategy (e.g., BTCUSDT, BTC/USD, ETH-PERP)
+    const pairMatch = upper.match(/([A-Z]{2,10})[\/\-\\]?(?:USDT|USD|BUSD|USDC|PERP|FRAX|DAI)/);
     if (pairMatch) {
         const t = pairMatch[1];
         if (COIN_MAP[t] || STOCK_MAP[t]) return t;
@@ -185,7 +189,7 @@ export const detectTicker = (text) => {
         if (t.length >= 2 && !blacklist.includes(t)) return t;
     }
 
-    // 4. Heuristic Search (Longest first to avoid partial matches like 'BIT' for 'BITCOIN')
+    // 4. Heuristic Search
     const sortedCoins = Object.keys(COIN_MAP).sort((a, b) => b.length - a.length);
     for (const ticker of sortedCoins) {
         if (new RegExp(`\\b${ticker}\\b`).test(upper)) return ticker;

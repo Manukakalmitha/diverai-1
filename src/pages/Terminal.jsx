@@ -1092,8 +1092,10 @@ export default function Terminal() {
                 if (profile?.subscription_tier === 'pro' && user) {
                     try {
                         setStatusMessage("Deep Scan (Cloud OCR)...");
+                        // CRITICAL: We pass ocrSrc (which can be originalFileSrc if we want raw)
+                        // Actually, let's use originalFileSrc for cloud OCR as it's pure
                         const { data, error } = await supabase.functions.invoke('detect_ticker', {
-                            body: { image: ocrImage }
+                            body: { image: originalFileSrc }
                         });
 
                         if (error) throw error;
@@ -1138,14 +1140,13 @@ export default function Terminal() {
             let detectedTicker = null;
             let anchorPrice = null;
 
-            if (typeof ocrRawResult === 'string') {
-                // Local OCR path returned just the ticker or null
-                detectedTicker = ocrRawResult;
-            } else if (ocrRawResult && typeof ocrRawResult === 'object') {
+            if (typeof ocrRawResult === 'object' && ocrRawResult !== null) {
                 // Cloud OCR path (or updated promise) with raw text
                 const fullText = ocrRawResult.text || "";
+                console.log("[Terminal] OCR text:", fullText.substring(0, 100));
                 detectedTicker = detectTicker(fullText);
                 anchorPrice = detectPrice(fullText);
+                console.log("[Terminal] Detected:", { ticker: detectedTicker, price: anchorPrice });
             }
 
             ticker = detectedTicker || manualTicker;

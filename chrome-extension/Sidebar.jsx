@@ -218,6 +218,7 @@ const Sidebar = () => {
             const fullText = ocrData?.text || '';
             const ticker = detectTicker(fullText);
             const anchorPrice = detectPrice(fullText);
+            console.log("[Sidebar] OCR Detected:", { ticker, anchorPrice });
 
             if (!ticker && !anchorPrice) throw new Error("Neural Core Rejected: No valid asset or price identified.");
 
