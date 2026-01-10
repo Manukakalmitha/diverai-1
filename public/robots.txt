@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://diveraitrading.web.app/sitemap.xml
+Sitemap: https://diverai.flisoft.agency/sitemap.xml
+

@@ -7,7 +7,7 @@ import { useAppContext } from '../src/context/AppContext';
 import { runRealAnalysis } from '../src/lib/analysis';
 import { detectTicker, fetchTickerData, fetchMarketData, fetchHistoricalData, fetchYahooData, fetchStockData, fetchStockHistory, STOCK_MAP } from '../src/lib/marketData';
 
-const PROD_URL = "https://diveraitrading.web.app";
+const PROD_URL = "https://diverai.flisoft.agency";
 
 // --- Shared Components for Terminal Aesthetic ---
 const SentimentGauge = ({ probability, direction }) => {
@@ -516,3 +516,4 @@ const Sidebar = () => {
 };
 
 export default Sidebar;
+
