@@ -46,7 +46,7 @@ const Layout = ({ children, showNav = true, showTicker = true, navStyle }) => {
                                         </div>
                                         <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700">
                                             {profile?.avatar_url ? (
-                                                <img src={profile.avatar_url} alt="Profile" className="w-full h-full object-cover rounded-full" />
+                                                <img src={profile.avatar_url} alt="Profile" className="w-full h-full object-cover rounded-full" referrerPolicy="no-referrer" />
                                             ) : (
                                                 <span className="text-xs font-bold text-slate-400">{user.email[0].toUpperCase()}</span>
                                             )}

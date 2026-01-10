@@ -919,13 +919,14 @@ export default function Terminal() {
 
     const fetchIp = async () => {
         try {
+            // Use a slightly different approach to avoid common ad-blocker patterns if needed, 
+            // but for now just silence the error.
             const res = await fetch('https://api.ipify.org?format=json');
             if (!res.ok) throw new Error("Network response was not ok");
             const data = await res.json();
             setUserIp(data.ip);
         } catch (err) {
-            // Ad-blockers or privacy tools often block this. Fail gracefully.
-            console.info("IP tracking disabled/blocked. Using session fallback.");
+            // Ad-blockers or privacy tools often block this. Fail silently.
             setUserIp('unknown-client');
         }
     };

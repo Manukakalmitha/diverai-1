@@ -180,7 +180,7 @@ export default function ProfilePage() {
                         <div className="w-32 h-32 md:w-40 md:h-40 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-[48px] p-1 shadow-2xl overflow-hidden relative">
                             <div className="w-full h-full bg-slate-900 rounded-[44px] flex items-center justify-center overflow-hidden">
                                 {profile?.avatar_url ? (
-                                    <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                                    <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                                 ) : (
                                     <User className="w-16 h-16 md:w-20 md:h-20 text-white" />
                                 )}
@@ -215,18 +215,10 @@ export default function ProfilePage() {
 
                     <div className="flex flex-col gap-3 w-full md:w-auto">
                         <button
-                            onClick={async () => {
-                                try {
-                                    const { openCustomerPortal } = await import('../lib/lemonsqueezy');
-                                    const url = await openCustomerPortal();
-                                    if (url) window.location.href = url;
-                                } catch (err) {
-                                    alert("Could not open billing portal: " + err.message);
-                                }
-                            }}
+                            onClick={() => navigate('/pricing')}
                             className="px-6 py-3 bg-white text-slate-950 font-black rounded-2xl text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all flex items-center justify-center gap-2"
                         >
-                            <Crown className="w-4 h-4" /> Manage Plan
+                            <Crown className="w-4 h-4" /> View Pricing
                         </button>
                         <button
                             onClick={() => { supabase.auth.signOut(); navigate('/'); }}
@@ -439,7 +431,7 @@ export default function ProfilePage() {
                                         <div className="flex items-center gap-6">
                                             {item.imageUrl ? (
                                                 <div className="w-16 h-12 rounded-lg bg-slate-800 border border-slate-700 overflow-hidden flex-shrink-0">
-                                                    <img src={item.imageUrl} alt={item.ticker} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                                                    <img src={item.imageUrl} alt={item.ticker} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" referrerPolicy="no-referrer" />
                                                 </div>
                                             ) : (
                                                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-xs ${item.direction.includes('Bullish') ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
