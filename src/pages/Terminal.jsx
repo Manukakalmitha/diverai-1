@@ -1240,40 +1240,39 @@ export default function Terminal() {
                         }
                     }
                 } catch (dataErr) {
-                    console.warn("API Data Fetch Failed, falling back to Visual Scan:", dataErr);
+                    console.warn("API Data Fetch Failed, engaging Anchored Visual Fallback:", dataErr);
 
                     // UNIVERSAL FALLBACK:
                     // If API fails (bad key, rate limit, etc), use Visual Analysis instead of failing.
+                    setStatusMessage("API Access Denied. Engaging Anchored Visual Extraction...");
 
-                    setStatusMessage("API Access Denied. Engaging Visual Pattern Extraction...");
+                    // Use pre-captured visualData or re-extract if missing
+                    let fallbackPrices = visualData?.points;
+                    if (!fallbackPrices || fallbackPrices.length < 20) {
+                        fallbackPrices = await extractChartData(visualSrc);
+                    }
 
-                    // We might not have run extractChartData yet if OCR originally succeeded.
-                    const extractedPrices = await extractChartData(visualSrc);
+                    if (fallbackPrices && fallbackPrices.length > 20) {
+                        // Apply OCR Anchor if we have it
+                        const finalPoints = anchorPrice
+                            ? anchorPriceToVisual(fallbackPrices, anchorPrice)
+                            : fallbackPrices;
 
-                    if (extractedPrices && extractedPrices.length > 20) {
-                        setStatusMessage("Visual Data Extracted. Running Neural Engines...");
-                        ticker = `${ticker || "UNKNOWN"} (VISUAL)`; // Mark as visual fallback
-
+                        ticker = `${ticker || "UNKNOWN"} (Visual Sync)`;
                         marketStats = {
-                            price: extractedPrices[extractedPrices.length - 1],
+                            price: finalPoints[finalPoints.length - 1],
                             change24h: 0,
                             volume: 0,
-                            source: 'Visual Cortex (Fallback)'
+                            source: anchorPrice ? 'Visual Cortex (Anchored)' : 'Visual Cortex (Estimate)'
                         };
-                        historicalPrices = extractedPrices;
+                        historicalPrices = finalPoints;
 
-                        // Clean up API key if it was the culprit
-                        if (dataErr.message && (dataErr.message.includes("403") || dataErr.message.includes("Forbidden"))) {
+                        // Clean up Finnhub key if that was the fail point
+                        if (dataErr.message?.includes("forbidden") || dataErr.message?.includes("403")) {
                             localStorage.removeItem('finnhub_key');
                         }
                     } else {
-                        // REJECTION LOGIC
-                        console.warn("Visual Validation Failed: No valid chart structure detected.");
-                        setStatusMessage("Neural Core Rejected: No Valid Chart Detected.");
-
-                        // Show a more descriptive warning to the user
-                        alert("Safety Check Triggered:\n\nThe AI could not detect a valid price chart in this image. Please ensure you are uploading a clear screenshot of a financial chart (Candlesticks or Line).");
-
+                        alert("Safety Check Triggered:\nNo valid chart or price data found. Please ensure the chart is clearly visible.");
                         setIsAnalyzing(false);
                         return;
                     }
