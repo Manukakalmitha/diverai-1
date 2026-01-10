@@ -1,0 +1,435 @@
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
+import { Mail, Lock, Loader2, AlertCircle, ArrowLeft, Activity, CheckCircle2, Chrome } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+
+const AuthPage = ({ initialMode = 'login' }) => {
+    const [isLogin, setIsLogin] = useState(initialMode === 'login');
+    const [isEmailSent, setIsEmailSent] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState(null);
+    const [resendCooldown, setResendCooldown] = useState(0);
+    const navigate = useNavigate();
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const source = queryParams.get('source');
+    const extId = queryParams.get('extId');
+    const [isExtAuthSuccess, setIsExtAuthSuccess] = useState(false);
+
+    useEffect(() => {
+        setIsLogin(initialMode === 'login');
+    }, [initialMode]);
+
+    // Check for already existing session from extension
+    useEffect(() => {
+        const checkExistingSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session && source === 'extension' && extId) {
+                // Sync session to extension
+                if (window.chrome && chrome.runtime && chrome.runtime.sendMessage) {
+                    chrome.runtime.sendMessage(extId, {
+                        type: 'AUTH_SYNC',
+                        session: {
+                            access_token: session.access_token,
+                            refresh_token: session.refresh_token
+                        }
+                    });
+                }
+                setIsExtAuthSuccess(true);
+            }
+        };
+        checkExistingSession();
+    }, [source, extId]);
+
+    const handleAuth = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+
+        try {
+            if (isLogin) {
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                if (error) throw error;
+
+                if (source === 'extension' && extId && data.session) {
+                    // Sync session to extension
+                    if (window.chrome && chrome.runtime && chrome.runtime.sendMessage) {
+                        chrome.runtime.sendMessage(extId, {
+                            type: 'AUTH_SYNC',
+                            session: {
+                                access_token: data.session.access_token,
+                                refresh_token: data.session.refresh_token
+                            }
+                        }, (response) => {
+                            console.log("Extension auth sync response:", response);
+                        });
+                    }
+                    setIsExtAuthSuccess(true);
+                } else {
+                    navigate('/analysis');
+                }
+            } else {
+                const { error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        emailRedirectTo: source === 'extension'
+                            ? `${window.location.origin}/login?source=extension&extId=${extId}`
+                            : `${window.location.origin}/analysis`
+                    }
+                });
+                if (error) throw error;
+                setIsEmailSent(true);
+            }
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleGoogleLogin = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: source === 'extension'
+                        ? `${window.location.origin}/login?source=extension&extId=${extId}`
+                        : `${window.location.origin}/analysis`
+                }
+            });
+            if (error) throw error;
+        } catch (err) {
+            setError(err.message);
+            setLoading(false);
+        }
+    };
+
+    const handleResend = async () => {
+        if (resendCooldown > 0) return;
+        setLoading(true);
+        try {
+            const { error } = await supabase.auth.resend({
+                type: 'signup',
+                email: email,
+                options: {
+                    redirectTo: `${window.location.origin}/`
+                }
+            });
+            if (error) throw error;
+            setResendCooldown(60);
+            const timer = setInterval(() => {
+                setResendCooldown((prev) => {
+                    if (prev <= 1) {
+                        clearInterval(timer);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const [checkingStatus, setCheckingStatus] = useState(false);
+
+    useEffect(() => {
+        let interval;
+        if (isEmailSent) {
+            interval = setInterval(async () => {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session) {
+                    clearInterval(interval);
+                    if (source === 'extension' && extId) {
+                        // Sync session
+                        if (window.chrome && chrome.runtime && chrome.runtime.sendMessage) {
+                            chrome.runtime.sendMessage(extId, {
+                                type: 'AUTH_SYNC',
+                                session: {
+                                    access_token: session.access_token,
+                                    refresh_token: session.refresh_token
+                                }
+                            });
+                        }
+                        setIsExtAuthSuccess(true);
+                        setIsEmailSent(false); // Stop showing magic link view
+                    } else {
+                        navigate('/analysis');
+                    }
+                }
+            }, 5000);
+        }
+        return () => interval && clearInterval(interval);
+    }, [isEmailSent, navigate, source, extId]);
+
+    const checkVerificationStatus = async () => {
+        setCheckingStatus(true);
+        try {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            if (error) throw error;
+            if (session) {
+                if (source === 'extension' && extId) {
+                    // Sync session
+                    if (window.chrome && chrome.runtime && chrome.runtime.sendMessage) {
+                        chrome.runtime.sendMessage(extId, {
+                            type: 'AUTH_SYNC',
+                            session: {
+                                access_token: session.access_token,
+                                refresh_token: session.refresh_token
+                            }
+                        });
+                    }
+                    setIsExtAuthSuccess(true);
+                    setIsEmailSent(false);
+                } else {
+                    navigate('/analysis');
+                }
+            } else {
+                setError("Verification still pending. Please click the link in your email.");
+            }
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setCheckingStatus(false);
+        }
+    };
+
+    if (isExtAuthSuccess) {
+        return (
+            <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4">
+                <div className="w-full max-w-md space-y-8 animate-in fade-in zoom-in-95 duration-500">
+                    <div className="text-center space-y-6">
+                        <div className="relative mx-auto w-24 h-24">
+                            <div className="absolute inset-0 bg-emerald-500/20 rounded-full animate-ping"></div>
+                            <div className="relative bg-emerald-500 rounded-full w-24 h-24 flex items-center justify-center shadow-2xl shadow-emerald-500/20">
+                                <CheckCircle2 className="w-12 h-12 text-slate-950" />
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <h2 className="text-3xl md:text-4xl font-black text-white tracking-tighter uppercase leading-none">Terminal Auth Sync</h2>
+                            <p className="text-slate-400 text-base font-medium leading-relaxed">
+                                Your secure session has been transmitted to the <span className="text-emerald-400 font-bold">Diver AI Companion</span>.
+                                <br />
+                                You may now close this tab.
+                            </p>
+                        </div>
+
+                        <div className="p-6 bg-slate-900/50 rounded-2xl border border-slate-800 text-left">
+                            <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] leading-relaxed">
+                                <span className="text-emerald-500 mr-2">●</span> EXT_ID: {extId?.substring(0, 12)}...
+                                <br />
+                                <span className="text-emerald-500 mr-2">●</span> STATUS: SYNCHRONIZED
+                            </p>
+                        </div>
+
+                        <button
+                            onClick={() => window.close()}
+                            className="w-full py-4 bg-white text-slate-950 font-black rounded-xl transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-widest hover:bg-emerald-400"
+                        >
+                            Return to Chart
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (isEmailSent) {
+        return (
+            <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4">
+                <div className="w-full max-w-md space-y-8 animate-in fade-in zoom-in-95 duration-500">
+                    <div className="text-center space-y-6">
+                        <div className="relative mx-auto w-24 h-24">
+                            <div className="absolute inset-0 bg-emerald-500/20 rounded-full animate-ping"></div>
+                            <div className="relative bg-emerald-500 rounded-full w-24 h-24 flex items-center justify-center shadow-2xl shadow-emerald-500/20">
+                                <Mail className="w-12 h-12 text-slate-950 animate-bounce" />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <h2 className="text-3xl md:text-4xl font-black text-white tracking-tighter uppercase">Check Your Inbox</h2>
+                            <p className="text-slate-400 text-base font-medium leading-relaxed">
+                                We've sent a magic link to <br />
+                                <span className="text-emerald-400 font-bold">{email}</span>
+                            </p>
+                        </div>
+
+                        <div className="p-6 bg-slate-900/50 rounded-2xl border border-slate-800 text-left">
+                            <p className="text-xs text-slate-400 font-medium uppercase tracking-widest leading-relaxed">
+                                <span className="text-emerald-500 mr-2">●</span> Click the link to verify.
+                                <br />
+                                <span className="text-emerald-500 mr-2">●</span> Your terminal will unlock automatically.
+                            </p>
+                        </div>
+
+                        {error && (
+                            <div className="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs rounded-xl font-bold flex items-center gap-2">
+                                <AlertCircle className="w-4 h-4" /> {error}
+                            </div>
+                        )}
+
+                        <div className="space-y-3">
+                            <button
+                                onClick={checkVerificationStatus}
+                                disabled={checkingStatus}
+                                className="w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-widest disabled:opacity-50"
+                            >
+                                {checkingStatus ? <Loader2 className="w-4 h-4 animate-spin" /> : 'I Have Verified'}
+                            </button>
+                            <button
+                                onClick={handleResend}
+                                disabled={loading || resendCooldown > 0}
+                                className="w-full py-4 bg-slate-800 hover:bg-slate-700 text-white font-black rounded-xl transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-widest disabled:opacity-50"
+                            >
+                                {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend Email'}
+                            </button>
+                        </div>
+                        <button
+                            onClick={() => setIsEmailSent(false)}
+                            className="text-slate-500 hover:text-white text-xs font-black uppercase tracking-[0.2em] transition-colors mt-8"
+                        >
+                            Back to Login
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-slate-950 flex flex-col lg:flex-row">
+            {/* Left Column - Branding */}
+            <div className="hidden lg:flex lg:w-1/2 p-12 bg-slate-900 flex-col justify-between border-r border-slate-800 relative overflow-hidden">
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
+                <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
+                    <Activity className="w-96 h-96" />
+                </div>
+
+                <div className="relative z-10">
+                    <Link to="/" className="inline-flex items-center gap-2 text-white mb-8 hover:opacity-80 transition-opacity">
+                        <div className="bg-blue-600 rounded-lg p-1.5 shadow-sm">
+                            <Activity className="text-white w-5 h-5" />
+                        </div>
+                        <span className="text-xl font-bold tracking-tight">Diver<span className="text-blue-500">AI</span></span>
+                    </Link>
+                </div>
+
+                <div className="relative z-10 space-y-6 max-w-lg">
+                    <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter leading-[1.1]">
+                        {isLogin ? "Welcome Back to the Terminal." : "Join the Era of Intelligent Trading."}
+                    </h1>
+                    <p className="text-lg text-slate-400 font-medium leading-relaxed">
+                        Access institutional-grade optical pattern recognition and probabilistic forecasting.
+                    </p>
+                </div>
+
+                <div className="relative z-10 pt-12">
+                    <p className="text-xs text-slate-500 font-mono">
+                        System Status: <span className="text-emerald-500">Operational</span>
+                        <br />
+                        Latency: <span className="text-emerald-500">12ms</span>
+                    </p>
+                </div>
+            </div>
+
+            {/* Right Column - Form */}
+            <div className="w-full lg:w-1/2 p-6 md:p-8 lg:p-24 flex flex-col justify-center bg-slate-950">
+                <div className="w-full max-w-md mx-auto space-y-8">
+                    <div className="text-center lg:text-left">
+                        <Link to="/" className="inline-flex lg:hidden items-center gap-2 text-white mb-8 hover:opacity-80 transition-opacity">
+                            <Activity className="text-emerald-500 w-6 h-6" />
+                            <span className="text-xl font-bold tracking-tight">Diver<span className="text-emerald-500">AI</span></span>
+                        </Link>
+                        <h2 className="text-2xl font-bold text-white mb-2">{isLogin ? 'Sign In to Account' : 'Create Account'}</h2>
+                        <p className="text-slate-400 text-sm">
+                            {isLogin ? "Enter your credentials to access the dashboard." : "Get started with your free account."}
+                        </p>
+                    </div>
+
+                    {error && (
+                        <div className="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm rounded-xl font-medium flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+                            <AlertCircle className="w-5 h-5 shrink-0" /> {error}
+                        </div>
+                    )}
+
+                    <div className="space-y-4">
+                        <button
+                            onClick={handleGoogleLogin}
+                            disabled={loading}
+                            className="w-full bg-white hover:bg-slate-200 text-slate-900 font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-3 disabled:opacity-50 text-sm uppercase tracking-wider"
+                        >
+                            <img src="https://www.svgrepo.com/show/355037/google.svg" alt="Google" className="w-5 h-5" />
+                            <span>Continue with Google</span>
+                        </button>
+
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <span className="w-full border-t border-slate-800" />
+                            </div>
+                            <div className="relative flex justify-center text-xs uppercase">
+                                <span className="bg-slate-950 px-2 text-slate-500 font-bold tracking-widest">Or continue with email</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form onSubmit={handleAuth} className="space-y-6">
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">Email</label>
+                            <div className="relative">
+                                <Mail className="absolute left-4 top-3.5 text-slate-500 w-5 h-5" />
+                                <input
+                                    type="email"
+                                    required
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="w-full bg-slate-900 border border-slate-800 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-600"
+                                    placeholder="name@example.com"
+                                    autoComplete="username"
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">Password</label>
+                            <div className="relative">
+                                <Lock className="absolute left-4 top-3.5 text-slate-500 w-5 h-5" />
+                                <input
+                                    type="password"
+                                    required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full bg-slate-900 border border-slate-800 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-600"
+                                    placeholder="••••••••"
+                                    autoComplete={isLogin ? "current-password" : "new-password"}
+                                />
+                            </div>
+                        </div>
+
+                        <button
+                            disabled={loading}
+                            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 text-sm uppercase tracking-wider shadow-lg shadow-blue-500/20"
+                        >
+                            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (isLogin ? 'Sign In' : 'Create Account')}
+                        </button>
+                    </form>
+
+                    <p className="text-center text-sm text-slate-500">
+                        {isLogin ? "Don't have an account? " : "Already have an account? "}
+                        <Link to={isLogin ? "/signup" : "/login"} onClick={() => setIsLogin(!isLogin)} className="text-blue-500 hover:text-blue-400 font-bold transition-colors">
+                            {isLogin ? 'Sign up' : 'Sign in'}
+                        </Link>
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default AuthPage;
