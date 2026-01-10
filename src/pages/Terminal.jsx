@@ -6,12 +6,12 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import Tesseract from 'tesseract.js';
-import { detectTicker, fetchMarketData, fetchHistoricalData, COIN_MAP, STOCK_MAP, fetchStockData, fetchStockHistory, fetchYahooData, fetchMacroHistory, calculateMacroSentiment, fetchTickerData } from '../lib/marketData';
+import { detectTicker, detectPrice, fetchMarketData, fetchHistoricalData, COIN_MAP, STOCK_MAP, fetchStockData, fetchStockHistory, fetchYahooData, fetchMacroHistory, calculateMacroSentiment, fetchTickerData } from '../lib/marketData';
 import { useAppContext } from '../context/AppContext';
 import AuthModal from '../components/AuthModal';
 import { calculateRSI as calcRSI, calculateMACD, calculateBollingerBands, detectPatterns } from '../lib/technicalAnalysis';
 import { prepareData, calculateStats, createModel, trainModel, predictNextPrice, disposeModel, assessModelAccuracy, saveGlobalModel, loadGlobalModel, runBackgroundTraining, runBackgroundAssessment, saveGlobalModelArtifacts } from '../lib/brain';
-import { extractChartData } from '../lib/vision';
+import { extractChartData, anchorPriceToVisual } from '../lib/vision';
 import { runRealAnalysis } from '../lib/analysis';
 
 // --- ENGINE LOGIC (Real Implementation) ---
@@ -1098,8 +1098,7 @@ export default function Terminal() {
 
                         if (error) throw error;
                         if (data?.text) {
-                            const detected = detectTicker(data.text);
-                            if (detected) return detected;
+                            return { text: data.text, ticker: detectTicker(data.text) };
                         }
                     } catch (cloudErr) {
                         if (cloudErr.message?.includes("401")) {
@@ -1116,14 +1115,14 @@ export default function Terminal() {
 
                     // Optimizing for ticker symbols (uppercase, numbers, basic symbols)
                     await worker.setParameters({
-                        tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$-/.'
+                        tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$-/. '
                     });
 
                     const { data: { text } } = await worker.recognize(ocrImage);
-                    return detectTicker(text);
+                    return { text, ticker: detectTicker(text) };
                 } catch (ocrErr) {
                     console.warn("OCR Engine Failure:", ocrErr);
-                    return null;
+                    return { text: "", ticker: null };
                 }
             })();
 
@@ -1133,7 +1132,21 @@ export default function Terminal() {
             })();
 
             // Wait for both "eyes" to see
-            const [detectedTicker, visualData] = await Promise.all([ocrPromise, visualPromise]);
+            const [ocrRawResult, visualData] = await Promise.all([ocrPromise, visualPromise]);
+
+            // Handle Hybrid Detection (Ticker OR Price)
+            let detectedTicker = null;
+            let anchorPrice = null;
+
+            if (typeof ocrRawResult === 'string') {
+                // Local OCR path returned just the ticker or null
+                detectedTicker = ocrRawResult;
+            } else if (ocrRawResult && typeof ocrRawResult === 'object') {
+                // Cloud OCR path (or updated promise) with raw text
+                const fullText = ocrRawResult.text || "";
+                detectedTicker = detectTicker(fullText);
+                anchorPrice = detectPrice(fullText);
+            }
 
             ticker = detectedTicker || manualTicker;
             const hasVisual = visualData && visualData.points.length > 20;
@@ -1148,12 +1161,18 @@ export default function Terminal() {
             // Fallback for visual data if ticker is missing
             if (!ticker && hasVisual) {
                 ticker = "VISUAL-SCAN";
-                historicalPrices = visualData.points;
+
+                // CRITICAL FIX: Scale visual points to anchor price if detected
+                const finalPoints = anchorPrice
+                    ? anchorPriceToVisual(visualData.points, anchorPrice)
+                    : visualData.points;
+
+                historicalPrices = finalPoints;
                 marketStats = {
-                    price: visualData.points[visualData.points.length - 1],
+                    price: finalPoints[finalPoints.length - 1],
                     change24h: 0,
                     volume: 0,
-                    source: 'Visual Cortex'
+                    source: anchorPrice ? 'Visual Cortex (Anchored)' : 'Visual Cortex'
                 };
             }
 

@@ -122,54 +122,78 @@ export const STOCK_MAP = {
     'DIA': 'SPDR Dow Jones'
 };
 
+export const detectPrice = (text) => {
+    if (!text) return null;
+
+    // 1. Look for numbers with decimals (most likely prices)
+    // Regex: Match numbers like 102,434.50 or 1.2345
+    const decimalMatches = text.match(/\d{1,3}(?:,\d{3})*(?:\.\d+)/g);
+    if (decimalMatches) {
+        const candidates = decimalMatches
+            .map(m => parseFloat(m.replace(/,/g, '')))
+            .filter(n => n > 0.0001 && n < 10000000);
+        if (candidates.length > 0) {
+            // Usually the most prominent price is the largest one in the top area or the last one (current price)
+            // But for high-cap assets like BTC, the largest is usually the correct price.
+            // For now, let's take the first valid match as it's often the current price in titles/headers.
+            return candidates[0];
+        }
+    }
+
+    // 2. Fallback to large integers if no decimals found
+    const intMatches = text.match(/\b\d{2,7}\b/g);
+    if (intMatches) {
+        const candidates = intMatches
+            .map(m => parseInt(m))
+            .filter(n => n > 10 && n < 1000000);
+        if (candidates.length > 0) return candidates[0];
+    }
+
+    return null;
+};
+
 export const detectTicker = (text) => {
     if (!text) return null;
 
-    // Normalize: Remove all non-alphanumeric characters (keep only letters and numbers)
-    const cleanText = text.toUpperCase().replace(/[^A-Z0-9]/g, ' ');
-    const words = cleanText.split(/\s+/);
-
-    // 1. Exact Match Strategy (Crypto OR Stock)
-    for (const word of words) {
-        if ((COIN_MAP[word] || STOCK_MAP[word]) && word.length >= 2) return word;
-    }
-
     const upper = text.toUpperCase();
+
+    // 0. Blacklist / Filter
+    const blacklist = ['USD', 'USDT', 'VOL', '24H', 'HIGH', 'LOW', 'PRICE', 'INDEX', 'STOCK', 'CRYPTO', 'CHART'];
+
+    // Normalize: Remove all non-alphanumeric characters
+    const cleanText = upper.replace(/[^A-Z0-9]/g, ' ');
+    const words = cleanText.split(/\s+/).filter(w => w.length >= 2 && !blacklist.includes(w));
+
+    // 1. Exact Match Strategy (Priority)
+    for (const word of words) {
+        if (COIN_MAP[word] || STOCK_MAP[word]) return word;
+    }
 
     // 2. Pair Strategy (e.g., BTCUSDT, BTC/USD)
     const pairMatch = upper.match(/([A-Z]{2,10})[\/\-\\]?(?:USDT|USD|BUSD|USDC|PERP)/);
     if (pairMatch) {
-        // Prioritize exact map hits
-        if (COIN_MAP[pairMatch[1]]) return pairMatch[1];
-        if (STOCK_MAP[pairMatch[1]]) return pairMatch[1];
-        // If it looks valid and has USD/USDT, return it (generic fallback)
-        if (pairMatch[1].length >= 2) return pairMatch[1];
+        const t = pairMatch[1];
+        if (COIN_MAP[t] || STOCK_MAP[t]) return t;
+        if (t.length >= 2 && !blacklist.includes(t)) return t;
     }
 
     // 3. Page Title Context Strategy (Yahoo, TradingView, etc.)
-    // Matches: "AAPL 185.00...", "Tesla, Inc. (TSLA)..."
     const titleMatch = upper.match(/\(([A-Z]{2,6})\)[ -]|^([A-Z]{2,6})\s+\d/);
     if (titleMatch) {
         const t = titleMatch[1] || titleMatch[2];
         if (COIN_MAP[t] || STOCK_MAP[t]) return t;
-        // Generic fallback if it looks like a ticker in parentheses or at start of title
-        if (t.length >= 2) return t;
+        if (t.length >= 2 && !blacklist.includes(t)) return t;
     }
 
-    // 4. Heuristic Search
-    // Check Crypto
+    // 4. Heuristic Search (Longest first to avoid partial matches like 'BIT' for 'BITCOIN')
     const sortedCoins = Object.keys(COIN_MAP).sort((a, b) => b.length - a.length);
     for (const ticker of sortedCoins) {
-        const regex = new RegExp(`\\b${ticker}\\b|${ticker}USD|${ticker}PERP|${ticker}\\s*[/\\\\]?\\s*USD`);
-        if (regex.test(upper)) return ticker;
+        if (new RegExp(`\\b${ticker}\\b`).test(upper)) return ticker;
     }
 
-    // Check Stocks
     const sortedStocks = Object.keys(STOCK_MAP).sort((a, b) => b.length - a.length);
     for (const ticker of sortedStocks) {
-        // Stocks often appear with $ sign (e.g., $AAPL) or just plain word validation if mapped
-        const regex = new RegExp(`\\b${ticker}\\b|\\$${ticker}`);
-        if (regex.test(upper)) return ticker;
+        if (new RegExp(`\\b${ticker}\\b|\\$${ticker}`).test(upper)) return ticker;
     }
 
     return null;

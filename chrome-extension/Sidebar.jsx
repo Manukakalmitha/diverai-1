@@ -5,7 +5,7 @@ import { Activity, Zap, Search, AlertTriangle, CheckCircle2, Lock, User, LogOut,
 import { supabase } from '../src/lib/supabase';
 import { useAppContext } from '../src/context/AppContext';
 import { runRealAnalysis } from '../src/lib/analysis';
-import { detectTicker, fetchTickerData, fetchMarketData, fetchHistoricalData, fetchYahooData, fetchStockData, fetchStockHistory, STOCK_MAP } from '../src/lib/marketData';
+import { detectTicker, detectPrice, fetchTickerData, fetchMarketData, fetchHistoricalData, fetchYahooData, fetchStockData, fetchStockHistory, STOCK_MAP } from '../src/lib/marketData';
 
 const PROD_URL = "https://diverai.flisoft.agency";
 
@@ -215,9 +215,11 @@ const Sidebar = () => {
 
             if (!response || !response.ok) throw new Error("Visualization Service Unavailable");
             const ocrData = await response.json();
-            const ticker = detectTicker(ocrData?.text || '');
+            const fullText = ocrData?.text || '';
+            const ticker = detectTicker(fullText);
+            const anchorPrice = detectPrice(fullText);
 
-            if (!ticker) throw new Error("Neural Core Rejected: No valid asset ticker identified.");
+            if (!ticker && !anchorPrice) throw new Error("Neural Core Rejected: No valid asset or price identified.");
 
             setStatusMessage(`Target Locked: ${ticker}. Syncing Data...`);
             let marketStats, historicalPrices;

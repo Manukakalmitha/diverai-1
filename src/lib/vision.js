@@ -106,3 +106,13 @@ export const extractChartData = (imageSrc) => {
         img.src = imageSrc;
     });
 };
+
+export const anchorPriceToVisual = (points, anchorPrice) => {
+    if (!points || points.length === 0 || !anchorPrice) return points;
+    const lastPoint = points[points.length - 1];
+    // If the last point is 0, we can't scale it properly
+    if (lastPoint === 0) return points;
+
+    const scale = anchorPrice / lastPoint;
+    return points.map(p => p * scale);
+};
