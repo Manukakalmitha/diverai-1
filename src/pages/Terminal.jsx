@@ -442,7 +442,7 @@ const generatePDF = () => {
     window.print();
 };
 
-const MacroFluctuationChart = ({ macroTrend, isPro }) => {
+const MacroFluctuationChart = ({ macroTrend, isPro, source }) => {
     if (!isPro) return null;
     if (!macroTrend || !macroTrend.prices || !macroTrend.dates) return null;
 
