@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 import fs from 'fs';
+import obfuscator from 'rollup-plugin-obfuscator';
 
 export default defineConfig(({ mode }) => {
     // Standard Vite env loading
@@ -37,10 +38,19 @@ export default defineConfig(({ mode }) => {
                 name: 'extension-setup',
                 writeBundle() {
                     const distPath = resolve(__dirname, 'dist-extension');
+
+                    // Copy manifest
                     fs.copyFileSync(
                         resolve(__dirname, 'chrome-extension/manifest.json'),
                         resolve(distPath, 'manifest.json')
                     );
+
+                    // Copy license to dist
+                    const rootLicense = resolve(__dirname, 'LICENSE');
+                    if (fs.existsSync(rootLicense)) {
+                        fs.copyFileSync(rootLicense, resolve(distPath, 'LICENSE'));
+                    }
+
                     const nestedHtml = resolve(distPath, 'chrome-extension/sidepanel.html');
                     const rootHtml = resolve(distPath, 'sidepanel.html');
                     if (fs.existsSync(nestedHtml)) {
@@ -53,7 +63,21 @@ export default defineConfig(({ mode }) => {
                         fs.rmdirSync(resolve(distPath, 'chrome-extension'));
                     }
                 }
-            }
+            },
+            obfuscator({
+                compact: true,
+                controlFlowFlattening: true,
+                controlFlowFlatteningThreshold: 0.75,
+                numbersToExpressions: true,
+                simplify: true,
+                stringArray: true,
+                stringArrayEncoding: ['base64'],
+                stringArrayThreshold: 0.75,
+                unicodeEscapeSequence: false, // Keep it false for better compatibility with extension stores
+                splitStrings: true,
+                splitStringsChunkLength: 10,
+                target: 'browser'
+            }),
         ],
         build: {
             outDir: 'dist-extension',
