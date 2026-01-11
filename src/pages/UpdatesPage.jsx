@@ -12,6 +12,7 @@ import {
     Tag
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useSEO, SEO_CONFIGS } from '../hooks/useSEO';
 
 const updates = [
     {
@@ -89,6 +90,9 @@ const updates = [
 ];
 
 const UpdatesPage = () => {
+    // Apply page-specific SEO
+    useSEO(SEO_CONFIGS.updates);
+
     return (
         <div className="min-h-screen bg-[#050B14] text-white">
             {/* Header */}
@@ -133,8 +137,8 @@ const UpdatesPage = () => {
                         <div className="flex flex-wrap items-center gap-4 mb-8">
                             <div className="flex items-center gap-3">
                                 <div className={`px-3 py-1.5 rounded-lg font-mono text-sm font-bold ${update.isLatest
-                                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                                        : 'bg-slate-800 text-slate-300 border border-slate-700'
+                                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                    : 'bg-slate-800 text-slate-300 border border-slate-700'
                                     }`}>
                                     {update.version}
                                 </div>
@@ -161,8 +165,8 @@ const UpdatesPage = () => {
                                 >
                                     <div className="flex gap-4">
                                         <div className={`shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${change.type === 'feature'
-                                                ? 'bg-emerald-500/10 text-emerald-400'
-                                                : 'bg-blue-500/10 text-blue-400'
+                                            ? 'bg-emerald-500/10 text-emerald-400'
+                                            : 'bg-blue-500/10 text-blue-400'
                                             }`}>
                                             <change.icon className="w-5 h-5" />
                                         </div>
@@ -172,8 +176,8 @@ const UpdatesPage = () => {
                                                     {change.title}
                                                 </h3>
                                                 <span className={`px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded ${change.type === 'feature'
-                                                        ? 'bg-emerald-500/10 text-emerald-400'
-                                                        : 'bg-blue-500/10 text-blue-400'
+                                                    ? 'bg-emerald-500/10 text-emerald-400'
+                                                    : 'bg-blue-500/10 text-blue-400'
                                                     }`}>
                                                     {change.type}
                                                 </span>

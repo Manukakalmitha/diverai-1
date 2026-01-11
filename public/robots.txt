@@ -1,5 +1,25 @@
+# Diver AI - Robots.txt
+# https://diverai.flisoft.agency
+
 User-agent: *
 Allow: /
+Allow: /analysis
+Allow: /pricing
+Allow: /docs
+Allow: /articles
+Allow: /updates
+Allow: /what-is-diver-ai
+Allow: /diverai-quant-whitepaper.pdf
 
+# Block internal/auth pages from indexing (keep login/signup for user access)
+Disallow: /profile
+Disallow: /api/
+
+# Crawl rate
+Crawl-delay: 1
+
+# Sitemaps
 Sitemap: https://diverai.flisoft.agency/sitemap.xml
 
+# Host
+Host: https://diverai.flisoft.agency
