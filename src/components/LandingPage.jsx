@@ -33,9 +33,65 @@ import {
     Chrome,
     Smartphone,
     Monitor,
-    FileText
+    FileText,
+    Megaphone
 } from 'lucide-react';
 import ReviewSection from './ReviewSection';
+
+// Announcement Banner Component
+const AnnouncementBanner = () => {
+    const BANNER_VERSION = 'jan-2026-v1'; // Change this to show banner again for new announcements
+
+    // Check localStorage synchronously to avoid flash
+    const getInitialDismissedState = () => {
+        if (typeof window === 'undefined') return true;
+        return localStorage.getItem(`banner-dismissed-${BANNER_VERSION}`) === 'true';
+    };
+
+    const [isDismissed, setIsDismissed] = useState(getInitialDismissedState);
+
+    const handleDismiss = () => {
+        setIsDismissed(true);
+        localStorage.setItem(`banner-dismissed-${BANNER_VERSION}`, 'true');
+    };
+
+    if (isDismissed) return null;
+
+    return (
+        <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="relative bg-gradient-to-r from-emerald-600/90 via-emerald-500/90 to-blue-600/90 text-white overflow-hidden"
+        >
+            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 mix-blend-overlay pointer-events-none"></div>
+            <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-center gap-4 relative">
+                <div className="flex items-center gap-3">
+                    <div className="hidden sm:flex items-center justify-center w-6 h-6 bg-white/20 rounded-full backdrop-blur-sm">
+                        <Megaphone className="w-3.5 h-3.5" />
+                    </div>
+                    <p className="text-xs sm:text-sm font-medium text-center">
+                        <span className="font-bold">What's New:</span> Optical Engine v2.4 is here with enhanced pattern recognition!
+                    </p>
+                </div>
+                <a
+                    href="/updates"
+                    className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full text-xs font-bold transition-all hover:scale-105"
+                >
+                    See Updates <ArrowRight className="w-3 h-3" />
+                </a>
+                <button
+                    onClick={handleDismiss}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-white/20 rounded-full transition-colors"
+                    aria-label="Dismiss announcement"
+                >
+                    <X className="w-4 h-4" />
+                </button>
+            </div>
+        </motion.div>
+    );
+};
+
 
 // Sample testimonials data
 const testimonials = [
@@ -169,6 +225,9 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
             <InstallationGuideModal isOpen={showGuide} onClose={() => setShowGuide(false)} platform={platform} />
 
             <main>
+                {/* Announcement Banner */}
+                <AnnouncementBanner />
+
                 {/* Institutional Hero Section */}
                 <section className="relative pt-32 pb-40 overflow-hidden bg-[#020617]">
                     {/* Architectural Grid Background */}

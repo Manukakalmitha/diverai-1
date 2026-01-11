@@ -17,6 +17,7 @@ const ArticlesHub = lazy(() => import('./pages/ArticlesHub'));
 
 const ArticlePage = lazy(() => import('./pages/ArticlePage'));
 const AuthPage = lazy(() => import('./pages/AuthPage'));
+const UpdatesPage = lazy(() => import('./pages/UpdatesPage'));
 
 const LoadingFallback = () => (
   <div className="min-h-screen bg-slate-950 flex items-center justify-center">
@@ -52,6 +53,7 @@ function App() {
               <Route path="/what-is-diver-ai" element={<Layout><WhatIsDiverAI /></Layout>} />
               <Route path="/articles" element={<Layout><ArticlesHub /></Layout>} />
               <Route path="/articles/:slug" element={<Layout><ArticlePage /></Layout>} />
+              <Route path="/updates" element={<Layout><UpdatesPage /></Layout>} />
             </Routes>
           </Suspense>
         </Router>
