@@ -8,7 +8,7 @@ const PricingPage = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="py-20 md:py-32">
+        <div className="min-h-screen">
             <Pricing
                 user={user}
                 profile={profile}

@@ -46,3 +46,62 @@ body,
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
+
+/* Print-specific styles for PDF export */
+@media print {
+  html, body, #root {
+    background-color: white !important;
+    color: black !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Hide non-essential UI elements */
+  nav, header, footer, 
+  .sidebar, 
+  [class*="animate-"],
+  button:not(.print-visible),
+  .print\\:hidden {
+    display: none !important;
+  }
+
+  /* Force white background for dark elements */
+  [class*="bg-slate"], 
+  [class*="bg-\\["] {
+    background-color: white !important;
+  }
+
+  /* Force black text for light text */
+  [class*="text-slate"],
+  [class*="text-white"],
+  [class*="text-emerald"],
+  [class*="text-rose"],
+  [class*="text-blue"],
+  [class*="text-amber"] {
+    color: black !important;
+  }
+
+  /* Ensure borders are visible */
+  [class*="border-slate"] {
+    border-color: #e2e8f0 !important;
+  }
+
+  /* Page setup */
+  @page {
+    size: A4;
+    margin: 1.5cm;
+  }
+
+  /* Avoid page breaks inside cards */
+  .grid, .rounded-lg, table {
+    page-break-inside: avoid;
+  }
+
+  /* Ensure images are visible and sized correctly */
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+    opacity: 1 !important;
+    filter: none !important;
+  }
+}

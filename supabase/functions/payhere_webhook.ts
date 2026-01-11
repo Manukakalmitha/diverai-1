@@ -1,4 +1,7 @@
 // supabase/functions/payhere_webhook.ts
+// IMPORTANT: Deploy with --no-verify-jwt flag:
+// supabase functions deploy payhere_webhook --no-verify-jwt
+
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.0";
 import { crypto } from "https://deno.land/std@0.203.0/crypto/mod.ts";
 import { encodeHex } from "https://deno.land/std@0.203.0/encoding/hex.ts";
