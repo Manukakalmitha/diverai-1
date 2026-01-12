@@ -39,8 +39,30 @@ const ReferralPage = () => {
             }
         };
 
+        const ensureReferralCode = async () => {
+            if (profile && !profile.referral_code) {
+                try {
+                    // Generate a simple random code
+                    const newCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+
+                    const { error } = await supabase
+                        .from('profiles')
+                        .update({ referral_code: newCode })
+                        .eq('id', user.id);
+
+                    if (error) throw error;
+
+                    // Force reload the window/profile to get the new code
+                    window.location.reload();
+                } catch (err) {
+                    console.error("Error creating referral code:", err);
+                }
+            }
+        };
+
         fetchReferralData();
-    }, [user]);
+        ensureReferralCode();
+    }, [user, profile]);
 
     const referralLink = profile?.referral_code
         ? `${window.location.origin}/signup?ref=${profile.referral_code}`
