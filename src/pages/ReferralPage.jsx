@@ -42,7 +42,9 @@ const ReferralPage = () => {
         fetchReferralData();
     }, [user]);
 
-    const referralLink = `${window.location.origin}/signup?ref=${profile?.referral_code}`;
+    const referralLink = profile?.referral_code
+        ? `${window.location.origin}/signup?ref=${profile.referral_code}`
+        : '';
 
     const handleCopy = () => {
         navigator.clipboard.writeText(referralLink);

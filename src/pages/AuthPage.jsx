@@ -21,7 +21,7 @@ const AuthPage = ({ initialMode = 'login' }) => {
 
     useEffect(() => {
         const ref = queryParams.get('ref');
-        if (ref) {
+        if (ref && ref !== 'null' && ref !== 'undefined') {
             localStorage.setItem('referral_code', ref);
             setReferralCode(ref);
         }

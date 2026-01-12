@@ -3,8 +3,8 @@
 -- 1. Create referrals table to track who referred whom
 CREATE TABLE IF NOT EXISTS public.referrals (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    referrer_id UUID REFERENCES auth.users(id) NOT NULL,
-    referred_user_id UUID REFERENCES auth.users(id) NOT NULL,
+    referrer_id UUID REFERENCES public.profiles(id) NOT NULL,
+    referred_user_id UUID REFERENCES public.profiles(id) NOT NULL,
     reward_granted BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS public.referrals (
 -- 2. Add referral tracking columns to profiles
 ALTER TABLE public.profiles 
 ADD COLUMN IF NOT EXISTS referral_code TEXT UNIQUE,
-ADD COLUMN IF NOT EXISTS referred_by UUID REFERENCES auth.users(id),
+ADD COLUMN IF NOT EXISTS referred_by UUID REFERENCES public.profiles(id),
 ADD COLUMN IF NOT EXISTS referral_count INT DEFAULT 0,
 ADD COLUMN IF NOT EXISTS pro_expires_at TIMESTAMPTZ;
 
