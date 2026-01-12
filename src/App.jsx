@@ -18,6 +18,7 @@ const ArticlesHub = lazy(() => import('./pages/ArticlesHub'));
 const ArticlePage = lazy(() => import('./pages/ArticlePage'));
 const AuthPage = lazy(() => import('./pages/AuthPage'));
 const UpdatesPage = lazy(() => import('./pages/UpdatesPage'));
+const ReferralPage = lazy(() => import('./pages/ReferralPage'));
 
 const LoadingFallback = () => (
   <div className="min-h-screen bg-slate-950 flex items-center justify-center">
@@ -54,6 +55,7 @@ function App() {
               <Route path="/articles" element={<Layout><ArticlesHub /></Layout>} />
               <Route path="/articles/:slug" element={<Layout><ArticlePage /></Layout>} />
               <Route path="/updates" element={<Layout><UpdatesPage /></Layout>} />
+              <Route path="/referral" element={<Layout><ReferralPage /></Layout>} />
             </Routes>
           </Suspense>
         </Router>

@@ -364,11 +364,22 @@ export const assessModelAccuracy = async (fullPrices, onProgress) => {
         gamma: Math.max(0.15, (hits.technical / totalHits))
     };
 
+    // Calculate Brier Score (mean squared difference between prob and outcome)
+    const brierScore = (predictions.reduce((acc, p) => {
+        const prob = p.predicted > prices[baseIdx + p.step - 2] ? 0.75 : 0.25; // Simple prob proxy for backtest
+        const outcome = p.actual > prices[baseIdx + p.step - 2] ? 1 : 0;
+        return acc + Math.pow(prob - outcome, 2);
+    }, 0) / TEST_POINTS).toFixed(4);
+
     return {
         accuracy: ((hits.neural / TEST_POINTS) * 100).toFixed(1),
         hits,
         recommendedWeights,
-        predictions
+        predictions,
+        metrics: {
+            brierScore,
+            rmse: (Math.sqrt(predictions.reduce((acc, p) => acc + Math.pow(p.actual - p.predicted, 2), 0) / TEST_POINTS)).toFixed(2)
+        }
     };
 };
 

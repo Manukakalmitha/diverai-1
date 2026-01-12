@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Activity, Book, Crown, User } from 'lucide-react';
+import { Activity, Book, Crown, User, Share2 } from 'lucide-react';
 
 const MobileNav = () => {
     const location = useLocation();
@@ -28,6 +28,10 @@ const MobileNav = () => {
                 <Link to="/profile" className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${isActive('/profile') ? 'text-emerald-400' : 'text-slate-500'}`}>
                     <User className={`w-5 h-5 ${isActive('/profile') ? 'fill-emerald-500/20' : ''}`} />
                     <span className="text-[9px] font-black uppercase tracking-widest">Account</span>
+                </Link>
+                <Link to="/referral" className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${isActive('/referral') ? 'text-emerald-400' : 'text-slate-500'}`}>
+                    <Share2 className={`w-5 h-5 ${isActive('/referral') ? 'fill-emerald-500/20' : ''}`} />
+                    <span className="text-[9px] font-black uppercase tracking-widest">Referral</span>
                 </Link>
             </div>
         </div>

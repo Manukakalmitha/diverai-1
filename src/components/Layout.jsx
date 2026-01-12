@@ -31,6 +31,7 @@ const Layout = ({ children, showNav = true, showTicker = true, navStyle }) => {
                                 <Link to="/articles" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Markets</Link>
                                 <Link to="/docs" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Documentation</Link>
                                 <Link to="/pricing" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Pricing</Link>
+                                <Link to="/referral" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Referral</Link>
                             </nav>
                         )}
 

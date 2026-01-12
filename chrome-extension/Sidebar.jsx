@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, Zap, Search, AlertTriangle, CheckCircle2, Lock, User, LogOut, ChevronLeft, Cpu, TrendingUp, TrendingDown, Minus, Clock, ShieldCheck, Key, History, Trash2, BarChart3, Fingerprint } from 'lucide-react';
+import { Activity, Zap, Search, AlertTriangle, CheckCircle2, Lock, User, LogOut, ChevronLeft, Cpu, TrendingUp, TrendingDown, Minus, Clock, ShieldCheck, Key, History, Trash2, BarChart3, Fingerprint, Share2, Trophy, Copy } from 'lucide-react';
 import { supabase } from '../src/lib/supabase';
 import { useAppContext } from '../src/context/AppContext';
 import { runRealAnalysis } from '../src/lib/analysis';
@@ -49,7 +49,8 @@ const Sidebar = () => {
     const [limitType, setLimitType] = useState('guest'); // guest, verify, free
     const [userIp, setUserIp] = useState(null);
     const [history, setHistory] = useState([]);
-    const [activeTab, setActiveTab] = useState('analyze'); // analyze, history
+    const [activeTab, setActiveTab] = useState('analyze'); // analyze, history, referral
+    const [referralCopied, setReferralCopied] = useState(false);
 
     useEffect(() => {
         fetchIp();
@@ -325,6 +326,7 @@ const Sidebar = () => {
                 <div className="flex px-2 border-t border-slate-900">
                     <TabButton id="analyze" label="Analysis" icon={Zap} />
                     <TabButton id="history" label="History" icon={History} />
+                    {user && <TabButton id="referral" label="Rewards" icon={Trophy} />}
                 </div>
             </div>
 
@@ -367,6 +369,60 @@ const Sidebar = () => {
                                     </div>
                                 ))
                             )}
+                        </motion.div>
+                    )}
+
+                    {/* --- REFERRAL TAB --- */}
+                    {activeTab === 'referral' && user && (
+                        <motion.div
+                            key="referral"
+                            initial={{ opacity: 0, x: 10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="space-y-4"
+                        >
+                            <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-5 border border-white/10 shadow-xl relative overflow-hidden">
+                                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
+                                <div className="relative z-10 space-y-3">
+                                    <h3 className="text-sm font-black uppercase tracking-tight">Earn Pro Status</h3>
+                                    <p className="text-[10px] text-blue-100 font-medium leading-relaxed">Refer a friend. You both get 30 days of Pro analysis upon their signup.</p>
+
+                                    <div className="pt-2">
+                                        <div className="flex gap-2">
+                                            <div className="flex-1 bg-slate-950/40 border border-white/10 rounded-lg px-3 py-2 text-[9px] font-mono text-blue-200 truncate">
+                                                {profile?.referral_code ? `${PROD_URL}/signup?ref=${profile.referral_code}` : 'Generating...'}
+                                            </div>
+                                            <button
+                                                onClick={() => {
+                                                    navigator.clipboard.writeText(`${PROD_URL}/signup?ref=${profile?.referral_code}`);
+                                                    setReferralCopied(true);
+                                                    setTimeout(() => setReferralCopied(false), 2000);
+                                                }}
+                                                className="bg-white text-slate-950 p-2 rounded-lg hover:bg-blue-100 transition-colors"
+                                            >
+                                                {referralCopied ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-3">
+                                    <p className="text-[8px] font-bold text-slate-500 uppercase mb-1">Total Referrals</p>
+                                    <p className="text-xl font-black text-white">{profile?.referral_count || 0}</p>
+                                </div>
+                                <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-3">
+                                    <p className="text-[8px] font-bold text-slate-500 uppercase mb-1">Days Granted</p>
+                                    <p className="text-xl font-black text-emerald-400">{(profile?.referral_count || 0) * 30}</p>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={() => window.open(`${PROD_URL}/referral`, '_blank')}
+                                className="w-full py-3 bg-slate-900 border border-slate-800 hover:border-blue-500/50 text-slate-300 hover:text-white text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2"
+                            >
+                                <Share2 className="w-3.5 h-3.5" /> View Full Dashboard
+                            </button>
                         </motion.div>
                     )}
 

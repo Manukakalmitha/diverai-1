@@ -17,6 +17,15 @@ const AuthPage = ({ initialMode = 'login' }) => {
     const source = queryParams.get('source');
     const extId = queryParams.get('extId');
     const [isExtAuthSuccess, setIsExtAuthSuccess] = useState(false);
+    const [referralCode, setReferralCode] = useState(localStorage.getItem('referral_code') || '');
+
+    useEffect(() => {
+        const ref = queryParams.get('ref');
+        if (ref) {
+            localStorage.setItem('referral_code', ref);
+            setReferralCode(ref);
+        }
+    }, [location.search]);
 
     useEffect(() => {
         setIsLogin(initialMode === 'login');
@@ -75,6 +84,9 @@ const AuthPage = ({ initialMode = 'login' }) => {
                     email,
                     password,
                     options: {
+                        data: {
+                            referred_by: referralCode || undefined
+                        },
                         emailRedirectTo: source === 'extension'
                             ? `${window.location.origin}/login?source=extension&extId=${extId}`
                             : `${window.location.origin}/analysis`
@@ -97,6 +109,7 @@ const AuthPage = ({ initialMode = 'login' }) => {
             const { error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
+                    queryParams: referralCode ? { referred_by: referralCode } : undefined,
                     redirectTo: source === 'extension'
                         ? `${window.location.origin}/login?source=extension&extId=${extId}`
                         : `${window.location.origin}/analysis`
