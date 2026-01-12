@@ -27,7 +27,7 @@ const ReferralPage = () => {
             try {
                 const { data, error } = await supabase
                     .from('referrals')
-                    .select('*, referred_user:referred_user_id(email)')
+                    .select('*, referred_user:profiles!referred_user_id(email)')
                     .eq('referrer_id', user.id);
 
                 if (error) throw error;
