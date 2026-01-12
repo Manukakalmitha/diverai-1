@@ -169,7 +169,16 @@ const Sidebar = () => {
         setAnalysisResult(null);
 
         try {
-            const msgResponse = await chrome.runtime.sendMessage({ action: 'CAPTURE_SCREENSHOT' });
+            const msgResponse = await new Promise((resolve) => {
+                chrome.runtime.sendMessage({ action: 'CAPTURE_SCREENSHOT' }, (response) => {
+                    if (chrome.runtime.lastError) {
+                        resolve({ error: "Connection to extension background lost. Please refresh the page." });
+                    } else {
+                        resolve(response);
+                    }
+                });
+            });
+
             if (msgResponse.error) throw new Error(msgResponse.error);
             const imgUrl = msgResponse.dataUrl;
             setScreenshot(imgUrl);

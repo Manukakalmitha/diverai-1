@@ -60,7 +60,15 @@ function addDiverButton() {
   btn.style.justifyContent = 'center';
 
   btn.onclick = () => {
-    chrome.runtime.sendMessage({ action: 'OPEN_SIDEBAR' });
+    try {
+      chrome.runtime.sendMessage({ action: 'OPEN_SIDEBAR' }, (response) => {
+        if (chrome.runtime.lastError) {
+          console.debug("DiverAI: Connection to background script lost/pending. Re-injection may be needed.");
+        }
+      });
+    } catch (e) {
+      console.debug("DiverAI: Message sending failed (likely extension context invalidated).");
+    }
   };
 
   if (targetArea) {
