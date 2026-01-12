@@ -40,7 +40,7 @@ import ReviewSection from './ReviewSection';
 
 // Announcement Banner Component
 const AnnouncementBanner = () => {
-    const BANNER_VERSION = 'jan-2026-v1'; // Change this to show banner again for new announcements
+    const BANNER_VERSION = 'jan-2026-v2'; // Change this to show banner again for new announcements
 
     // Check localStorage synchronously to avoid flash
     const getInitialDismissedState = () => {
@@ -71,7 +71,7 @@ const AnnouncementBanner = () => {
                         <Megaphone className="w-3.5 h-3.5" />
                     </div>
                     <p className="text-xs sm:text-sm font-medium text-center">
-                        <span className="font-bold">What's New:</span> Optical Engine v2.4 is here with enhanced pattern recognition!
+                        <span className="font-bold">What's New:</span> Diver AI v2.5 is here with a fresh identity and enhanced PWA support!
                     </p>
                 </div>
                 <a
@@ -245,7 +245,7 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                                     className="inline-flex items-center gap-3 px-4 py-1.5 bg-slate-900 border border-slate-800 rounded-full"
                                 >
                                     <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_#10b981]"></div>
-                                    <span className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">System Operational v2.4</span>
+                                    <span className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">System Operational v2.5</span>
                                 </motion.div>
 
                                 <motion.h1
@@ -400,7 +400,7 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                         </div>
 
                         <div className="text-[10px] font-mono text-slate-600 uppercase tracking-widest pt-8">
-                            * Optical Engine v2.4 Certified Compatible
+                            * Optical Engine v2.5 Certified Compatible
                         </div>
                     </div>
                 </section>
@@ -797,7 +797,7 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                         <div className="flex flex-col gap-4">
                             <div className="flex items-center gap-6">
                                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                                <span className="text-xs text-slate-500 font-mono uppercase tracking-widest">System Nominal • v2.4</span>
+                                <span className="text-xs text-slate-500 font-mono uppercase tracking-widest">System Nominal • v2.5</span>
                             </div>
                             <div className="flex flex-wrap gap-x-6 gap-y-2 text-[10px] text-slate-700 font-mono uppercase">
                                 <span>Advanced Market Scanning</span>

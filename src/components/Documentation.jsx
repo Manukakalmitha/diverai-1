@@ -90,7 +90,7 @@ const Documentation = ({ onClose }) => {
                         </div>
                         <h1 className="text-4xl md:text-5xl font-black text-white mb-6 tracking-tighter">Quantitative Manual</h1>
                         <p className="text-xl text-slate-400 leading-relaxed font-light">
-                            Standard Operating Procedures (v3.2.1-STABLE) for the Diver AI forecasting terminal.
+                            Standard Operating Procedures (v2.5.0-STABLE) for the Diver AI forecasting terminal.
                         </p>
                     </div>
 
@@ -248,7 +248,7 @@ const Documentation = ({ onClose }) => {
 
                     <footer className="mt-32 pt-12 border-t border-slate-800 pb-12">
                         <div className="flex justify-between items-center text-xs text-slate-500">
-                            <div>Last updated: Jan 07, 2026</div>
+                            <div>Last updated: Jan 12, 2026</div>
                             <div>© 2026 Diver AI by <a href="https://flisoft.agency" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-500 transition-colors">Fli SOFT</a></div>
                         </div>
                     </footer>

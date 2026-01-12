@@ -16,10 +16,36 @@ import { useSEO, SEO_CONFIGS } from '../hooks/useSEO';
 
 const updates = [
     {
+        version: 'v2.5.0',
+        date: 'January 12, 2026',
+        title: 'New Identity & PWA Evolution',
+        isLatest: true,
+        changes: [
+            {
+                type: 'feature',
+                icon: Sparkles,
+                title: 'Brand Identity Refresh',
+                description: 'Complete visual overhaul of Diver AI branding including a new modern logo and a professionally crafted OG image.'
+            },
+            {
+                type: 'feature',
+                icon: Rocket,
+                title: 'Enhanced PWA Support',
+                description: 'Full suite of high-resolution icons provided for iOS, Android, and Desktop, ensuring a premium native app experience.'
+            },
+            {
+                type: 'improvement',
+                icon: Zap,
+                title: 'Asset Optimization',
+                description: 'All branding assets have been precisely resized and optimized for performance and visual clarity across all devices.'
+            }
+        ]
+    },
+    {
         version: 'v2.4.0',
         date: 'January 11, 2026',
         title: 'Optical Engine Enhancement',
-        isLatest: true,
+        isLatest: false,
         changes: [
             {
                 type: 'feature',
