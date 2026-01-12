@@ -272,6 +272,7 @@
       "@type": "Product",
       "name": "Diver AI Chrome Extension",
       "description": "Free Chrome extension for AI-powered stock and crypto chart analysis. Works on TradingView, Yahoo Finance, and more.",
+      "image": "https://diverai.flisoft.agency/og-image.png",
       "brand": {
         "@type": "Brand",
         "name": "Diver AI"
@@ -281,7 +282,40 @@
         "price": "0",
         "priceCurrency": "USD",
         "availability": "https://schema.org/InStock",
-        "url": "https://chromewebstore.google.com/detail/gjmicgddmbghplbdolnmiecjkdfipand"
+        "url": "https://chromewebstore.google.com/detail/gjmicgddmbghplbdolnmiecjkdfipand",
+        "shippingDetails": {
+          "@type": "OfferShippingDetails",
+          "shippingRate": {
+            "@type": "MonetaryAmount",
+            "value": "0",
+            "currency": "USD"
+          },
+          "shippingDestination": {
+            "@type": "DefinedRegion",
+            "addressCountry": "US"
+          },
+          "deliveryTime": {
+            "@type": "ShippingDeliveryTime",
+            "handlingTime": {
+              "@type": "QuantitativeValue",
+              "minValue": 0,
+              "maxValue": 0,
+              "unitCode": "DAY"
+            },
+            "transitTime": {
+              "@type": "QuantitativeValue",
+              "minValue": 0,
+              "maxValue": 0,
+              "unitCode": "DAY"
+            }
+          }
+        },
+        "hasMerchantReturnPolicy": {
+          "@type": "MerchantReturnPolicy",
+          "applicableCountry": "US",
+          "returnPolicyCategory": "https://schema.org/NoReturns",
+          "merchantReturnLink": "https://diverai.flisoft.agency/docs"
+        }
       },
       "aggregateRating": {
         "@type": "AggregateRating",
