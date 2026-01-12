@@ -7,8 +7,35 @@ if (!supabaseUrl || !supabaseAnonKey) {
     console.error('Missing Supabase Environment Variables!');
 }
 
+// Custom storage handler for Chrome Extensions to ensure persistence
+const customStorage = {
+    getItem: (key) => {
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            return new Promise((resolve) => {
+                chrome.storage.local.get([key], (result) => resolve(result[key] || null));
+            });
+        }
+        return localStorage.getItem(key);
+    },
+    setItem: (key, value) => {
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            chrome.storage.local.set({ [key]: value });
+        } else {
+            localStorage.setItem(key, value);
+        }
+    },
+    removeItem: (key) => {
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            chrome.storage.local.remove([key]);
+        } else {
+            localStorage.removeItem(key);
+        }
+    },
+};
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
+        storage: customStorage,
         autoRefreshToken: true,
         persistSession: true,
         detectSessionInUrl: true

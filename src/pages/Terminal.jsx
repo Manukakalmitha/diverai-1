@@ -1122,10 +1122,16 @@ export default function Terminal() {
                 if (profile?.subscription_tier === 'pro' && user) {
                     try {
                         setStatusMessage("Deep Scan (Cloud OCR)...");
-                        // CRITICAL: We pass ocrSrc (which can be originalFileSrc if we want raw)
-                        // Actually, let's use originalFileSrc for cloud OCR as it's pure
+
+                        // Explicitly get session to ensure freshness and prevent 401
+                        const { data: { session } } = await supabase.auth.getSession();
+                        const token = session?.access_token;
+
+                        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
                         const { data, error } = await supabase.functions.invoke('detect_ticker', {
-                            body: { image: originalFileSrc }
+                            body: { image: originalFileSrc },
+                            headers: headers
                         });
 
                         if (error) throw error;

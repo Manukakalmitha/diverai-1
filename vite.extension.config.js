@@ -98,6 +98,10 @@ export default defineConfig(({ mode }) => {
         resolve: {
             alias: {
                 '@': resolve(__dirname, './src'),
+                // Force extension build to use the extension-specific supabase client
+                '../lib/supabase': resolve(__dirname, './src/lib/supabase-extension.js'),
+                './supabase': resolve(__dirname, './src/lib/supabase-extension.js'),
+                '/src/lib/supabase': resolve(__dirname, './src/lib/supabase-extension.js')
             },
         },
     };
