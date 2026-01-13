@@ -1,12 +1,17 @@
 import React from 'react';
 import { Shield, Zap, Target, Search, HelpCircle, Activity, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
 const WhatIsDiverAI = () => {
     const navigate = useNavigate();
 
     return (
         <div className="min-h-screen bg-[#0f172a] text-slate-200 font-sans selection:bg-blue-500/30 pt-20 pb-20">
+            <Helmet>
+                <title>What is Diver AI? | Understanding OPR & Neural Engine</title>
+                <meta name="description" content="Learn about Diver AI's Institutional-grade trading intelligence. Explore Optical Pattern Recognition and Bayesian Neural Networks." />
+            </Helmet>
             <div className="max-w-4xl mx-auto px-6">
 
                 {/* Header */}

@@ -13,6 +13,7 @@ import { calculateRSI as calcRSI, calculateMACD, calculateBollingerBands, detect
 import { prepareData, calculateStats, createModel, trainModel, predictNextPrice, disposeModel, assessModelAccuracy, saveGlobalModel, loadGlobalModel, runBackgroundTraining, runBackgroundAssessment, saveGlobalModelArtifacts } from '../lib/brain';
 import { extractChartData, anchorPriceToVisual } from '../lib/vision';
 import { runRealAnalysis } from '../lib/analysis';
+import { Helmet } from 'react-helmet-async';
 
 // --- ENGINE LOGIC (Real Implementation) ---
 
@@ -1598,6 +1599,12 @@ export default function Terminal() {
 
     return (
         <div className="flex flex-col h-[calc(100dvh-64px)] pb-0 relative overflow-hidden bg-slate-950">
+            <Helmet>
+                <title>Analysis Terminal | Diver AI - Institutional AI Chart Scanning</title>
+                <meta name="description" content="Access the Diver AI Analysis Terminal. Scan charts with neural networks to identify high-probability patterns and institutional alpha." />
+                <meta property="og:title" content="Diver AI Terminal | Institutional Chart Analysis" />
+                <meta property="og:description" content="Live AI chart scanning and probabilistic forecasting. Get the edge with institutional-grade technology." />
+            </Helmet>
             <TickerTape items={tickerItems} />
 
             {/* Clinical System HUD */}

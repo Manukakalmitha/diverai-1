@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
 export default function ProfilePage() {
     const { user, profile, refreshProfile } = useAppContext();
@@ -168,6 +169,10 @@ export default function ProfilePage() {
 
     return (
         <div className="min-h-screen py-10 md:py-20 px-6 animate-in fade-in duration-700">
+            <Helmet>
+                <title>User Profile | Diver AI - Trading Architecture</title>
+                <meta name="description" content="Manage your Diver AI profile, billing, and neural engine settings. View your trade accuracy and history." />
+            </Helmet>
             <div className="max-w-5xl mx-auto space-y-10">
 
                 {/* Profile Header */}

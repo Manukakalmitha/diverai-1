@@ -34,33 +34,36 @@ const LoadingFallback = () => (
   </div>
 );
 
+import { HelmetProvider } from 'react-helmet-async';
 import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   return (
     <ErrorBoundary>
-      <AppProvider>
-        <Router>
-          <Suspense fallback={<LoadingFallback />}>
-            <Routes>
-              <Route path="/" element={<Layout><Home /></Layout>} />
-              <Route path="/login" element={<AuthPage initialMode="login" />} />
-              <Route path="/signup" element={<AuthPage initialMode="signup" />} />
-              <Route path="/analysis" element={<Layout showNav={true} navStyle="minimal" showTicker={false}><Terminal /></Layout>} />
-              <Route path="/pricing" element={<Layout><PricingPage /></Layout>} />
-              <Route path="/docs" element={<Layout showTicker={false}><DocsPage /></Layout>} />
-              <Route path="/legal/:type" element={<Layout><LegalPage /></Layout>} />
-              <Route path="/profile" element={<Layout><ProfilePage /></Layout>} />
-              <Route path="/what-is-diver-ai" element={<Layout><WhatIsDiverAI /></Layout>} />
-              <Route path="/articles" element={<Layout><ArticlesHub /></Layout>} />
-              <Route path="/articles/:slug" element={<Layout><ArticlePage /></Layout>} />
-              <Route path="/updates" element={<Layout><UpdatesPage /></Layout>} />
-              <Route path="/referral" element={<Layout><ReferralPage /></Layout>} />
-            </Routes>
-          </Suspense>
-        </Router>
-        <ReloadPrompt />
-      </AppProvider>
+      <HelmetProvider>
+        <AppProvider>
+          <Router>
+            <Suspense fallback={<LoadingFallback />}>
+              <Routes>
+                <Route path="/" element={<Layout><Home /></Layout>} />
+                <Route path="/login" element={<AuthPage initialMode="login" />} />
+                <Route path="/signup" element={<AuthPage initialMode="signup" />} />
+                <Route path="/analysis" element={<Layout showNav={true} navStyle="minimal" showTicker={false}><Terminal /></Layout>} />
+                <Route path="/pricing" element={<Layout><PricingPage /></Layout>} />
+                <Route path="/docs" element={<Layout showTicker={false}><DocsPage /></Layout>} />
+                <Route path="/legal/:type" element={<Layout><LegalPage /></Layout>} />
+                <Route path="/profile" element={<Layout><ProfilePage /></Layout>} />
+                <Route path="/what-is-diver-ai" element={<Layout><WhatIsDiverAI /></Layout>} />
+                <Route path="/articles" element={<Layout><ArticlesHub /></Layout>} />
+                <Route path="/articles/:slug" element={<Layout><ArticlePage /></Layout>} />
+                <Route path="/updates" element={<Layout><UpdatesPage /></Layout>} />
+                <Route path="/referral" element={<Layout><ReferralPage /></Layout>} />
+              </Routes>
+            </Suspense>
+          </Router>
+          <ReloadPrompt />
+        </AppProvider>
+      </HelmetProvider>
     </ErrorBoundary>
   );
 }

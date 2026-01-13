@@ -12,7 +12,7 @@ import {
     Tag
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useSEO, SEO_CONFIGS } from '../hooks/useSEO';
+import { Helmet } from 'react-helmet-async';
 
 const updates = [
     {
@@ -116,11 +116,15 @@ const updates = [
 ];
 
 const UpdatesPage = () => {
-    // Apply page-specific SEO
-    useSEO(SEO_CONFIGS.updates);
 
     return (
         <div className="min-h-screen bg-[#050B14] text-white">
+            <Helmet>
+                <title>Product Updates & Changelog | Diver AI</title>
+                <meta name="description" content="Stay up to date with the latest Diver AI features, improvements, and fixes. See what's new in the AI trading platform." />
+                <meta property="og:title" content="Diver AI Updates | What's New" />
+                <meta property="og:description" content="Latest features and improvements to the Diver AI trading analysis platform." />
+            </Helmet>
             {/* Header */}
             <div className="border-b border-slate-800 bg-[#020617]">
                 <div className="max-w-4xl mx-auto px-6 py-12">

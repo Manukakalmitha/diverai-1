@@ -2,10 +2,17 @@ import React from 'react';
 import { articles } from '../data/articles';
 import { Link } from 'react-router-dom';
 import { ArrowRight, BookOpen } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 
 const ArticlesHub = () => {
     return (
         <div className="min-h-screen bg-[#0f172a] text-slate-200 font-sans selection:bg-blue-500/30 pt-24 pb-20">
+            <Helmet>
+                <title>Market Intelligence Hub | Diver AI Articles</title>
+                <meta name="description" content="Deep dives into algorithmic trading, pattern recognition theory, and market psychology. Learn the science behind Diver AI." />
+                <meta property="og:title" content="Diver AI Articles | Trading Intelligence" />
+                <meta property="og:description" content="Read our latest insights on AI trading and market analysis techniques." />
+            </Helmet>
             <div className="max-w-7xl mx-auto px-6">
 
                 <div className="text-center mb-20 space-y-6">

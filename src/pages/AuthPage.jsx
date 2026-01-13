@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { Mail, Lock, Loader2, AlertCircle, ArrowLeft, Activity, CheckCircle2, Chrome } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 const AuthPage = ({ initialMode = 'login' }) => {
@@ -109,7 +110,9 @@ const AuthPage = ({ initialMode = 'login' }) => {
             const { error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    queryParams: referralCode ? { referred_by: referralCode } : undefined,
+                    data: {
+                        referred_by: referralCode || undefined
+                    },
                     redirectTo: source === 'extension'
                         ? `${window.location.origin}/login?source=extension&extId=${extId}`
                         : `${window.location.origin}/analysis`
@@ -129,7 +132,9 @@ const AuthPage = ({ initialMode = 'login' }) => {
             const { error } = await supabase.auth.signInWithOAuth({
                 provider: 'apple',
                 options: {
-                    queryParams: referralCode ? { referred_by: referralCode } : undefined,
+                    data: {
+                        referred_by: referralCode || undefined
+                    },
                     redirectTo: source === 'extension'
                         ? `${window.location.origin}/login?source=extension&extId=${extId}`
                         : `${window.location.origin}/analysis`
@@ -339,6 +344,10 @@ const AuthPage = ({ initialMode = 'login' }) => {
 
     return (
         <div className="min-h-screen bg-slate-950 flex flex-col lg:flex-row">
+            <Helmet>
+                <title>{isLogin ? 'Login | Diver AI' : 'Sign Up | Diver AI'}</title>
+                <meta name="description" content="Access your Diver AI terminal or join our network of elite traders. Institutional-grade analysis is one click away." />
+            </Helmet>
             {/* Left Column - Branding */}
             <div className="hidden lg:flex lg:w-1/2 p-12 bg-slate-900 flex-col justify-between border-r border-slate-800 relative overflow-hidden">
                 <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>

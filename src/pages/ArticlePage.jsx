@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { articles } from '../data/articles';
 import { ArrowLeft, Calendar, Clock, Share2 } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 
 const ArticlePage = () => {
     const { slug } = useParams();
@@ -18,6 +19,13 @@ const ArticlePage = () => {
 
     return (
         <div className="min-h-screen bg-[#0f172a] text-slate-200 font-sans selection:bg-blue-500/30 pt-24 pb-20">
+            <Helmet>
+                <title>{`${article.title} | Diver AI Insights`}</title>
+                <meta name="description" content={article.summary} />
+                <meta property="og:title" content={article.title} />
+                <meta property="og:description" content={article.summary} />
+                <meta property="og:type" content="article" />
+            </Helmet>
             <article className="max-w-3xl mx-auto px-6">
 
                 <button

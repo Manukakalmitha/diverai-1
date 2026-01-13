@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
 import LandingPage from '../components/LandingPage';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
+import { Helmet } from 'react-helmet-async';
 
 const Home = () => {
     const navigate = useNavigate();
@@ -24,12 +24,20 @@ const Home = () => {
     }
 
     return (
-        <LandingPage
-            onStart={() => navigate('/analysis')}
-            onOpenInfo={(type) => navigate(`/legal/${type}`)}
-            onOpenDocs={() => navigate('/docs')}
-            onOpenPricing={() => navigate('/pricing')}
-        />
+        <>
+            <Helmet>
+                <title>Diver AI | Institutional-Grade AI Stock Analysis & Crypto Signals</title>
+                <meta name="description" content="Master the markets with Diver AI. Institutional-grade optical pattern recognition and probabilistic forecasting for stocks, crypto, and forex." />
+                <meta property="og:title" content="Diver AI | AI-Powered Market Intelligence" />
+                <meta property="og:description" content="Get institutional-grade trading signals using AI pattern recognition. Try free today." />
+            </Helmet>
+            <LandingPage
+                onStart={() => navigate('/analysis')}
+                onOpenInfo={(type) => navigate(`/legal/${type}`)}
+                onOpenDocs={() => navigate('/docs')}
+                onOpenPricing={() => navigate('/pricing')}
+            />
+        </>
     );
 };
 

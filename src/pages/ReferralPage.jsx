@@ -14,6 +14,7 @@ import {
     ArrowRight
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
 const ReferralPage = () => {
     const { user, profile } = useAppContext();
@@ -76,6 +77,12 @@ const ReferralPage = () => {
 
     return (
         <div className="min-h-screen bg-slate-950 text-white p-6 md:p-12 lg:p-24">
+            <Helmet>
+                <title>Referral Program | Diver AI - Give Pro, Get Pro</title>
+                <meta name="description" content="Join the Diver AI referral program. Invite your friends to the ultimate AI trading companion and earn 30 days of Pro for every successful signup." />
+                <meta property="og:title" content="Diver AI Referral Rewards | Get Pro Free" />
+                <meta property="og:description" content="Grow the network, claim Pro status. Earn rewards for every trader you invite." />
+            </Helmet>
             <div className="max-w-6xl mx-auto space-y-12">
 
                 {/* Hero Section */}
