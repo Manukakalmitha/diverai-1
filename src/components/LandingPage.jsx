@@ -40,7 +40,7 @@ import ReviewSection from './ReviewSection';
 
 // Announcement Banner Component
 const AnnouncementBanner = () => {
-    const BANNER_VERSION = 'jan-2026-v2'; // Change this to show banner again for new announcements
+    const BANNER_VERSION = 'jan-2026-v4'; // Change this to show banner again for new announcements
 
     // Check localStorage synchronously to avoid flash
     const getInitialDismissedState = () => {
@@ -71,7 +71,7 @@ const AnnouncementBanner = () => {
                         <Megaphone className="w-3.5 h-3.5" />
                     </div>
                     <p className="text-xs sm:text-sm font-medium text-center">
-                        <span className="font-bold">What's New:</span> Diver AI v2.5 is here with a fresh identity and enhanced PWA support!
+                        <span className="font-bold">What's New:</span> Diver AI v4.0 is here with Precision Calibration and RMSE-V4 Neural Core!
                     </p>
                 </div>
                 <a
@@ -245,7 +245,7 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                                     className="inline-flex items-center gap-3 px-4 py-1.5 bg-slate-900 border border-slate-800 rounded-full"
                                 >
                                     <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_#10b981]"></div>
-                                    <span className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">System Operational v2.5</span>
+                                    <span className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">System Operational v4.0</span>
                                 </motion.div>
 
                                 <motion.h1
@@ -400,7 +400,7 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                         </div>
 
                         <div className="text-[10px] font-mono text-slate-600 uppercase tracking-widest pt-8">
-                            * Optical Engine v2.5 Certified Compatible
+                            * Optical Engine v4.0 Precision Certified
                         </div>
                     </div>
                 </section>

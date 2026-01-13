@@ -16,10 +16,36 @@ import { Helmet } from 'react-helmet-async';
 
 const updates = [
     {
+        version: 'v4.0.0',
+        date: 'January 13, 2026',
+        title: 'Precision Calibration: RMSE V4',
+        isLatest: true,
+        changes: [
+            {
+                type: 'feature',
+                icon: Cpu,
+                title: 'Bayesian Neural Core V4',
+                description: 'Upgraded LSTM architecture with a 45-period temporal window and multivariate ATR fusion for extreme predictive precision.'
+            },
+            {
+                type: 'feature',
+                icon: Zap,
+                title: 'Volatility-Adjusted Multiplier',
+                description: 'Hybrid fusion logic now dynamically scales neural probability based on market volatility, reducing false signals.'
+            },
+            {
+                type: 'improvement',
+                icon: Sparkles,
+                title: 'Refined OCR Preprocessing',
+                description: 'New multi-stage denoising and sharpening kernels for near-perfect ticker extraction from complex chart backgrounds.'
+            }
+        ]
+    },
+    {
         version: 'v2.5.0',
         date: 'January 12, 2026',
         title: 'New Identity & PWA Evolution',
-        isLatest: true,
+        isLatest: false,
         changes: [
             {
                 type: 'feature',

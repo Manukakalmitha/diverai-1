@@ -1,6 +1,6 @@
 import * as tf from '@tensorflow/tfjs';
-import { supabase } from './supabase';
-import { calculateRSI, calculateMACD, detectPatterns } from './technicalAnalysis';
+import { supabase } from './supabase.js';
+import { calculateRSI, calculateMACD, detectPatterns, calculateATR } from './technicalAnalysis.js';
 
 // Explicitly set backend
 const initTf = async () => {
@@ -73,10 +73,11 @@ export const runBackgroundAssessment = (fullPrices, onProgress) => {
 
 
 // Hyperparameters (Industry Upgraded)
-export const WINDOW_SIZE = 30; // Increased from 14 for better context
-const EPOCHS = 25; // Adjusted for deeper learning
+// Hyperparameters (Industry Upgraded - V4 Precision)
+export const WINDOW_SIZE = 45;
+const EPOCHS = 35;
 const BATCH_SIZE = 32;
-const FEATURES = 3; // Price, RSI, MACD Histogram
+const FEATURES = 4; // Price, RSI, MACD Histogram, ATR
 
 /**
  * Normalizes a pattern using "Zero-Base" (first candle as 0)
@@ -98,12 +99,13 @@ const zScoreNormalize = (val, mean, std) => (val - mean) / (std || 1);
 export const augmentPattern = (patternVector) => {
     // patternVector is [WINDOW_SIZE][FEATURES]
     return patternVector.map(step => {
-        const noise = (Math.random() - 0.5) * 0.001; // subtle noise
-        const scale = 0.998 + (Math.random() * 0.004); // subtle scale shift
+        const noise = (Math.random() - 0.5) * 0.0005; // lower noise
+        const scale = 0.999 + (Math.random() * 0.002); // tighter scale
         return [
             step[0] * scale + noise,
             step[1] * scale + noise,
-            step[2] * scale + noise
+            step[2] * scale + noise,
+            step[3] * scale + noise
         ];
     });
 };
@@ -112,13 +114,14 @@ export const augmentPattern = (patternVector) => {
  * Calculate stats for Z-Score normalization WITHOUT creating tensors
  */
 export const calculateStats = (dataSeries) => {
-    const { prices, rsi, macd } = dataSeries;
-    const minLen = Math.min(prices.length, rsi.length, macd.length);
+    const { prices, rsi, macd, atr } = dataSeries;
+    const minLen = Math.min(prices.length, rsi.length, macd.length, (atr?.length || 0));
     const p = prices.slice(-minLen);
     const r = rsi.slice(-minLen);
     const m = macd.slice(-minLen);
+    const a = atr.slice(-minLen);
 
-    return [p, r, m].map(arr => {
+    return [p, r, m, a].map(arr => {
         const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
         const std = Math.sqrt(arr.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / arr.length) || 1;
         return { mean, std };
@@ -127,16 +130,16 @@ export const calculateStats = (dataSeries) => {
 
 /**
  * Multivariate Data Preparation with Z-Score Normalization
- * Optimized for RAM using TypedArrays directly
  */
 export const prepareData = (dataSeries, windowSize) => {
-    const { prices, rsi, macd } = dataSeries;
-    const minLen = Math.min(prices.length, rsi.length, macd.length);
+    const { prices, rsi, macd, atr } = dataSeries;
+    const minLen = Math.min(prices.length, rsi.length, macd.length, (atr?.length || 0));
     const stats = calculateStats(dataSeries);
 
     const p = prices.slice(-minLen);
     const r = rsi.slice(-minLen);
     const m = macd.slice(-minLen);
+    const a = atr.slice(-minLen);
 
     const count = minLen - windowSize;
     if (count <= 0) return { xs: tf.tensor3d([], [0, windowSize, FEATURES]), ys: tf.tensor2d([], [0, 1]), stats };
@@ -152,7 +155,8 @@ export const prepareData = (dataSeries, windowSize) => {
             pattern.push([
                 (p[i + j] - windowBasePrice) / (windowBasePrice || 1), // Zero-base price
                 zScoreNormalize(r[i + j], stats[1].mean, stats[1].std),
-                zScoreNormalize(m[i + j], stats[2].mean, stats[2].std)
+                zScoreNormalize(m[i + j], stats[2].mean, stats[2].std),
+                zScoreNormalize(a[i + j], stats[3].mean, stats[3].std)
             ]);
         }
 
@@ -160,10 +164,9 @@ export const prepareData = (dataSeries, windowSize) => {
         yData.push((p[i + windowSize] - windowBasePrice) / (windowBasePrice || 1));
 
         // AUGMENTATION (On-the-fly)
-        // Add a noisy version of the same pattern to double the training set
         const augmented = augmentPattern(pattern);
         xData.push(augmented);
-        yData.push((p[i + windowSize] - windowBasePrice) / (windowBasePrice || 1) * (0.998 + Math.random() * 0.004));
+        yData.push((p[i + windowSize] - windowBasePrice) / (windowBasePrice || 1) * (0.999 + Math.random() * 0.002));
     }
 
     const xs = tf.tensor3d(xData, [xData.length, windowSize, FEATURES]);
@@ -177,35 +180,41 @@ export const createModel = () => {
 
     // Layer 1: LSTM (Temporal Feature Extraction)
     model.add(tf.layers.lstm({
-        units: 32, // Reduced from 64
+        units: 64,
         inputShape: [WINDOW_SIZE, FEATURES],
         returnSequences: true,
         recurrentInitializer: 'glorotUniform',
-        kernelRegularizer: tf.regularizers.l2({ l2: 0.01 })
+        kernelRegularizer: tf.regularizers.l2({ l2: 0.005 })
     }));
 
     model.add(tf.layers.dropout({ rate: 0.2 }));
 
     // Layer 2: LSTM (Deep Pattern Detection)
     model.add(tf.layers.lstm({
-        units: 16, // Reduced from 32
+        units: 32,
         returnSequences: false,
         recurrentInitializer: 'glorotUniform'
     }));
 
     model.add(tf.layers.batchNormalization());
 
+    // Layer 3: Interpretation
     model.add(tf.layers.dense({
-        units: 16, // Matches LSTM 2
+        units: 32,
         activation: 'relu',
-        kernelRegularizer: tf.regularizers.l2({ l2: 0.01 })
+        kernelRegularizer: tf.regularizers.l2({ l2: 0.005 })
+    }));
+
+    model.add(tf.layers.dense({
+        units: 16,
+        activation: 'relu'
     }));
 
     model.add(tf.layers.dense({ units: 1, activation: 'linear' }));
 
     model.compile({
-        optimizer: tf.train.adam(0.005),
-        loss: 'meanSquaredError' // Reverted for compatibility
+        optimizer: tf.train.adam(0.002),
+        loss: 'meanSquaredError'
     });
 
     return model;
@@ -230,7 +239,6 @@ export const trainModel = async (model, dataSeries, epochsOverride = null) => {
 };
 
 export const predictNextPrice = (model, lastWindowSeries, stats) => {
-    // lastWindowSeries: { prices: [30], rsi: [30], macd: [30] }
     const basePrice = lastWindowSeries.prices[0];
     const inputData = [];
 
@@ -238,7 +246,8 @@ export const predictNextPrice = (model, lastWindowSeries, stats) => {
         inputData.push([
             (lastWindowSeries.prices[i] - basePrice) / (basePrice || 1),
             zScoreNormalize(lastWindowSeries.rsi[i], stats[1].mean, stats[1].std),
-            zScoreNormalize(lastWindowSeries.macd[i], stats[2].mean, stats[2].std)
+            zScoreNormalize(lastWindowSeries.macd[i], stats[2].mean, stats[2].std),
+            zScoreNormalize(lastWindowSeries.atr[i], stats[3].mean, stats[3].std)
         ]);
     }
 
@@ -262,18 +271,18 @@ export const disposeModel = (model) => {
 
 /**
  * Runs a rolling window backtest on the data.
- * @param {Array} prices - Full array of historical prices
- * @param {Function} onProgress - Callback(percent)
- * @returns {Object} - { accuracy (0-100), rmse, chartData: [{date, actual, predicted}] }
  */
 export const assessModelAccuracy = async (fullPrices, onProgress) => {
     // Requires pre-calculated indicators
     const rsi = calculateRSI(fullPrices, 14);
     const macd = calculateMACD(fullPrices).histogram;
-    const minLen = Math.min(fullPrices.length, rsi.length, macd.length);
+    const atr = calculateATR(fullPrices, null, fullPrices, 14);
+
+    const minLen = Math.min(fullPrices.length, rsi.length, macd.length, atr.length);
     const prices = fullPrices.slice(-minLen);
     const r = rsi.slice(-minLen);
     const m = macd.slice(-minLen);
+    const a = atr.slice(-minLen);
 
     const TEST_POINTS = 10;
     if (minLen < WINDOW_SIZE + TEST_POINTS + 10) {
@@ -283,7 +292,6 @@ export const assessModelAccuracy = async (fullPrices, onProgress) => {
     const predictions = [];
     let hits = { neural: 0, pattern: 0, technical: 0 };
 
-    // OPTIMIZATION: Create one model for the whole assessment
     const model = createModel();
 
     // 1. Initial bulk training on history
@@ -291,7 +299,8 @@ export const assessModelAccuracy = async (fullPrices, onProgress) => {
     const baseSeries = {
         prices: prices.slice(0, baseIdx),
         rsi: r.slice(0, baseIdx),
-        macd: m.slice(0, baseIdx)
+        macd: m.slice(0, baseIdx),
+        atr: a.slice(0, baseIdx)
     };
 
     if (onProgress) onProgress(10);
@@ -310,14 +319,15 @@ export const assessModelAccuracy = async (fullPrices, onProgress) => {
             const lastWindowSeries = {
                 prices: prices.slice(targetIdx - WINDOW_SIZE, targetIdx),
                 rsi: r.slice(targetIdx - WINDOW_SIZE, targetIdx),
-                macd: m.slice(targetIdx - WINDOW_SIZE, targetIdx)
+                macd: m.slice(targetIdx - WINDOW_SIZE, targetIdx),
+                atr: a.slice(targetIdx - WINDOW_SIZE, targetIdx)
             };
             return predictNextPrice(model, lastWindowSeries, stats);
         });
         const neuralDir = predicted > prevClose ? 1 : -1;
         if (neuralDir === actualDir) hits.neural++;
 
-        // B. Pattern Prediction (using technicalAnalysis.js logic)
+        // B. Pattern Prediction
         const currentPrices = prices.slice(0, targetIdx);
         const pattern = detectPatterns(currentPrices);
         let patternDir = 0;
@@ -325,11 +335,11 @@ export const assessModelAccuracy = async (fullPrices, onProgress) => {
         else if (pattern.sentiment === 'Bearish') patternDir = -1;
         if (patternDir === actualDir) hits.pattern++;
 
-        // C. Technical Prediction (RSI based)
+        // C. Technical Prediction
         const currentRSI = r[targetIdx - 1];
         let techDir = 0;
-        if (currentRSI < 40) techDir = 1;      // Bullish bias
-        else if (currentRSI > 60) techDir = -1; // Bearish bias
+        if (currentRSI < 40) techDir = 1;
+        else if (currentRSI > 60) techDir = -1;
         if (techDir === actualDir) hits.technical++;
 
         predictions.push({ step: i + 1, actual, predicted, isCorrect: neuralDir === actualDir });
@@ -343,7 +353,8 @@ export const assessModelAccuracy = async (fullPrices, onProgress) => {
                 x.push([
                     (prices[idx] - basePrice) / (basePrice || 1),
                     zScoreNormalize(r[idx], stats[1].mean, stats[1].std),
-                    zScoreNormalize(m[idx], stats[2].mean, stats[2].std)
+                    zScoreNormalize(m[idx], stats[2].mean, stats[2].std),
+                    zScoreNormalize(a[idx], stats[3].mean, stats[3].std)
                 ]);
             }
             const xt = tf.tensor3d([x], [1, WINDOW_SIZE, FEATURES]);
@@ -356,7 +367,7 @@ export const assessModelAccuracy = async (fullPrices, onProgress) => {
 
     model.dispose();
 
-    // Calculate Recommended Weights (Normalized 0.0 to 1.0)
+    // Calculate Recommended Weights 
     const totalHits = hits.neural + hits.pattern + hits.technical || 1;
     const recommendedWeights = {
         omega: Math.max(0.2, (hits.neural / totalHits)),
@@ -364,9 +375,9 @@ export const assessModelAccuracy = async (fullPrices, onProgress) => {
         gamma: Math.max(0.15, (hits.technical / totalHits))
     };
 
-    // Calculate Brier Score (mean squared difference between prob and outcome)
+    // Calculate Brier Score 
     const brierScore = (predictions.reduce((acc, p) => {
-        const prob = p.predicted > prices[baseIdx + p.step - 2] ? 0.75 : 0.25; // Simple prob proxy for backtest
+        const prob = p.predicted > prices[baseIdx + p.step - 2] ? 0.75 : 0.25;
         const outcome = p.actual > prices[baseIdx + p.step - 2] ? 1 : 0;
         return acc + Math.pow(prob - outcome, 2);
     }, 0) / TEST_POINTS).toFixed(4);
@@ -467,7 +478,7 @@ export const loadGlobalModel = async (user, name) => {
             .select('model_json')
             .eq('user_id', user.id)
             .eq('name', name)
-            .maybeSingle(); // Better handling for empty states
+            .maybeSingle();
 
         if (error || !data) return null;
 
@@ -488,8 +499,8 @@ export const loadGlobalModel = async (user, name) => {
 
         // SHAPE VERIFICATION: Ensure the loaded model matches the current WINDOW_SIZE
         const inputShape = model.inputs[0].shape; // [null, windowSize, features]
-        if (inputShape[1] !== WINDOW_SIZE) {
-            console.warn(`[Brain] Model shape mismatch detected (${inputShape[1]} vs ${WINDOW_SIZE}). Discarding legacy model.`);
+        if (inputShape[1] !== WINDOW_SIZE || inputShape[2] !== FEATURES) {
+            console.warn(`[Brain] Model shape mismatch detected (${inputShape[1]}x${inputShape[2]} vs ${WINDOW_SIZE}x${FEATURES}). Discarding legacy model.`);
             model.dispose();
             return null;
         }

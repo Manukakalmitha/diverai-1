@@ -137,32 +137,32 @@ export const detectPatterns = (prices) => {
     return patterns.length > 0 ? patterns[0] : { name: 'Consolidation', sentiment: 'Neutral' };
 };
 
-export const calculateATR = (prices, period = 14) => {
-    if (prices.length < period + 1) return [];
-
+export const calculateATR = (highs, lows, closes, period = 14) => {
+    // Check if we have triple arrays or single array
     let tr = [];
-    // Calculate True Range for each candle
-    for (let i = 1; i < prices.length; i++) {
-        const high = prices[i]; // Approximate High (using Close for simplicity if High not avail, but here we only have single price array. For better ATR we need High/Low/Close. 
-        // fallback: using Volatility of Close-to-Close as proxy for TR if only Close exists.
-        // TR = max( |High - Low|, |High - PrevClose|, |Low - PrevClose| )
-        // Since we only have 'prices' (assumed Close), we will use |Close - PrevClose| which is a simplified volatility.
-        // ideally we should pass {high, low, close} to this function.
-        // Assuming 'prices' is just an array of numbers.
+    const hasFullData = Array.isArray(highs) && Array.isArray(lows) && Array.isArray(closes);
 
-        const current = prices[i];
-        const prev = prices[i - 1];
+    const len = hasFullData ? highs.length : (Array.isArray(highs) ? highs.length : 0);
+    if (len < period + 1) return [];
 
-        // Simulating High/Low from Close allows for minimal ATR estimation
-        // A better approach for this app since we only fetch 'prices' (closes) usually:
-        // Use a multiplier on the absolute change to estimate "True Range" including intraday noise.
-        const change = Math.abs(current - prev);
-        const estimatedIntradayVolatility = current * 0.005; // 0.5% base noise
-        const estimatedTR = Math.max(change, estimatedIntradayVolatility);
-        tr.push(estimatedTR);
+    for (let i = 1; i < len; i++) {
+        let currentTR;
+        if (hasFullData) {
+            const h = highs[i];
+            const l = lows[i];
+            const pc = closes[i - 1];
+            currentTR = Math.max(h - l, Math.abs(h - pc), Math.abs(l - pc));
+        } else {
+            // Fallback for single array (assumed Closes)
+            const current = highs[i];
+            const prev = highs[i - 1];
+            const change = Math.abs(current - prev);
+            // 1.5x multiplier on Close-to-Close as a better proxy for True Range when H/L are missing
+            currentTR = Math.max(change, current * 0.0075);
+        }
+        tr.push(currentTR);
     }
 
-    // SMA of TR
     const atr = [];
     let initialATR = tr.slice(0, period).reduce((a, b) => a + b, 0) / period;
     atr.push(initialATR);
@@ -172,36 +172,61 @@ export const calculateATR = (prices, period = 14) => {
         atr.push(nextATR);
     }
 
-    // Pad the beginning to match prices length (roughly)
-    const padding = new Array(prices.length - atr.length).fill(null);
+    const padding = new Array(len - atr.length).fill(atr[0]);
     return [...padding, ...atr];
 };
 
-export const findSupportResistance = (prices) => {
-    if (prices.length < 20) return { support: Math.min(...prices), resistance: Math.max(...prices) };
+export const findSupportResistance = (closes, highs, lows) => {
+    const prices = Array.isArray(closes) ? closes : [];
+    if (prices.length < 20) return { support: Math.min(...prices), resistance: Math.max(...prices), strength: { s: 1, r: 1 } };
 
-    // Simple local extrema finding
+    const useHL = Array.isArray(highs) && Array.isArray(lows) && highs.length === prices.length;
     const levels = [];
     const window = 5;
 
     for (let i = window; i < prices.length - window; i++) {
-        const slice = prices.slice(i - window, i + window + 1);
-        const current = prices[i];
-        const isMax = slice.every(p => p <= current);
-        const isMin = slice.every(p => p >= current);
+        // Resistance: Look at highs
+        if (useHL) {
+            const hSlice = highs.slice(i - window, i + window + 1);
+            const currentH = highs[i];
+            if (hSlice.every(p => p <= currentH)) levels.push({ price: currentH, type: 'Resistance' });
 
-        if (isMax) levels.push({ price: current, type: 'Resistance' });
-        if (isMin) levels.push({ price: current, type: 'Support' });
+            const lSlice = lows.slice(i - window, i + window + 1);
+            const currentL = lows[i];
+            if (lSlice.every(p => p >= currentL)) levels.push({ price: currentL, type: 'Support' });
+        } else {
+            const slice = prices.slice(i - window, i + window + 1);
+            const current = prices[i];
+            const isMax = slice.every(p => p <= current);
+            const isMin = slice.every(p => p >= current);
+            if (isMax) levels.push({ price: current, type: 'Resistance' });
+            if (isMin) levels.push({ price: current, type: 'Support' });
+        }
     }
 
-    // Find nearest strong levels to current price
     const currentPrice = prices[prices.length - 1];
 
-    const supports = levels.filter(l => l.type === 'Support' && l.price < currentPrice).sort((a, b) => b.price - a.price);
-    const resistances = levels.filter(l => l.type === 'Resistance' && l.price > currentPrice).sort((a, b) => a.price - b.price);
+    // Improved Strength Detection: Group nearby levels
+    const getNearestLevel = (type, target) => {
+        const filtered = levels.filter(l => l.type === type && (type === 'Support' ? l.price < target : l.price > target));
+        if (filtered.length === 0) return { price: (type === 'Support' ? Math.min(...prices) : Math.max(...prices)), strength: 1 };
+
+        // Sort by proximity
+        const sorted = filtered.sort((a, b) => Math.abs(a.price - target) - Math.abs(b.price - target));
+        const nearest = sorted[0].price;
+
+        // Count how many times this price level (within 0.5% tolerance) was touched
+        const hits = levels.filter(l => l.type === type && Math.abs(l.price - nearest) / nearest < 0.005).length;
+
+        return { price: nearest, strength: Math.min(5, hits) };
+    };
+
+    const s = getNearestLevel('Support', currentPrice);
+    const r = getNearestLevel('Resistance', currentPrice);
 
     return {
-        support: supports.length > 0 ? supports[0].price : Math.min(...prices), // Fallback to all-time low of period
-        resistance: resistances.length > 0 ? resistances[0].price : Math.max(...prices) // Fallback to all-time high of period
+        support: s.price,
+        resistance: r.price,
+        strength: { s: s.strength, r: r.strength }
     };
 };

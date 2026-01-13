@@ -199,25 +199,26 @@ export const generatePreprocessedVariants = (imageElement) => {
         description: 'High contrast grayscale'
     });
 
-    // Variant 2: Adaptive Threshold
+    // Variant 2: Adaptive Threshold + Noise Reduction
     const canvas2 = document.createElement('canvas');
     canvas2.width = w;
     canvas2.height = h;
     const ctx2 = canvas2.getContext('2d');
     ctx2.filter = 'grayscale(100%)';
     ctx2.drawImage(imageElement, 0, 0, w, h);
+    applyMedianBlur(canvas2, ctx2, 1); // V4 Addition: Median blur to reduce noise
     applyAdaptiveThreshold(canvas2, ctx2);
     if (isDark) {
         ctx2.filter = 'invert(100%)';
         ctx2.drawImage(canvas2, 0, 0);
     }
     variants.push({
-        name: 'adaptive_threshold',
+        name: 'adaptive_threshold_v4',
         dataUrl: canvas2.toDataURL('image/png'),
-        description: 'Adaptive binary threshold'
+        description: 'Adaptive binary with noise reduction'
     });
 
-    // Variant 3: Sharpened
+    // Variant 3: Multi-Stage Precision (V4 ADDITION)
     const canvas3 = document.createElement('canvas');
     canvas3.width = w;
     canvas3.height = h;
@@ -225,12 +226,13 @@ export const generatePreprocessedVariants = (imageElement) => {
     ctx3.filter = isDark ? 'invert(100%) grayscale(100%)' : 'grayscale(100%)';
     ctx3.drawImage(imageElement, 0, 0, w, h);
     applySharpen(canvas3, ctx3);
-    ctx3.filter = 'contrast(150%)';
+    applyMedianBlur(canvas3, ctx3, 1);
+    ctx3.filter = 'contrast(160%) brightness(110%)';
     ctx3.drawImage(canvas3, 0, 0);
     variants.push({
-        name: 'sharpened',
+        name: 'precision_v4',
         dataUrl: canvas3.toDataURL('image/png'),
-        description: 'Sharpened edges'
+        description: 'Sharpened + Denoised High Contrast'
     });
 
     // Variant 4: ROI - Top Left (where ticker usually is)

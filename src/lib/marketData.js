@@ -206,7 +206,7 @@ export const detectTicker = (text) => {
 // --- CRYPTO API (CoinGecko) ---
 
 const PROXIES = []; // Proxies no longer needed with Edge Function
-import { supabase } from './supabase'; // Correct relative path within src/lib
+import { supabase } from './supabase.js'; // Correct relative path within src/lib
 
 const fetchProxy = async (mode, tickers) => {
     try {
@@ -261,11 +261,22 @@ export const fetchHistoricalData = async (ticker, days = 90) => {
     const coinId = COIN_MAP[ticker];
     if (!coinId) return null;
 
-    // Chart fetch via proxy
+    // Chart fetch via proxy (market_chart returns prices and volumes)
+    // For full OHLC we'd use the /ohlc endpoint, but market_chart is more dense.
+    // We'll standardize to OHLCV object even if some fields are derived/aliased.
     const data = await fetchProxy('market_chart', [coinId]);
 
     if (data && data.prices) {
-        return data.prices.map(p => p[1]);
+        const closes = data.prices.map(p => p[1]);
+        const volumes = (data.total_volumes || []).map(v => v[1]);
+
+        return {
+            closes,
+            highs: closes, // CoinGecko market_chart doesn't provide daily high/low separately without /ohlc
+            lows: closes,  // but /ohlc has lower granularity. We'll use closes as fallback for H/L if needed.
+            volumes,
+            source: 'CoinGecko High-Speed'
+        };
     }
     return null;
 };
@@ -300,8 +311,6 @@ export const fetchStockHistory = async (ticker, apiKey) => {
 
     try {
         // Finnhub Stock Candles Endpoint
-        // resolution: 'D' (Day)
-        // from/to: UNIX timestamps
         const to = Math.floor(Date.now() / 1000);
         const from = to - (90 * 24 * 60 * 60); // 90 days ago
 
@@ -309,7 +318,13 @@ export const fetchStockHistory = async (ticker, apiKey) => {
         const data = await response.json();
 
         if (data.s === 'ok' && data.c) {
-            return data.c; // 'c' is the array of close prices
+            return {
+                closes: data.c,
+                highs: data.h || data.c,
+                lows: data.l || data.c,
+                volumes: data.v || [],
+                source: 'Finnhub Institutional'
+            };
         }
     } catch (error) {
         console.warn("Stock History API Error:", error);
@@ -331,16 +346,24 @@ export const fetchYahooData = async (ticker) => {
                 const quote = data.chart.result[0];
                 const meta = quote.meta;
                 const indicators = quote.indicators.quote[0];
-                const prices = indicators.close || [];
+                const closes = indicators.close || [];
+                const highs = indicators.high || closes;
+                const lows = indicators.low || closes;
+                const volumes = indicators.volume || [];
 
-                // Filter out nulls from prices
-                const cleanPrices = prices.filter(p => p !== null && p !== undefined);
+                // Filter out nulls from prices (sync all arrays)
+                const cleanData = closes.map((c, i) => ({
+                    c,
+                    h: highs[i],
+                    l: lows[i],
+                    v: volumes[i]
+                })).filter(d => d.c !== null && d.c !== undefined);
 
-                if (cleanPrices.length === 0) return null;
+                if (cleanData.length === 0) return null;
 
-                // Last Price
-                const currentPrice = meta.regularMarketPrice || cleanPrices[cleanPrices.length - 1];
-                const prevClose = meta.chartPreviousClose || cleanPrices[cleanPrices.length - 2] || currentPrice;
+                const finalCloses = cleanData.map(d => d.c);
+                const currentPrice = meta.regularMarketPrice || finalCloses[finalCloses.length - 1];
+                const prevClose = meta.chartPreviousClose || finalCloses[finalCloses.length - 2] || currentPrice;
                 const changePercent = ((currentPrice - prevClose) / prevClose) * 100;
 
                 return {
@@ -350,7 +373,13 @@ export const fetchYahooData = async (ticker) => {
                         volume: meta.regularMarketVolume || 0,
                         source: 'Yahoo Finance (Edge)'
                     },
-                    historicalPrices: cleanPrices
+                    historicalData: {
+                        closes: finalCloses,
+                        highs: cleanData.map(d => d.h),
+                        lows: cleanData.map(d => d.l),
+                        volumes: cleanData.map(d => d.v),
+                        source: 'Yahoo Institutional Stream'
+                    }
                 };
             }
         } catch (e) { console.warn(`Yahoo fetch failed for ${sym}:`, e); }
@@ -414,7 +443,7 @@ const fetchBulkCrypto = async (tickers) => {
                 ticker: t,
                 price: coinData.usd,
                 change: coinData.usd_24h_change,
-                sparkline: sparklineMap[t] || [],
+                sparkline: sparklineMap[t]?.closes || [],
                 isCrypto: true
             };
         }).filter(Boolean);
@@ -435,7 +464,7 @@ const fetchBulkStocks = async (tickers) => {
                     ticker: t,
                     price: data.marketStats.price,
                     change: data.marketStats.change24h,
-                    sparkline: data.historicalPrices || [],
+                    sparkline: data.historicalData?.closes || [],
                     isCrypto: false
                 };
             }

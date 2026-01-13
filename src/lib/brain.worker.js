@@ -1,22 +1,23 @@
 import * as tf from '@tensorflow/tfjs';
-import { calculateRSI, calculateMACD, detectPatterns } from './technicalAnalysis';
+import { calculateRSI, calculateMACD, detectPatterns, calculateATR } from './technicalAnalysis.js';
 
-// Hyperparameters (Industry Upgraded)
-const WINDOW_SIZE = 30;
-const EPOCHS = 25;
+// Hyperparameters (Industry Upgraded - V4 Precision)
+const WINDOW_SIZE = 45;
+const EPOCHS = 35;
 const BATCH_SIZE = 32;
-const FEATURES = 3;
+const FEATURES = 4; // Price, RSI, MACD Histogram, ATR
 
 const zScoreNormalize = (val, mean, std) => (val - mean) / (std || 1);
 
 const augmentPattern = (patternVector) => {
     return patternVector.map(step => {
-        const noise = (Math.random() - 0.5) * 0.001;
-        const scale = 0.998 + (Math.random() * 0.004);
+        const noise = (Math.random() - 0.5) * 0.0005; // Slightly lower noise for more precision
+        const scale = 0.999 + (Math.random() * 0.002);
         return [
             step[0] * scale + noise,
             step[1] * scale + noise,
-            step[2] * scale + noise
+            step[2] * scale + noise,
+            step[3] * scale + noise
         ];
     });
 };
@@ -25,13 +26,14 @@ const augmentPattern = (patternVector) => {
  * Calculate stats for Z-Score normalization WITHOUT creating tensors
  */
 const calculateStats = (dataSeries) => {
-    const { prices, rsi, macd } = dataSeries;
-    const minLen = Math.min(prices.length, rsi.length, macd.length);
+    const { prices, rsi, macd, atr } = dataSeries;
+    const minLen = Math.min(prices.length, rsi.length, macd.length, (atr?.length || 0));
     const p = prices.slice(-minLen);
     const r = rsi.slice(-minLen);
     const m = macd.slice(-minLen);
+    const a = atr.slice(-minLen);
 
-    return [p, r, m].map(arr => {
+    return [p, r, m, a].map(arr => {
         const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
         const std = Math.sqrt(arr.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / arr.length) || 1;
         return { mean, std };
@@ -42,13 +44,14 @@ const calculateStats = (dataSeries) => {
  * Multivariate Data Preparation with Z-Score Normalization
  */
 const prepareData = (dataSeries, windowSize) => {
-    const { prices, rsi, macd } = dataSeries;
-    const minLen = Math.min(prices.length, rsi.length, macd.length);
+    const { prices, rsi, macd, atr } = dataSeries;
+    const minLen = Math.min(prices.length, rsi.length, macd.length, atr.length);
     const stats = calculateStats(dataSeries);
 
     const p = prices.slice(-minLen);
     const r = rsi.slice(-minLen);
     const m = macd.slice(-minLen);
+    const a = atr.slice(-minLen);
 
     const count = minLen - windowSize;
     if (count <= 0) return { xs: tf.tensor3d([], [0, windowSize, FEATURES]), ys: tf.tensor2d([], [0, 1]), stats };
@@ -64,7 +67,8 @@ const prepareData = (dataSeries, windowSize) => {
             pattern.push([
                 (p[i + j] - windowBasePrice) / (windowBasePrice || 1),
                 zScoreNormalize(r[i + j], stats[1].mean, stats[1].std),
-                zScoreNormalize(m[i + j], stats[2].mean, stats[2].std)
+                zScoreNormalize(m[i + j], stats[2].mean, stats[2].std),
+                zScoreNormalize(a[i + j], stats[3].mean, stats[3].std)
             ]);
         }
 
@@ -74,7 +78,7 @@ const prepareData = (dataSeries, windowSize) => {
         // AUGMENTATION
         const augmented = augmentPattern(pattern);
         xData.push(augmented);
-        yData.push((p[i + windowSize] - windowBasePrice) / (windowBasePrice || 1) * (0.998 + Math.random() * 0.004));
+        yData.push((p[i + windowSize] - windowBasePrice) / (windowBasePrice || 1) * (0.999 + Math.random() * 0.002));
     }
 
     const xs = tf.tensor3d(xData, [xData.length, windowSize, FEATURES]);
@@ -85,30 +89,46 @@ const prepareData = (dataSeries, windowSize) => {
 
 const createModel = () => {
     const model = tf.sequential();
+
+    // Layer 1: LSTM (Temporal Feature Extraction)
     model.add(tf.layers.lstm({
-        units: 32,
+        units: 64, // Increased for deeper feature extraction
         inputShape: [WINDOW_SIZE, FEATURES],
         returnSequences: true,
         recurrentInitializer: 'glorotUniform',
-        kernelRegularizer: tf.regularizers.l2({ l2: 0.01 })
+        kernelRegularizer: tf.regularizers.l2({ l2: 0.005 })
     }));
+
     model.add(tf.layers.dropout({ rate: 0.2 }));
+
+    // Layer 2: LSTM (Deep Pattern Detection)
     model.add(tf.layers.lstm({
-        units: 16,
+        units: 32,
         returnSequences: false,
         recurrentInitializer: 'glorotUniform'
     }));
+
     model.add(tf.layers.batchNormalization());
+
+    // Layer 3: Dense interpretation layer (V4 ADDITION)
+    model.add(tf.layers.dense({
+        units: 32,
+        activation: 'relu',
+        kernelRegularizer: tf.regularizers.l2({ l2: 0.005 })
+    }));
+
     model.add(tf.layers.dense({
         units: 16,
-        activation: 'relu',
-        kernelRegularizer: tf.regularizers.l2({ l2: 0.01 })
+        activation: 'relu'
     }));
+
     model.add(tf.layers.dense({ units: 1, activation: 'linear' }));
+
     model.compile({
-        optimizer: tf.train.adam(0.005),
+        optimizer: tf.train.adam(0.002), // Lower learning rate for precision
         loss: 'meanSquaredError'
     });
+
     return model;
 };
 
@@ -134,7 +154,8 @@ const predictNextPrice = (model, lastWindowSeries, stats) => {
         inputData.push([
             (lastWindowSeries.prices[i] - basePrice) / (basePrice || 1),
             zScoreNormalize(lastWindowSeries.rsi[i], stats[1].mean, stats[1].std),
-            zScoreNormalize(lastWindowSeries.macd[i], stats[2].mean, stats[2].std)
+            zScoreNormalize(lastWindowSeries.macd[i], stats[2].mean, stats[2].std),
+            zScoreNormalize(lastWindowSeries.atr[i], stats[3].mean, stats[3].std)
         ]);
     }
 
@@ -152,10 +173,13 @@ const assessModelAccuracy = async (fullPrices, reportProgress) => {
     const rsi = calculateRSI(fullPrices, 14);
     const macdResult = calculateMACD(fullPrices);
     const macdHist = macdResult.histogram;
-    const minLen = Math.min(fullPrices.length, rsi.length, macdResult.histogram.length);
+    const atr = calculateATR(fullPrices, null, fullPrices, 14); // Using improved ATR
+
+    const minLen = Math.min(fullPrices.length, rsi.length, macdHist.length, atr.length);
     const prices = fullPrices.slice(-minLen);
     const r = rsi.slice(-minLen);
     const m = macdHist.slice(-minLen);
+    const a = atr.slice(-minLen);
 
     const TEST_POINTS = 10;
     if (minLen < WINDOW_SIZE + TEST_POINTS + 10) {
@@ -175,7 +199,8 @@ const assessModelAccuracy = async (fullPrices, reportProgress) => {
     const baseSeries = {
         prices: prices.slice(0, baseIdx),
         rsi: r.slice(0, baseIdx),
-        macd: m.slice(0, baseIdx)
+        macd: m.slice(0, baseIdx),
+        atr: a.slice(0, baseIdx)
     };
 
     if (reportProgress) reportProgress(10);
@@ -192,7 +217,8 @@ const assessModelAccuracy = async (fullPrices, reportProgress) => {
             const lastWindowSeries = {
                 prices: prices.slice(targetIdx - WINDOW_SIZE, targetIdx),
                 rsi: r.slice(targetIdx - WINDOW_SIZE, targetIdx),
-                macd: m.slice(targetIdx - WINDOW_SIZE, targetIdx)
+                macd: m.slice(targetIdx - WINDOW_SIZE, targetIdx),
+                atr: a.slice(targetIdx - WINDOW_SIZE, targetIdx)
             };
             return predictNextPrice(model, lastWindowSeries, stats);
         });
@@ -221,7 +247,8 @@ const assessModelAccuracy = async (fullPrices, reportProgress) => {
                 x.push([
                     (prices[idx] - basePrice) / (basePrice || 1),
                     zScoreNormalize(r[idx], stats[1].mean, stats[1].std),
-                    zScoreNormalize(m[idx], stats[2].mean, stats[2].std)
+                    zScoreNormalize(m[idx], stats[2].mean, stats[2].std),
+                    zScoreNormalize(a[idx], stats[3].mean, stats[3].std)
                 ]);
             }
             const xt = tf.tensor3d([x], [1, WINDOW_SIZE, FEATURES]);
@@ -267,9 +294,9 @@ self.onmessage = async (e) => {
 
     try {
         if (type === 'TRAIN_AND_PREDICT') {
-            const { ticker, historicalPrices, rsi, macdHist } = data;
+            const { ticker, historicalPrices, rsi, macdHist, atr } = data;
             const model = createModel();
-            const dataSeries = { prices: historicalPrices, rsi, macd: macdHist };
+            const dataSeries = { prices: historicalPrices, rsi, macd: macdHist, atr };
 
             const trainResult = await trainModel(model, dataSeries);
             if (!trainResult) throw new Error("Training failed");
@@ -277,7 +304,8 @@ self.onmessage = async (e) => {
             const lastWindow = {
                 prices: historicalPrices.slice(-WINDOW_SIZE),
                 rsi: rsi.slice(-WINDOW_SIZE),
-                macd: macdHist.slice(-WINDOW_SIZE)
+                macd: macdHist.slice(-WINDOW_SIZE),
+                atr: atr.slice(-WINDOW_SIZE)
             };
 
             const predictedPrice = predictNextPrice(model, lastWindow, trainResult.stats);
@@ -291,11 +319,6 @@ self.onmessage = async (e) => {
                     binary += String.fromCharCode(bytes[i]);
                 }
                 modelArtifacts.weightData = btoa(binary);
-            }
-
-            // Prepare weightData for transfer
-            if (modelArtifacts.weightData instanceof ArrayBuffer) {
-                // Keep it as ArrayBuffer for transferability if possible, but brain.js expects it to be handled.
             }
 
             self.postMessage({
