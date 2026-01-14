@@ -43,43 +43,43 @@ export default defineConfig({
             short_name: 'Terminal',
             description: 'Open AI Trading Terminal',
             url: '/analysis',
-            icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }]
+            icons: [{ src: 'pwa-192x192-v2.png', sizes: '192x192' }]
           },
           {
             name: 'Subscription Plans',
             short_name: 'Pricing',
             description: 'Check Premium Plans',
             url: '/pricing',
-            icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }]
+            icons: [{ src: 'pwa-192x192-v2.png', sizes: '192x192' }]
           },
           {
             name: 'Documentation',
             short_name: 'Docs',
             description: 'Learn how to use Diver AI',
             url: '/docs',
-            icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }]
+            icons: [{ src: 'pwa-192x192-v2.png', sizes: '192x192' }]
           },
           {
             name: 'My Account',
             short_name: 'Account',
             description: 'Manage your profile',
             url: '/profile',
-            icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }]
+            icons: [{ src: 'pwa-192x192-v2.png', sizes: '192x192' }]
           }
         ],
         icons: [
           {
-            src: 'pwa-192x192.png',
+            src: 'pwa-192x192-v2.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'pwa-512x512.png',
+            src: 'pwa-512x512-v2.png',
             sizes: '512x512',
             type: 'image/png'
           },
           {
-            src: 'pwa-512x512.png',
+            src: 'pwa-512x512-v2.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'
