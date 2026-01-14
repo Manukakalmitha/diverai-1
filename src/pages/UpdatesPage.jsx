@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import {
     ArrowLeft,
+    Activity,
     Sparkles,
     Zap,
     Cpu,
@@ -16,10 +17,36 @@ import { Helmet } from 'react-helmet-async';
 
 const updates = [
     {
+        version: 'v5.1.0',
+        date: 'January 14, 2026',
+        title: 'Native Android Experience',
+        isLatest: true,
+        changes: [
+            {
+                type: 'feature',
+                icon: Rocket,
+                title: 'Signed TWA Application',
+                description: 'Official signed APK release, fully compliant with Google Play Store requirements for a trusted native experience.'
+            },
+            {
+                type: 'feature',
+                icon: Zap,
+                title: 'Native Integration',
+                description: 'Seamless deep linking and asset link verification for a true app-like feel on Android devices.'
+            },
+            {
+                type: 'improvement',
+                icon: Sparkles,
+                title: 'Streamlined Mobile UX',
+                description: 'Optimizations for the Android status bar, splash screen, and navigation for a cohesive mobile environment.'
+            }
+        ]
+    },
+    {
         version: 'v5.0.0',
         date: 'January 14, 2026',
         title: 'Institutional Grade: V5 Precision',
-        isLatest: true,
+        isLatest: false,
         changes: [
             {
                 type: 'feature',
