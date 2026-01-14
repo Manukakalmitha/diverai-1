@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import LandingPage from '../components/LandingPage';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';

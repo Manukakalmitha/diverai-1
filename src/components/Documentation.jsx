@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BookOpen, AlertTriangle, CheckCircle, BarChart3, Scan, Cpu, X, Search, ChevronRight, Hash, Menu, FileText, Download } from 'lucide-react';
+import { BookOpen, AlertTriangle, CheckCircle, BarChart3, Scan, Cpu, X, Search, ChevronRight, Hash, Menu, FileText, Download, Share2, Smartphone, Clipboard, Monitor } from 'lucide-react';
 
 const Documentation = ({ onClose }) => {
     const [activeSection, setActiveSection] = useState('getting-started');
@@ -15,6 +15,7 @@ const Documentation = ({ onClose }) => {
         { id: 'supported-assets', title: 'Supported Assets' },
         { id: 'prediction-validity', title: 'Prediction Validity' },
         { id: 'interpreting-signals', title: 'Interpreting Signals' },
+        { id: 'mobile-analysis', title: 'Mobile Analysis' },
     ];
 
     return (
@@ -203,55 +204,98 @@ const Documentation = ({ onClose }) => {
                             </div>
                         </section>
 
-                        {/* Section 4: Interpreting Results */}
-                        <section id="interpreting-signals" className="scroll-mt-24 space-y-8">
+                        {/* Section 5: Mobile Analysis */}
+                        <section id="mobile-analysis" className="scroll-mt-24 space-y-8">
                             <div className="pb-4 border-b border-slate-800">
-                                <h2 className="text-2xl font-bold text-white mb-2">Interpreting Signals</h2>
-                                <p className="text-slate-500 text-sm">Decoding the Directional Bias Matrix.</p>
+                                <h2 className="text-2xl font-bold text-white mb-2">Mobile Analysis Protocol</h2>
+                                <p className="text-slate-500 text-sm">Lightning-fast scanning for mobile trading apps.</p>
                             </div>
 
-                            <div className="prose prose-invert max-w-none text-slate-300">
-                                <p>The <strong>Directional Bias Matrix</strong> is derived from four critical weight layers:</p>
-                                <div className="grid sm:grid-cols-2 gap-4 mt-6 not-prose">
-                                    <div className="p-4 bg-slate-900/30 border border-slate-800 rounded-lg">
-                                        <div className="text-xs font-mono text-emerald-500 mb-1">Layer 1 (ω)</div>
-                                        <div className="font-bold text-white text-sm">Neural LSTM</div>
-                                        <div className="text-xs text-slate-500 mt-1">Temporal feature extraction</div>
+                            <p className="text-slate-300 leading-relaxed">
+                                Mobile traders cannot use Chrome extensions, so we've engineered two high-speed alternatives to avoid manual file uploads.
+                            </p>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2">
+                                        <Share2 className="w-5 h-5 text-emerald-400" />
+                                        <h3 className="text-white font-bold">Method A: System Share</h3>
                                     </div>
-                                    <div className="p-4 bg-slate-900/30 border border-slate-800 rounded-lg">
-                                        <div className="text-xs font-mono text-emerald-500 mb-1">Layer 2 (α)</div>
-                                        <div className="font-bold text-white text-sm">Geometric Pattern</div>
-                                        <div className="text-xs text-slate-500 mt-1">Triangle/Flag confluence</div>
-                                    </div>
-                                    <div className="p-4 bg-slate-900/30 border border-slate-800 rounded-lg">
-                                        <div className="text-xs font-mono text-emerald-500 mb-1">Layer 3 (γ)</div>
-                                        <div className="font-bold text-white text-sm">Technical</div>
-                                        <div className="text-xs text-slate-500 mt-1">RSI/MACD convergence</div>
-                                    </div>
-                                    <div className="p-4 bg-slate-900/30 border border-slate-800 rounded-lg">
-                                        <div className="text-xs font-mono text-emerald-500 mb-1">Layer 4 (M)</div>
-                                        <div className="font-bold text-white text-sm">Macro</div>
-                                        <div className="text-xs text-slate-500 mt-1">Institutional trend alignment</div>
+                                    <div className="p-5 bg-slate-900/50 border border-slate-800 rounded-2xl space-y-3">
+                                        <div className="flex gap-3 items-center text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                            <div className="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center text-white">1</div>
+                                            Take a screenshot of your trading app.
+                                        </div>
+                                        <div className="flex gap-3 items-center text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                            <div className="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center text-white">2</div>
+                                            Open your Gallery/Photos and click "Share".
+                                        </div>
+                                        <div className="flex gap-3 items-center text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                            <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center text-slate-950">3</div>
+                                            Select "Diver AI" from the list.
+                                        </div>
+                                        <p className="text-[10px] text-emerald-500/60 font-medium italic mt-2">Requires PWA Installation: Add to Home Screen.</p>
                                     </div>
                                 </div>
-                                <div className="mt-8 p-6 bg-slate-900 border-l-2 border-emerald-500 rounded-r-xl">
-                                    <div className="text-emerald-400 font-bold uppercase tracking-widest text-xs mb-2 flex items-center gap-2">
-                                        <Cpu className="w-4 h-4" /> Operational Note
+
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2">
+                                        <Clipboard className="w-5 h-5 text-blue-400" />
+                                        <h3 className="text-white font-bold">Method B: Smart Paste</h3>
                                     </div>
-                                    <p className="text-sm text-slate-400 m-0">
-                                        Targets and protocols are generated using clinical-grade risk management algorithms. Do not deviate from the identified TP/SL structures regardless of market sentiment.
-                                    </p>
+                                    <div className="p-5 bg-slate-900/50 border border-slate-800 rounded-2xl space-y-3">
+                                        <div className="flex gap-3 items-center text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                            <div className="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center text-white">1</div>
+                                            Take a screenshot and click "Copy to Clipboard".
+                                        </div>
+                                        <div className="flex gap-3 items-center text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                            <div className="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center text-white">2</div>
+                                            Switch to Diver AI Terminal.
+                                        </div>
+                                        <div className="flex gap-3 items-center text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                            <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white">3</div>
+                                            Click the Pulse Widget and select "Paste Chart".
+                                        </div>
+                                    </div>
                                 </div>
+
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2">
+                                        <Monitor className="w-5 h-5 text-amber-400" />
+                                        <h3 className="text-white font-bold">Method C: Companion Overlay</h3>
+                                    </div>
+                                    <div className="p-5 bg-slate-900/50 border border-slate-800 rounded-2xl space-y-3">
+                                        <div className="flex gap-3 items-center text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                            <div className="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center text-white">1</div>
+                                            Open Pulse Widget and click "Companion Mode".
+                                        </div>
+                                        <div className="flex gap-3 items-center text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                            <div className="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center text-white">2</div>
+                                            A floating window appears. Switch to your trading app.
+                                        </div>
+                                        <div className="flex gap-3 items-center text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                            <div className="w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center text-slate-950">3</div>
+                                            When you share a chart, the overlay updates <strong>live</strong>.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-blue-500/5 border border-blue-500/20 rounded-2xl p-6">
+                                <h4 className="text-white font-bold text-sm mb-2 flex items-center gap-2"><Smartphone className="w-4 h-4 text-blue-400" /> Pro Tip: Kiwi Browser</h4>
+                                <p className="text-sm text-slate-400">
+                                    Android users can run the <strong>Diver AI Chrome Extension</strong> natively by using <a href="https://kiwibrowser.com/" target="_blank" className="text-blue-400 underline">Kiwi Browser</a>. This allows the Floating Widget to appear directly over TradingView on mobile.
+                                </p>
                             </div>
                         </section>
-                    </div>
 
-                    <footer className="mt-32 pt-12 border-t border-slate-800 pb-12">
-                        <div className="flex justify-between items-center text-xs text-slate-500">
-                            <div>Last updated: Jan 12, 2026</div>
-                            <div>© 2026 Diver AI by <a href="https://flisoft.agency" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-500 transition-colors">Fli SOFT</a></div>
-                        </div>
-                    </footer>
+                        <footer className="mt-32 pt-12 border-t border-slate-800 pb-12">
+                            <div className="flex justify-between items-center text-xs text-slate-500">
+                                <div>Last updated: Jan 12, 2026</div>
+                                <div>© 2026 Diver AI by <a href="https://flisoft.agency" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-500 transition-colors">Fli SOFT</a></div>
+                            </div>
+                        </footer>
+                    </div>
                 </div>
             </main>
 

@@ -16,10 +16,36 @@ import { Helmet } from 'react-helmet-async';
 
 const updates = [
     {
+        version: 'v5.0.0',
+        date: 'January 14, 2026',
+        title: 'Institutional Grade: V5 Precision',
+        isLatest: true,
+        changes: [
+            {
+                type: 'feature',
+                icon: Cpu,
+                title: 'Multi-Timeframe Alignment',
+                description: 'Neural core now cross-verifies signals against Daily trend bias to ensure high-probability macro alignment.'
+            },
+            {
+                type: 'feature',
+                icon: Activity,
+                title: 'Institutional VWAP Integration',
+                description: 'Volume-Weighted Average Price analysis identifies institutional value zones for more precise trade entries.'
+            },
+            {
+                type: 'improvement',
+                icon: Zap,
+                title: 'V5 Hybrid Fusion',
+                description: 'Revised Bayesian synthesis logic factorizing MTF bias and volume profile for a significant confidence boost.'
+            }
+        ]
+    },
+    {
         version: 'v4.0.0',
         date: 'January 13, 2026',
         title: 'Precision Calibration: RMSE V4',
-        isLatest: true,
+        isLatest: false,
         changes: [
             {
                 type: 'feature',

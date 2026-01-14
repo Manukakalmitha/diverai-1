@@ -299,7 +299,7 @@ self.onmessage = async (e) => {
             const dataSeries = { prices: historicalPrices, rsi, macd: macdHist, atr };
 
             const trainResult = await trainModel(model, dataSeries);
-            if (!trainResult) throw new Error("Training failed");
+            if (!trainResult) throw new Error(`Neural core training rejected: Insufficient data (${historicalPrices.length} bars)`);
 
             const lastWindow = {
                 prices: historicalPrices.slice(-WINDOW_SIZE),

@@ -2,21 +2,39 @@
 const style = document.createElement('style');
 style.textContent = `
   .diver-ai-btn {
-    background: #10b981;
-    color: #020617;
-    border: none;
-    border-radius: 4px;
-    padding: 6px 12px;
-    font-weight: 700;
+    background: #1e293b;
+    color: #f8fafc;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 8px;
     cursor: pointer;
     margin-left: 10px;
     font-family: -apple-system, BlinkMacSystemFont, "Trebuchet MS", Roboto, Ubuntu, sans-serif;
-    transition: all 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 9999;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
   }
   .diver-ai-btn:hover {
-    background: #34d399;
-    box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+    background: #334155;
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 0 1px #10b981;
+  }
+  .diver-ai-btn:active {
+    transform: scale(0.95);
+  }
+  @keyframes heartbeat {
+    0% { transform: scale(1); }
+    15% { transform: scale(1.1); }
+    30% { transform: scale(1); }
+    45% { transform: scale(1.15); }
+    70% { transform: scale(1); }
+  }
+  .diver-ai-btn img {
+    animation: heartbeat 3s infinite ease-in-out;
   }
 `;
 document.head.appendChild(style);
@@ -51,13 +69,18 @@ function addDiverButton() {
 
   const btn = document.createElement('button');
   btn.className = 'diver-ai-btn';
-  // Use Image Logo instead of Text
-  const logoUrl = chrome.runtime.getURL('logo-text.png');
-  btn.innerHTML = `<img src="${logoUrl}" alt="DiverAI" style="height: 20px; vertical-align: middle;pointer-events:none;" />`;
-  btn.style.padding = '6px 12px';
+  // Use Pulse Icon Logo
+  const logoUrl = chrome.runtime.getURL('pulse-icon.png');
+  btn.innerHTML = `<img src="${logoUrl}" alt="DiverAI" style="height: 24px; width: 24px; vertical-align: middle; pointer-events:none; border-radius: 6px;" />`;
+  btn.style.padding = '8px';
   btn.style.display = 'flex';
   btn.style.alignItems = 'center';
   btn.style.justifyContent = 'center';
+  btn.style.backgroundColor = '#1e293b'; // Sleek dark slate
+  btn.style.border = '1px solid #334155';
+  btn.style.borderRadius = '12px';
+  btn.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+  btn.style.backdropFilter = 'blur(8px)';
 
   btn.onclick = () => {
     try {

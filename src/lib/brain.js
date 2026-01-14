@@ -15,56 +15,103 @@ const initTf = async () => {
 initTf();
 
 // --- Background Worker Integration ---
+// Training timeout: 5 minutes (300s) - increased from 2 min for mobile devices
+const TRAINING_TIMEOUT_MS = 300000;
+
 export const runBackgroundTraining = (data) => {
     return new Promise((resolve, reject) => {
         const worker = new Worker(new URL('./brain.worker.js', import.meta.url), { type: 'module' });
+        let isSettled = false;
+
+        // Timeout handler to prevent indefinite hangs on slow devices
+        const timeoutId = setTimeout(() => {
+            if (!isSettled) {
+                isSettled = true;
+                worker.terminate();
+                reject(new Error(`Neural Training Timed Out (${TRAINING_TIMEOUT_MS / 1000}s Limit). Try again or use Fast Mode.`));
+            }
+        }, TRAINING_TIMEOUT_MS);
 
         worker.onmessage = (e) => {
             const { type, data: result } = e.data;
             if (type === 'TRAIN_SUCCESS') {
-                worker.terminate();
-                resolve(result);
+                if (!isSettled) {
+                    isSettled = true;
+                    clearTimeout(timeoutId);
+                    worker.terminate();
+                    resolve(result);
+                }
             } else if (type === 'ERROR') {
-                worker.terminate();
-                reject(new Error(result));
+                if (!isSettled) {
+                    isSettled = true;
+                    clearTimeout(timeoutId);
+                    worker.terminate();
+                    reject(new Error(result));
+                }
             }
         };
 
         worker.onerror = (err) => {
-            worker.terminate();
-            reject(err);
+            if (!isSettled) {
+                isSettled = true;
+                clearTimeout(timeoutId);
+                worker.terminate();
+                reject(err);
+            }
         };
 
-        worker.postMessage({ type: 'TRAIN_AND_PREDICT', data });
+        if (data.historicalPrices?.length < WINDOW_SIZE + 20) {
+            clearTimeout(timeoutId);
+            reject(new Error(`Insufficient price history for neural training. Got ${data.historicalPrices?.length || 0} bars, need ${WINDOW_SIZE + 20}.`));
+            return;
+        }
 
-        // Failsafe Timeout
-        setTimeout(() => {
-            worker.terminate();
-            reject(new Error("Neural Training Timed Out (120s Limit)"));
-        }, 120000);
+        worker.postMessage({ type: 'TRAIN_AND_PREDICT', data });
     });
 };
 
 export const runBackgroundAssessment = (fullPrices, onProgress) => {
     return new Promise((resolve, reject) => {
         const worker = new Worker(new URL('./brain.worker.js', import.meta.url), { type: 'module' });
+        let isSettled = false;
+
+        // Assessment timeout: 5 minutes
+        const timeoutId = setTimeout(() => {
+            if (!isSettled) {
+                isSettled = true;
+                worker.terminate();
+                reject(new Error(`Neural Assessment Timed Out (${TRAINING_TIMEOUT_MS / 1000}s Limit).`));
+            }
+        }, TRAINING_TIMEOUT_MS);
 
         worker.onmessage = (e) => {
             const { type, data: result } = e.data;
             if (type === 'ASSESS_SUCCESS') {
-                worker.terminate();
-                resolve(result);
+                if (!isSettled) {
+                    isSettled = true;
+                    clearTimeout(timeoutId);
+                    worker.terminate();
+                    resolve(result);
+                }
             } else if (type === 'PROGRESS') {
                 if (onProgress) onProgress(result);
             } else if (type === 'ERROR') {
-                worker.terminate();
-                reject(new Error(result));
+                if (!isSettled) {
+                    isSettled = true;
+                    clearTimeout(timeoutId);
+                    worker.terminate();
+                    reject(new Error(result));
+                }
             }
         };
 
         worker.onerror = (err) => {
-            worker.terminate();
-            reject(err);
+            if (!isSettled) {
+                isSettled = true;
+                clearTimeout(timeoutId);
+                worker.terminate();
+                reject(err);
+            }
         };
 
         worker.postMessage({ type: 'ASSESS_ACCURACY', data: { fullPrices } });

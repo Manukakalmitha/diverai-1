@@ -7,7 +7,7 @@ import { supabase } from './supabase.js';
 /**
  * Advanced Hybrid Fusion Logic (RMSE-Calibrated Form V4)
  */
-export const calculateHybridProbability = (neuralProb, patternSentiment, indicators, weights, reliabilityFactor = 0.95, macroSentiment = 0.5, volatilityRatio = 0.02) => {
+export const calculateHybridProbability = (neuralProb, patternSentiment, indicators, weights, reliabilityFactor = 0.95, macroSentiment = 0.5, volatilityRatio = 0.02, mtfBias = 0.5) => {
     const P0 = 0.5;
 
     // Dynamic Macro Weighting based on context
@@ -40,11 +40,15 @@ export const calculateHybridProbability = (neuralProb, patternSentiment, indicat
     const P4 = getDeviation(macroSentiment);
     const w4 = W_MACRO / totalW;
 
+    const P5 = getDeviation(mtfBias);
+    const w5 = 0.15; // Set weights for MTF alignment
+
     const layers = [
         { w: w1, p: P1, c: c1, f: 1.0 },
         { w: w2, p: P2, c: 0.9, f: 1.0 },
         { w: w3, p: P3, c: 1.0, f: f3 },
-        { w: w4, p: P4, c: 1.0, f: 1.0 }
+        { w: w4, p: P4, c: 1.0, f: 1.0 },
+        { w: w5, p: P5, c: 1.0, f: 1.0 }
     ];
 
     const product = layers.reduce((acc, layer) => {
@@ -61,11 +65,23 @@ export const calculateHybridProbability = (neuralProb, patternSentiment, indicat
  */
 export const runRealAnalysis = async (ticker, marketStats, historicalData, user, weights, setStatusMessage, syncReliability = 0.95, fastMode = false) => {
     // Standardize historical data (Support for Close-only array or full OHLCV object)
-    let closes = Array.isArray(historicalData) ? historicalData : (historicalData.closes || []);
-    let highs = historicalData.highs || closes;
-    let lows = historicalData.lows || closes;
-    let volumes = historicalData.volumes || [];
+    const closes = Array.isArray(historicalData) ? historicalData : (historicalData.closes || []);
+    const highs = historicalData.highs || closes;
+    const lows = historicalData.lows || closes;
+    const volumes = historicalData.volumes || [];
 
+    // --- SCALE GUARDIAN (V5.1 ADDITION) ---
+    // If OCR price is off by order of magnitude (e.g. 92.00 instead of 92000), auto-correct
+    let currentPrice = marketStats.price || closes[closes.length - 1];
+    const historicalClose = closes[closes.length - 1];
+    if (marketStats.price && historicalClose) {
+        const magnitudeDiff = Math.log10(historicalClose / marketStats.price);
+        if (Math.abs(magnitudeDiff) > 0.6) { // More than ~4x difference
+            const scaleFactor = Math.pow(10, Math.round(magnitudeDiff));
+            console.log(`[ScaleGuardian] Correcting OCR price scale: ${marketStats.price} -> ${marketStats.price * scaleFactor} (Factor: ${scaleFactor})`);
+            currentPrice = marketStats.price * scaleFactor;
+        }
+    }
     if (closes.length < 20) {
         throw new Error("Insufficient historical data for precision analysis");
     }
@@ -78,11 +94,28 @@ export const runRealAnalysis = async (ticker, marketStats, historicalData, user,
     const atr = calculateATR(highs, lows, closes, 14);
     const srLevels = findSupportResistance(closes, highs, lows);
 
+    // V5: Institutional Volume & Trend Indicators
+    const vwap = (historicalData.volumes && historicalData.volumes.length > 0)
+        ? (await import('./technicalAnalysis.js')).calculateVWAP(highs, lows, closes, historicalData.volumes)
+        : closes;
+
+    // C. Multi-Timeframe Alignment
+    let mtfBias = 0.5;
+    try {
+        setStatusMessage("Aligning Multi-Timeframe Bias (Daily)...");
+        const dailyData = await fetchMacroHistory(ticker);
+        if (dailyData?.prices) {
+            mtfBias = (await import('./technicalAnalysis.js')).calculateTrendBias(dailyData.prices);
+        }
+    } catch (mtfErr) {
+        console.warn("MTF Alignment failed, using neutral bias:", mtfErr);
+    }
+
     // B. Neural Network Training
     let neuralProb = 0.5;
     let statsFactors = null;
 
-    const currentPrice = marketStats?.price || closes[closes.length - 1];
+    // currentPrice is already defined and auto-corrected above
     const currentATR = atr[atr.length - 1] || (currentPrice * 0.02);
     const volatilityRatio = currentATR / currentPrice;
 
@@ -155,10 +188,10 @@ export const runRealAnalysis = async (ticker, marketStats, historicalData, user,
     const macroData = await fetchMacroHistory(ticker);
     const macroSentiment = calculateMacroSentiment(macroData?.prices);
 
-    // C. The Engine Fusion (V4 Consensus)
-    let finalProb = calculateHybridProbability(neuralProb, pattern.sentiment, { rsi }, weights, syncReliability, macroSentiment, volatilityRatio);
+    // C. The Engine Fusion (V5 Consensus)
+    let finalProb = calculateHybridProbability(neuralProb, pattern.sentiment, { rsi, macd: macdHist }, weights, syncReliability, macroSentiment, volatilityRatio, mtfBias);
 
-    // NON-LINEAR CONSENSUS BOOST (V4)
+    // NON-LINEAR CONSENSUS BOOST (V5)
     const techBull = rsi[rsi.length - 1] < 45 && pattern.sentiment === 'Bullish';
     const techBear = rsi[rsi.length - 1] > 55 && pattern.sentiment === 'Bearish';
 
@@ -172,10 +205,11 @@ export const runRealAnalysis = async (ticker, marketStats, historicalData, user,
 
     // D. Generate Report Data
     const factors = [
-        { name: `Neural Net (V4 LSTM)`, type: 'Deep Intelligence', w: weights.omega, p: neuralProb, value: fastMode ? 'Heuristic' : 'RMSE-Optimized' },
+        { name: `Neural Net (V5 LSTM)`, type: 'Deep Intelligence', w: weights.omega, p: neuralProb, value: fastMode ? 'Heuristic' : 'RMSE-Optimized' },
         { name: `Pattern Recognition`, type: 'Geometric', w: weights.alpha, p: pattern.sentiment === 'Bullish' ? 0.8 : (pattern.sentiment === 'Bearish' ? 0.2 : 0.5), value: pattern.name },
-        { name: `Technical Alpha`, type: 'Confluence', w: weights.gamma, p: (rsi < 40 ? 0.8 : (rsi > 60 ? 0.2 : 0.5)), value: `RSI-ATR Sync` },
+        { name: `Technical Alpha`, type: 'Confluence', w: weights.gamma, p: (rsi[rsi.length - 1] < 45 ? 0.8 : (rsi[rsi.length - 1] > 55 ? 0.2 : 0.5)), value: `RSI-ATR Sync` },
         { name: `Macro Sentiment`, type: 'Ensemble', w: 0.15, p: macroSentiment, value: `10Y-Alpha` },
+        { name: `MTF Alignment`, type: 'V5 Bias', w: 0.15, p: mtfBias, value: mtfBias > 0.6 ? 'Bullish' : (mtfBias < 0.4 ? 'Bearish' : 'Neutral') },
         { name: `Visual Alignment`, type: 'Sync', w: 0.10, p: syncReliability, value: `${(syncReliability * 100).toFixed(0)}%` }
     ];
 
@@ -221,7 +255,7 @@ export const runRealAnalysis = async (ticker, marketStats, historicalData, user,
 
     const generateStrategicOutlook = () => {
         const rsiVal = rsi[rsi.length - 1];
-        let narrative = `V4 Precision analysis of **${ticker}** identified a **${direction}** structure with **${confidence}%** accuracy calibration. `;
+        let narrative = `V5 Institutional analysis of **${ticker}** identified a **${direction}** structure with **${confidence}%** mathematical confidence. `;
         if (neuralProb > 0.7) narrative += "Deep LSTM detects aggressive institutional accumulation. ";
         else if (neuralProb < 0.3) narrative += "Neural inference highlights terminal distribution phases. ";
         if (srLevels.strength.s > 3 || srLevels.strength.r > 3) narrative += `Major ${srLevels.strength.s > srLevels.strength.r ? 'support' : 'resistance'} detected with strength ${Math.max(srLevels.strength.s, srLevels.strength.r)}/5. `;

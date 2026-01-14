@@ -1,5 +1,5 @@
 export const calculateSMA = (prices, period) => {
-    if (prices.length < period) return [];
+    if (!prices || prices.length < period) return [];
     const sma = [];
     for (let i = period - 1; i < prices.length; i++) {
         const sum = prices.slice(i - period + 1, i + 1).reduce((a, b) => a + b, 0);
@@ -229,4 +229,42 @@ export const findSupportResistance = (closes, highs, lows) => {
         resistance: r.price,
         strength: { s: s.strength, r: r.strength }
     };
+};
+
+export const calculateVWAP = (highs, lows, closes, volumes) => {
+    if (!volumes || volumes.length === 0 || volumes.length !== closes.length) return closes;
+
+    let cumulativePV = 0;
+    let cumulativeV = 0;
+    const vwap = [];
+
+    for (let i = 0; i < closes.length; i++) {
+        const typicalPrice = (highs[i] + lows[i] + closes[i]) / 3;
+        cumulativePV += typicalPrice * volumes[i];
+        cumulativeV += volumes[i];
+        vwap.push(cumulativeV === 0 ? typicalPrice : cumulativePV / cumulativeV);
+    }
+    return vwap;
+};
+
+export const calculateTrendBias = (closes) => {
+    if (!closes || closes.length < 50) return 0.5; // Neutral
+
+    const shortEMA = calculateEMA(closes.slice(-20), 10);
+    const longEMA = calculateEMA(closes.slice(-50), 40);
+
+    const sLast = shortEMA[shortEMA.length - 1];
+    const lLast = longEMA[longEMA.length - 1];
+
+    // Bias: 1.0 (Strong Bullish) to 0.0 (Strong Bearish)
+    let bias = 0.5;
+    if (sLast > lLast) bias = 0.75;
+    if (sLast < lLast) bias = 0.25;
+
+    // Refinement: Price proximity to EMAs
+    const current = closes[closes.length - 1];
+    if (current > sLast && sLast > lLast) bias = 0.9;
+    if (current < sLast && sLast < lLast) bias = 0.1;
+
+    return bias;
 };

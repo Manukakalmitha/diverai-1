@@ -133,8 +133,8 @@ export const extractROI = (canvas, ctx, region = 'top-left') => {
 
     switch (region) {
         case 'top-left':
-            w = Math.floor(width * 0.3);
-            h = Math.floor(height * 0.15);
+            w = Math.floor(width * 0.4);
+            h = Math.floor(height * 0.22); // Increased height to capture ticker + price info
             break;
         case 'top-center':
             x = Math.floor(width * 0.35);
@@ -151,7 +151,7 @@ export const extractROI = (canvas, ctx, region = 'top-left') => {
     const roiCanvas = document.createElement('canvas');
     roiCanvas.width = w;
     roiCanvas.height = h;
-    const roiCtx = roiCanvas.getContext('2d');
+    const roiCtx = roiCanvas.getContext('2d', { willReadFrequently: true });
 
     const imageData = ctx.getImageData(x, y, w, h);
     roiCtx.putImageData(imageData, 0, 0);
@@ -174,7 +174,7 @@ export const generatePreprocessedVariants = (imageElement) => {
     const testCanvas = document.createElement('canvas');
     testCanvas.width = w;
     testCanvas.height = h;
-    const testCtx = testCanvas.getContext('2d');
+    const testCtx = testCanvas.getContext('2d', { willReadFrequently: true });
     testCtx.drawImage(imageElement, 0, 0, w, h);
     const testData = testCtx.getImageData(0, 0, w, h).data;
     let totalBrightness = 0;
@@ -188,7 +188,7 @@ export const generatePreprocessedVariants = (imageElement) => {
     const canvas1 = document.createElement('canvas');
     canvas1.width = w;
     canvas1.height = h;
-    const ctx1 = canvas1.getContext('2d');
+    const ctx1 = canvas1.getContext('2d', { willReadFrequently: true });
     ctx1.filter = isDark
         ? 'invert(100%) grayscale(100%) contrast(180%) brightness(120%)'
         : 'grayscale(100%) contrast(180%) brightness(110%)';
@@ -203,7 +203,7 @@ export const generatePreprocessedVariants = (imageElement) => {
     const canvas2 = document.createElement('canvas');
     canvas2.width = w;
     canvas2.height = h;
-    const ctx2 = canvas2.getContext('2d');
+    const ctx2 = canvas2.getContext('2d', { willReadFrequently: true });
     ctx2.filter = 'grayscale(100%)';
     ctx2.drawImage(imageElement, 0, 0, w, h);
     applyMedianBlur(canvas2, ctx2, 1); // V4 Addition: Median blur to reduce noise
@@ -222,7 +222,7 @@ export const generatePreprocessedVariants = (imageElement) => {
     const canvas3 = document.createElement('canvas');
     canvas3.width = w;
     canvas3.height = h;
-    const ctx3 = canvas3.getContext('2d');
+    const ctx3 = canvas3.getContext('2d', { willReadFrequently: true });
     ctx3.filter = isDark ? 'invert(100%) grayscale(100%)' : 'grayscale(100%)';
     ctx3.drawImage(imageElement, 0, 0, w, h);
     applySharpen(canvas3, ctx3);

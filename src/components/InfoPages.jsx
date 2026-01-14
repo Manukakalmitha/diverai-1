@@ -91,7 +91,7 @@ const InfoPages = ({ type, onClose }) => {
                 },
                 {
                     h: "Contact",
-                    p: "For research inquiries, partnership opportunities, or support, please reach out to our team directly at research@diverai.com. We typically respond within 24 hours."
+                    p: "For research inquiries, partnership opportunities, or support, please reach out to our team directly at support.diverai@flisoft.agency. We typically respond within 24 hours."
                 }
             ]
         },

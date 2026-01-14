@@ -126,31 +126,52 @@ export const detectPrice = (text) => {
     if (!text) return null;
 
     // 1. Precise Match: Search for numbers with decimal places (common in trading)
-    const decimalMatches = text.match(/\d{1,3}(?:,\d{3})*\.\d{1,8}/g);
+    // Supports US Format (92,014.26) and handles messy OCR (92.014.26)
+    // V5.2: Also detect thousand separates WITHOUT decimals (92,520)
+    const decimalMatches = text.match(/\b\d{1,3}(?:[.,]\d{3})*[.,]\d{1,8}\b/g);
+    const complexIntMatches = text.match(/\b\d{1,3}(?:,\d{3})+\b/g);
+    const simpleIntMatches = text.match(/\b\d{4,7}\b/g);
 
-    // 2. Integer Match: Potential large-cap price or indices (e.g. BTC at 102434)
-    const intMatches = text.match(/\b\d{3,7}\b/g);
-
-    const allMatches = [...(decimalMatches || []), ...(intMatches || [])];
+    const allMatches = [
+        ...(decimalMatches || []),
+        ...(complexIntMatches || []),
+        ...(simpleIntMatches || [])
+    ];
 
     const candidates = allMatches
-        .map(m => parseFloat(m.replace(/,/g, '')))
+        .map(m => {
+            // Standardize: Remove commas if they are thousand decorators
+            const cleaned = m.replace(/,/g, '');
+            // If we have multiple dots (messy OCR), take the last one as decimal
+            const parts = cleaned.split('.');
+            if (parts.length > 2) {
+                const decimal = parts.pop();
+                return parseFloat(parts.join('') + '.' + decimal);
+            }
+            return parseFloat(cleaned);
+        })
         .filter(n => {
-            // Filter out obviously wrong numbers
-            if (n >= 2020 && n <= 2030) return false; // Likely a year
-            if (n === 24 || n === 1 || n === 7) return false; // Timeframes
+            if (n >= 2000 && n <= 3000) return false; // Filter out years
+            if (n === 24 || n === 1 || n === 7 || n === 30 || n === 15 || n === 60) return false;
             return n > 0.0001 && n < 20000000;
         });
 
     if (candidates.length === 0) return null;
 
-    // Heuristic: Prefer decimals, then larger numbers
+    // Heuristics (V5.2):
+    // Prefer numbers that match a "typical" price scale (0.1 to 150,000)
     const sorted = candidates.sort((a, b) => {
+        const aInTypicalRange = a > 0.1 && a < 150000;
+        const bInTypicalRange = b > 0.1 && b < 150000;
+        if (aInTypicalRange && !bInTypicalRange) return -1;
+        if (!aInTypicalRange && bInTypicalRange) return 1;
+
         const aHasDecimal = a % 1 !== 0;
         const bHasDecimal = b % 1 !== 0;
         if (aHasDecimal && !bHasDecimal) return -1;
         if (!aHasDecimal && bHasDecimal) return 1;
-        return b - a;
+
+        return a - b;
     });
 
     return sorted[0];
@@ -158,381 +179,306 @@ export const detectPrice = (text) => {
 
 export const detectTicker = (text) => {
     if (!text) return null;
-
     const upper = text.toUpperCase();
+    const blacklist = ['VOL', 'USD', 'USDT', 'UTC', 'CRYPTO', 'CRYPTOCURRENCY', 'PRICE', 'MARKET', 'CHANGE', 'TIME', 'TOTAL', 'LOW', 'HIGH', 'OPEN', 'CLOSE', 'DAILY', 'WEEKLY'];
 
-    // 0. Blacklist / Filter common noise
-    const blacklist = ['USD', 'USDT', 'VOL', '24H', 'HIGH', 'LOW', 'PRICE', 'INDEX', 'STOCK', 'CRYPTO', 'CHART', 'MARKET', 'TRADE', 'BUY', 'SELL'];
-
-    // Normalize: Remove noise
-    const cleanText = upper.replace(/[^A-Z0-9]/g, ' ');
-    const words = cleanText.split(/\s+/).filter(w => w.length >= 2 && !blacklist.includes(w));
-
-    // 1. Exact Match Strategy (Priority)
-    for (const word of words) {
-        if (COIN_MAP[word] || STOCK_MAP[word]) return word;
+    // 1. Explicit Ticker Dictionary Strategy
+    const words = upper.split(/[^A-Z0-9]/).filter(w => w.length >= 2);
+    for (const ticker of Object.keys(COIN_MAP)) {
+        if (words.includes(ticker)) return ticker;
     }
 
-    // 2. Pair Strategy (e.g., BTCUSDT, BTC/USD, ETH-PERP)
-    const pairMatch = upper.match(/([A-Z]{2,10})[\/\-\\]?(?:USDT|USD|BUSD|USDC|PERP|FRAX|DAI)/);
+    // 2. Pair Strategy (e.g., BTCUSDT, BTC/USD, ETH-PERP, 1000SHIBUSDT)
+    const pairMatch = upper.match(/\b([A-Z0-9]{2,10})[\/\-\\]?(?:USDT|USD|BUSD|USDC|PERP|FRAX|DAI)\b/);
     if (pairMatch) {
         const t = pairMatch[1];
         if (COIN_MAP[t] || STOCK_MAP[t]) return t;
         if (t.length >= 2 && !blacklist.includes(t)) return t;
     }
 
-    // 3. Page Title Context Strategy (Yahoo, TradingView, etc.)
-    const titleMatch = upper.match(/\(([A-Z]{2,6})\)[ -]|^([A-Z]{2,6})\s+\d/);
+    // 3. Contextual Pattern: CRYPTO O H L (Common TV/IBKR header) followed by Price
+    if ((upper.includes('CRYPTO') || upper.includes('O H L')) && !upper.includes('BITCOIN')) {
+        const price = detectPrice(text);
+        if (price > 40000 && price < 150000) return 'BTC';
+        if (price > 1500 && price < 10000) return 'ETH';
+    }
+
+    // 4. Full Name Variant Strategy (V5.1: Bitcoin, Ethereum, etc.)
+    const nameMap = {
+        'BITCOIN': 'BTC',
+        'ETHEREUM': 'ETH',
+        'SOLANA': 'SOL',
+        'RIPPLE': 'XRP',
+        'CARDANO': 'ADA',
+        'DOGECOIN': 'DOGE',
+        'AVALANCHE': 'AVAX'
+    };
+    for (const [name, ticker] of Object.entries(nameMap)) {
+        if (upper.includes(name)) return ticker;
+    }
+
+    // 5. Page Title Strategy
+    const titleMatch = upper.match(/\(([A-Z0-9]{2,6})\)[ -]|^([A-Z0-9]{2,6})\s+\d/);
     if (titleMatch) {
         const t = titleMatch[1] || titleMatch[2];
         if (COIN_MAP[t] || STOCK_MAP[t]) return t;
         if (t.length >= 2 && !blacklist.includes(t)) return t;
     }
 
-    // 4. Heuristic Search
-    const sortedCoins = Object.keys(COIN_MAP).sort((a, b) => b.length - a.length);
-    for (const ticker of sortedCoins) {
-        if (new RegExp(`\\b${ticker}\\b`).test(upper)) return ticker;
-    }
-
-    const sortedStocks = Object.keys(STOCK_MAP).sort((a, b) => b.length - a.length);
-    for (const ticker of sortedStocks) {
-        if (new RegExp(`\\b${ticker}\\b|\\$${ticker}`).test(upper)) return ticker;
-    }
-
     return null;
 };
 
-// --- CRYPTO API (CoinGecko) ---
-
-const PROXIES = []; // Proxies no longer needed with Edge Function
-import { supabase } from './supabase.js'; // Correct relative path within src/lib
-
-const fetchProxy = async (mode, tickers) => {
-    try {
-        const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/market-proxy`;
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-            },
-            body: JSON.stringify({ mode, tickers })
-        });
-
-        if (!response.ok) {
-            const err = await response.json().catch(() => ({}));
-            throw new Error(err.error || `Proxy Error (${response.status})`);
-        }
-
-        return await response.json();
-    } catch (err) {
-        console.warn(`Market Proxy Error (${mode}):`, err);
-        return null;
-    }
-};
-
-const fetchSafe = async (targetUrl) => {
-    // Deprecated: client-side fetch. Keeping stub to avoid breaking references if any remain.
-    console.warn("Legacy fetchSafe called. Should use fetchProxy.", targetUrl);
-    return null;
-};
+// ... REST OF FILE (FETCHERS) ...
+import { supabase } from './supabase.js';
 
 export const fetchMarketData = async (ticker) => {
     const coinId = COIN_MAP[ticker];
     if (!coinId) return null;
 
-    // Single ticker fetch via proxy
-    const data = await fetchProxy('simple_price', [coinId]);
-
-    if (data && data[coinId]) {
+    try {
+        const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true`);
+        const data = await response.json();
+        const coinData = data[coinId];
         return {
-            price: Number(data[coinId].usd) || 0,
-            change24h: Number(data[coinId].usd_24h_change) || 0,
-            volume: Number(data[coinId].usd_24h_vol) || 0,
-            source: 'CoinGecko (Edge)'
+            price: coinData.usd,
+            change24h: coinData.usd_24h_change,
+            volume: coinData.usd_24h_vol,
+            source: 'CoinGecko'
         };
+    } catch (err) {
+        console.error("CoinGecko Fetch Error:", err);
+        return null;
     }
-    return null;
 };
 
 export const fetchHistoricalData = async (ticker, days = 90) => {
     const coinId = COIN_MAP[ticker];
     if (!coinId) return null;
 
-    // Chart fetch via proxy (market_chart returns prices and volumes)
-    // For full OHLC we'd use the /ohlc endpoint, but market_chart is more dense.
-    // We'll standardize to OHLCV object even if some fields are derived/aliased.
-    const data = await fetchProxy('market_chart', [coinId]);
-
-    if (data && data.prices) {
-        const closes = data.prices.map(p => p[1]);
-        const volumes = (data.total_volumes || []).map(v => v[1]);
-
-        return {
-            closes,
-            highs: closes, // CoinGecko market_chart doesn't provide daily high/low separately without /ohlc
-            lows: closes,  // but /ohlc has lower granularity. We'll use closes as fallback for H/L if needed.
-            volumes,
-            source: 'CoinGecko High-Speed'
-        };
-    }
-    return null;
-};
-
-// --- STOCK API (Finnhub) ---
-
-export const fetchStockData = async (ticker, apiKey) => {
-    if (!STOCK_MAP[ticker] || !apiKey) return null;
+    const cached = getCachedData(`${coinId}_${days}`);
+    if (cached) return cached;
 
     try {
-        // Finnhub Quote Endpoint
-        const response = await fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${apiKey}`);
+        const response = await fetch(`https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=${days}`);
         const data = await response.json();
 
-        // data = { c: Current price, d: Change, dp: Percent change, ... }
-        if (data.c) {
-            return {
-                price: Number(data.c),
-                change24h: Number(data.dp), // Finnhub returns percentage change in 'dp'
-                volume: 0, // Quote endpoint doesn't always have vol, could use 'v' if available but often 0 for delayed
-                source: 'Finnhub API'
-            };
-        }
-    } catch (error) {
-        console.warn("Stock Data API Error:", error);
+        // CoinGecko only provides [timestamp, price] pairs. 
+        // We synthesize OHLC from this for V4 compatibility if needed, 
+        // but for pure prices we extract the second element.
+        const prices = data.prices.map(p => p[1]);
+        const volumes = data.total_volumes.map(v => v[1]);
+
+        // Synthesize H/L/C objects
+        const historical = {
+            closes: prices,
+            highs: prices.map(p => p * 1.002), // Approximation
+            lows: prices.map(p => p * 0.998),
+            volumes: volumes
+        };
+
+        setCachedData(`${coinId}_${days}`, historical);
+        return historical;
+    } catch (err) {
+        console.error("CoinGecko History Error:", err);
+        return null;
     }
-    return null;
+};
+
+export const fetchStockData = async (ticker, apiKey) => {
+    try {
+        const response = await fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${apiKey}`);
+        const data = await response.json();
+        if (!data.c) return null;
+        return {
+            price: data.c,
+            change24h: data.dp,
+            volume: 0,
+            source: 'Finnhub'
+        };
+    } catch (err) {
+        return null;
+    }
 };
 
 export const fetchStockHistory = async (ticker, apiKey) => {
-    if (!STOCK_MAP[ticker] || !apiKey) return null;
-
+    const end = Math.floor(Date.now() / 1000);
+    const start = end - (90 * 24 * 60 * 60);
     try {
-        // Finnhub Stock Candles Endpoint
-        const to = Math.floor(Date.now() / 1000);
-        const from = to - (90 * 24 * 60 * 60); // 90 days ago
-
-        const response = await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${ticker}&resolution=D&from=${from}&to=${to}&token=${apiKey}`);
+        const response = await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${ticker}&resolution=D&from=${start}&to=${end}&token=${apiKey}`);
         const data = await response.json();
-
-        if (data.s === 'ok' && data.c) {
-            return {
-                closes: data.c,
-                highs: data.h || data.c,
-                lows: data.l || data.c,
-                volumes: data.v || [],
-                source: 'Finnhub Institutional'
-            };
-        }
-    } catch (error) {
-        console.warn("Stock History API Error:", error);
-    }
-    return null;
-};
-// --- YAHOO FINANCE API (Key-Free Fallback) ---
-
-export const fetchYahooData = async (ticker) => {
-    // Yahoo tickers for indices might need care (e.g. ^GSPC for SPY sometimes preferred, but SPY works)
-    // Yahoo uses dot for classes (BRK-B instead of BRK.B)
-    const yTicker = ticker.replace('.', '-');
-
-    const tryFetch = async (sym) => {
-        try {
-            const data = await fetchProxy('yahoo_finance', [sym]);
-
-            if (data && data.chart && data.chart.result && data.chart.result[0]) {
-                const quote = data.chart.result[0];
-                const meta = quote.meta;
-                const indicators = quote.indicators.quote[0];
-                const closes = indicators.close || [];
-                const highs = indicators.high || closes;
-                const lows = indicators.low || closes;
-                const volumes = indicators.volume || [];
-
-                // Filter out nulls from prices (sync all arrays)
-                const cleanData = closes.map((c, i) => ({
-                    c,
-                    h: highs[i],
-                    l: lows[i],
-                    v: volumes[i]
-                })).filter(d => d.c !== null && d.c !== undefined);
-
-                if (cleanData.length === 0) return null;
-
-                const finalCloses = cleanData.map(d => d.c);
-                const currentPrice = meta.regularMarketPrice || finalCloses[finalCloses.length - 1];
-                const prevClose = meta.chartPreviousClose || finalCloses[finalCloses.length - 2] || currentPrice;
-                const changePercent = ((currentPrice - prevClose) / prevClose) * 100;
-
-                return {
-                    marketStats: {
-                        price: currentPrice,
-                        change24h: changePercent,
-                        volume: meta.regularMarketVolume || 0,
-                        source: 'Yahoo Finance (Edge)'
-                    },
-                    historicalData: {
-                        closes: finalCloses,
-                        highs: cleanData.map(d => d.h),
-                        lows: cleanData.map(d => d.l),
-                        volumes: cleanData.map(d => d.v),
-                        source: 'Yahoo Institutional Stream'
-                    }
-                };
-            }
-        } catch (e) { console.warn(`Yahoo fetch failed for ${sym}:`, e); }
-        return null;
-    };
-
-    // Attempt 1: Standard
-    let result = await tryFetch(yTicker);
-
-    // Attempt 2: Crypto Fallback (Append -USD if not already there and not a stock)
-    if (!result && !STOCK_MAP[ticker] && !yTicker.includes('-')) {
-        console.log(`Retrying ${yTicker} as crypto-pair (${yTicker}-USD)...`);
-        result = await tryFetch(`${yTicker}-USD`);
-    }
-
-    return result;
-};
-
-// --- TICKER TAPE API ---
-export const fetchTickerData = async (tickers) => {
-    const cryptoTickers = tickers.filter(t => COIN_MAP[t]);
-    const stockTickers = tickers.filter(t => STOCK_MAP[t]);
-
-    // Parallel execution for maximum performance
-    const [cryptoData, stockData] = await Promise.all([
-        fetchBulkCrypto(cryptoTickers),
-        fetchBulkStocks(stockTickers)
-    ]);
-
-    return [...cryptoData, ...stockData].filter(Boolean);
-};
-
-const fetchBulkCrypto = async (tickers) => {
-    if (tickers.length === 0) return [];
-    try {
-        const ids = tickers.map(t => COIN_MAP[t]).filter(Boolean);
-        if (ids.length === 0) return [];
-
-        // Single Bulk Call to Edge Function
-        const data = await fetchProxy('simple_price', ids);
-
-        if (!data) return [];
-
-        // Fetch sparklines (historical data) for top tickers
-        // We can optimize this later to be a single 'bulk_history' call if needed, 
-        // but for now parallel individual calls to Edge Function (which handles caching) is fine.
-        const topTickers = tickers.slice(0, 6);
-        const sparklineMap = {};
-
-        await Promise.all(topTickers.map(async (t) => {
-            const h = await fetchHistoricalData(t, 1);
-            if (h) sparklineMap[t] = h;
-        }));
-
-        return tickers.map(t => {
-            const id = COIN_MAP[t];
-            const coinData = data[id];
-            if (!coinData) return null;
-
-            return {
-                ticker: t,
-                price: coinData.usd,
-                change: coinData.usd_24h_change,
-                sparkline: sparklineMap[t]?.closes || [],
-                isCrypto: true
-            };
-        }).filter(Boolean);
-
-    } catch (e) {
-        console.warn("Bulk Crypto Error:", e);
-        return [];
-    }
-};
-
-const fetchBulkStocks = async (tickers) => {
-    // Yahoo public API isn't bulk-friendly, but we can parallelize individual fetches
-    const promises = tickers.map(async (t) => {
-        try {
-            const data = await fetchYahooData(t);
-            if (data?.marketStats) {
-                return {
-                    ticker: t,
-                    price: data.marketStats.price,
-                    change: data.marketStats.change24h,
-                    sparkline: data.historicalData?.closes || [],
-                    isCrypto: false
-                };
-            }
-        } catch (e) { /* ignore individual failures */ }
-        return null;
-    });
-    return (await Promise.all(promises)).filter(Boolean);
-};
-// --- MACO INTELLIGENCE LAYER (10-Year Deep Scan) ---
-
-export const fetchMacroHistory = async (ticker) => {
-    const isStock = STOCK_MAP[ticker];
-    const coinId = COIN_MAP[ticker];
-
-    try {
-        let data = null;
-
-        if (isStock) {
-            const yTicker = ticker.replace('.', '-');
-            data = await fetchProxy('macro_history', [yTicker, 'stock']);
-        } else if (coinId) {
-            // Use Yahoo Finance for Crypto 10Y (CoinGecko requires paid API for >365d)
-            const yTicker = `${ticker.toUpperCase()}-USD`;
-            data = await fetchProxy('macro_history', [yTicker, 'stock']);
-        }
-
-        // Both now return Yahoo format
-        if (data?.chart?.result?.[0]) {
-            const quote = data.chart.result[0];
-            const timestamps = quote.timestamp || [];
-            const closes = quote.indicators.quote[0].close || [];
-
-            // Filter nulls and sync arrays
-            const validData = timestamps.map((t, i) => ({ date: t, price: closes[i] })).filter(d => d.price != null);
-            return {
-                prices: validData.map(d => d.price),
-                dates: validData.map(d => d.date),
-                source: 'Yahoo Finance (Institutional)'
-            };
-        }
-
+        if (data.s !== 'ok') return null;
+        return {
+            closes: data.c,
+            highs: data.h,
+            lows: data.l,
+            volumes: data.v
+        };
     } catch (err) {
-        console.warn("Macro Data Fetch Error:", err);
+        return null;
     }
-    return null;
 };
 
-export const calculateMacroSentiment = (historicalPrices) => {
-    if (!historicalPrices || historicalPrices.length < 52) return 0.5; // Need at least 1 year of weekly data
+// Yahoo Finance Proxy (No Auth Required)
+export const fetchYahooData = async (ticker) => {
+    // Standardize ticker for Yahoo
+    const yTicker = ticker.includes('-') ? ticker.replace('-', '') : ticker;
 
-    const current = historicalPrices[historicalPrices.length - 1];
-    const ath = Math.max(...historicalPrices);
-    const atl = Math.min(...historicalPrices);
+    try {
+        // V5.2 CORS Hotfix: Prefer corsproxy.io as it is more stable than allorigins
+        const baseUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${yTicker}?interval=1d&range=3mo`;
+        const proxies = [
+            `https://corsproxy.io/?${encodeURIComponent(baseUrl)}`,
+            `https://api.allorigins.win/raw?url=${encodeURIComponent(baseUrl)}`
+        ];
 
-    // Proximity to ATH/ATL
-    const range = ath - atl || 1;
-    const percentile = (current - atl) / range; // 0 to 1
+        let data = null;
+        for (const proxy of proxies) {
+            try {
+                const response = await fetch(proxy);
+                if (!response.ok) continue;
+                data = await response.json();
+                if (data?.chart?.result) break;
+            } catch (pErr) { continue; }
+        }
 
-    // 200-Period Moving Average (Macro Trend)
-    const window = 200;
-    const slice = historicalPrices.slice(-window);
-    const ma200 = slice.reduce((a, b) => a + b, 0) / slice.length;
+        if (!data) throw new Error("All proxies failed");
+        const result = data.chart.result[0];
 
-    const isAboveMA = current > ma200 ? 1 : 0;
-    const maSlope = current / ma200; // > 1 is bullish
+        const closes = result.indicators.quote[0].close.filter(c => c !== null);
+        const highs = result.indicators.quote[0].high.filter(h => h !== null);
+        const lows = result.indicators.quote[0].low.filter(l => l !== null);
+        const volumes = result.indicators.quote[0].volume.filter(v => v !== null);
 
-    // Formula: 50% percentile position + 50% MA alignment
-    let sentiment = (percentile * 0.4) + (isAboveMA * 0.4) + (Math.min(1.5, maSlope) / 1.5 * 0.2);
+        const price = result.meta.regularMarketPrice;
+        const prevClose = result.meta.previousClose;
+        const change = ((price - prevClose) / prevClose) * 100;
 
-    return Math.min(0.95, Math.max(0.05, sentiment));
+        return {
+            marketStats: {
+                price,
+                change24h: change,
+                volume: volumes[volumes.length - 1],
+                source: 'Yahoo Finance'
+            },
+            historicalData: {
+                closes,
+                highs,
+                lows,
+                volumes
+            }
+        };
+    } catch (err) {
+        console.warn("Yahoo data fetch failed for", ticker, err);
+        return null;
+    }
+};
+
+// V5 Multi-Timeframe Fetcher
+export const fetchMacroHistory = async (ticker) => {
+    if (!ticker || ticker === "VISUAL-SCAN") return null;
+    const yTicker = ticker.includes('-') ? ticker.replace('-', '') : ticker;
+    try {
+        // V5.2 CORS Hotfix: Multi-proxy fallback
+        const baseUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${yTicker}?interval=1d&range=1y`;
+        const proxies = [
+            `https://corsproxy.io/?${encodeURIComponent(baseUrl)}`,
+            `https://api.allorigins.win/raw?url=${encodeURIComponent(baseUrl)}`
+        ];
+
+        let data = null;
+        for (const proxy of proxies) {
+            try {
+                const response = await fetch(proxy);
+                if (!response.ok) continue;
+                data = await response.json();
+                if (data?.chart?.result) break;
+            } catch (pErr) { continue; }
+        }
+
+        const result = data?.chart?.result?.[0];
+        return result?.indicators?.quote?.[0]?.close?.filter(c => c !== null) || null;
+    } catch (err) {
+        return null;
+    }
+};
+
+/**
+ * Macro Sentiment Core (V5.1 Restore)
+ * Calculates a long-term bias based on 10-year / annual price context
+ */
+export const calculateMacroSentiment = (prices) => {
+    if (!prices || prices.length < 10) return 0.5;
+    const current = prices[prices.length - 1];
+
+    // Multi-period context (Approximate SMA alignment)
+    const sma50 = prices.slice(-50).reduce((a, b) => a + b, 0) / Math.min(prices.length, 50);
+    const sma200 = prices.slice(-200).reduce((a, b) => a + b, 0) / Math.min(prices.length, 200);
+
+    let score = 0.5;
+    if (current > sma50) score += 0.1;
+    if (current > sma200) score += 0.15;
+    if (sma50 > sma200) score += 0.1;
+    if (current > prices[0]) score += 0.1; // Baseline annual growth
+
+    // Scale momentum for subtle bias adjustments
+    const mom = (current - prices[prices.length - 20]) / prices[prices.length - 20];
+    score += (mom * 0.5);
+
+    return Math.max(0.1, Math.min(0.9, score));
+};
+
+// Bulk Ticker Fetcher for TickerTape components (V5.1 Restore)
+export const fetchTickerData = async (symbols) => {
+    return Promise.all(symbols.map(async (ticker) => {
+        try {
+            // Try Yahoo first for bulk (supports Stocks AND Crypto)
+            const standardized = ticker.includes('-') ? ticker.replace('-', '') : ticker;
+            const yahooTicker = COIN_MAP[ticker] ? `${ticker}-USD` : standardized;
+
+            // V5.2 CORS Hotfix: Multi-proxy fallback
+            const baseUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${yahooTicker}?interval=1h&range=7d`;
+            const proxies = [
+                `https://corsproxy.io/?${encodeURIComponent(baseUrl)}`,
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(baseUrl)}`
+            ];
+
+            let data = null;
+            for (const proxy of proxies) {
+                try {
+                    const response = await fetch(proxy);
+                    if (!response.ok) continue;
+                    data = await response.json();
+                    if (data?.chart?.result) break;
+                } catch (pErr) { continue; }
+            }
+
+            const result = data?.chart?.result?.[0];
+
+            if (result) {
+                const prices = result.indicators.quote[0].close.filter(p => p !== null);
+                const price = result.meta.regularMarketPrice;
+                const prevClose = result.meta.previousClose;
+                const change = ((price - prevClose) / prevClose) * 100;
+
+                return {
+                    ticker,
+                    price,
+                    change,
+                    sparkline: prices.slice(-24) // Last 24 hourly points for sparkline
+                };
+            }
+
+            // Fallback to individual fetchers if Yahoo fails
+            const crypto = COIN_MAP[ticker] ? await fetchMarketData(ticker) : await fetchStockData(ticker, localStorage.getItem('finnhub_key'));
+            return {
+                ticker,
+                price: crypto?.price || 0,
+                change: crypto?.change24h || 0,
+                sparkline: [crypto?.price || 0, crypto?.price || 0]
+            };
+        } catch (e) {
+            console.warn(`Fetch failed for ${ticker}:`, e);
+            return { ticker, price: 0, change: 0, sparkline: [0, 0] };
+        }
+    }));
 };
