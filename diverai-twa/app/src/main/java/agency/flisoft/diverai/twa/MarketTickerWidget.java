@@ -39,9 +39,12 @@ public class MarketTickerWidget extends AppWidgetProvider {
         // Fetch Data in background
         new Thread(() -> {
             String price = "---";
+            String changeText = "";
+            int changeColor = 0xFF888888; // Default gray
+
             try {
-                // Fetch BTC Price
-                URL url = new URL("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd");
+                // Fetch BTC Price with 24h Change
+                URL url = new URL("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
                 conn.setConnectTimeout(5000);
@@ -59,8 +62,19 @@ public class MarketTickerWidget extends AppWidgetProvider {
                     
                     JSONObject json = new JSONObject(result.toString());
                     if (json.has("bitcoin")) {
-                         double p = json.getJSONObject("bitcoin").getDouble("usd");
+                         JSONObject btcData = json.getJSONObject("bitcoin");
+                         double p = btcData.getDouble("usd");
+                         double c = btcData.optDouble("usd_24h_change", 0.0);
+
                          price = "$" + String.format("%,.0f", p);
+                         
+                         if (c > 0) {
+                             changeText = "+" + String.format("%.2f", c) + "%";
+                             changeColor = 0xFF4ADE80; // Green (Tailwind green-400 equivalent)
+                         } else {
+                             changeText = String.format("%.2f", c) + "%";
+                             changeColor = 0xFFEF4444; // Red (Tailwind red-500 equivalent)
+                         }
                     }
                 }
             } catch (Exception e) {
@@ -70,6 +84,9 @@ public class MarketTickerWidget extends AppWidgetProvider {
             // Update the widget
             RemoteViews updateViews = new RemoteViews(context.getPackageName(), R.layout.widget_market_ticker);
             updateViews.setTextViewText(R.id.widget_ticker_price, price);
+            updateViews.setTextViewText(R.id.widget_ticker_change, changeText);
+            updateViews.setTextColor(R.id.widget_ticker_change, changeColor);
+
             // Re-bind click listeners
             updateViews.setOnClickPendingIntent(R.id.widget_ticker_symbol, pendingIntent);
             updateViews.setOnClickPendingIntent(R.id.widget_ticker_price, updatePendingIntent);
@@ -80,6 +97,7 @@ public class MarketTickerWidget extends AppWidgetProvider {
         
         // Set initial loading state
         views.setTextViewText(R.id.widget_ticker_price, "...");
+        views.setTextViewText(R.id.widget_ticker_change, "");
         appWidgetManager.updateAppWidget(appWidgetId, views);
     }
 }

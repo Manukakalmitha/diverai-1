@@ -5,7 +5,11 @@ _COROUTINE._CREATION
 agency.flisoft.diverai.twa.R$bool
 agency.flisoft.diverai.twa.R$color
 agency.flisoft.diverai.twa.R$drawable
+agency.flisoft.diverai.twa.R$id:
+    private void <init>()
 agency.flisoft.diverai.twa.R$integer
+agency.flisoft.diverai.twa.R$layout:
+    private void <init>()
 agency.flisoft.diverai.twa.R$mipmap
 agency.flisoft.diverai.twa.R$raw
 agency.flisoft.diverai.twa.R$string
