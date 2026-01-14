@@ -1,0 +1,88 @@
+{
+  "packageId": "agency.flisoft.diverai.twa",
+  "host": "diverai.flisoft.agency",
+  "name": "Diver AI Trading",
+  "launcherName": "Diver AI",
+  "display": "standalone",
+  "themeColor": "#020617",
+  "themeColorDark": "#000000",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#020617",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "https://diverai.flisoft.agency/pwa-512x512-v2.png",
+  "maskableIconUrl": "https://diverai.flisoft.agency/pwa-512x512-v2.png",
+  "monochromeIconUrl": "https://diverai.flisoft.agency/pwa-512x512-v2.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "C:\\Users\\manuk\\diverai\\diverai-twa\\android.keystore",
+    "alias": "android"
+  },
+  "appVersionName": "1",
+  "appVersionCode": 1,
+  "shortcuts": [
+    {
+      "name": "Analysis Terminal",
+      "shortName": "Terminal",
+      "url": "https://diverai.flisoft.agency/analysis",
+      "chosenIconUrl": "https://diverai.flisoft.agency/pwa-192x192-v2.png"
+    },
+    {
+      "name": "Subscription Plans",
+      "shortName": "Pricing",
+      "url": "https://diverai.flisoft.agency/pricing",
+      "chosenIconUrl": "https://diverai.flisoft.agency/pwa-192x192-v2.png"
+    },
+    {
+      "name": "Documentation",
+      "shortName": "Docs",
+      "url": "https://diverai.flisoft.agency/docs",
+      "chosenIconUrl": "https://diverai.flisoft.agency/pwa-192x192-v2.png"
+    },
+    {
+      "name": "My Account",
+      "shortName": "Account",
+      "url": "https://diverai.flisoft.agency/profile",
+      "chosenIconUrl": "https://diverai.flisoft.agency/pwa-192x192-v2.png"
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://diverai.flisoft.agency/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://diverai.flisoft.agency/",
+  "minSdkVersion": 21,
+  "shareTarget": {
+    "action": "https://diverai.flisoft.agency/share-target",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "files": [
+        {
+          "name": "files",
+          "accept": [
+            "image/*"
+          ]
+        }
+      ]
+    }
+  },
+  "orientation": "portrait",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "protocolHandlers": [],
+  "fileHandlers": [],
+  "launchHandlerClientMode": "",
+  "displayOverride": [],
+  "appVersion": "1"
+}
