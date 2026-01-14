@@ -90,7 +90,9 @@ export const runRealAnalysis = async (ticker, marketStats, historicalData, user,
     const rsi = calcRSI(closes, 14);
     const macdResult = calculateMACD(closes);
     const macdHist = macdResult.histogram;
-    const pattern = detectPatterns(closes);
+    const opens = historicalData.opens || [];
+    const patterns = detectPatterns(closes, highs, lows, opens);
+    const patternSenti = patterns[0].sentiment;
     const atr = calculateATR(highs, lows, closes, 14);
     const srLevels = findSupportResistance(closes, highs, lows);
 
@@ -189,11 +191,11 @@ export const runRealAnalysis = async (ticker, marketStats, historicalData, user,
     const macroSentiment = calculateMacroSentiment(macroData?.prices);
 
     // C. The Engine Fusion (V5 Consensus)
-    let finalProb = calculateHybridProbability(neuralProb, pattern.sentiment, { rsi, macd: macdHist }, weights, syncReliability, macroSentiment, volatilityRatio, mtfBias);
+    let finalProb = calculateHybridProbability(neuralProb, patternSenti, { rsi, macd: macdHist }, weights, syncReliability, macroSentiment, volatilityRatio, mtfBias);
 
     // NON-LINEAR CONSENSUS BOOST (V5)
-    const techBull = rsi[rsi.length - 1] < 45 && pattern.sentiment === 'Bullish';
-    const techBear = rsi[rsi.length - 1] > 55 && pattern.sentiment === 'Bearish';
+    const techBull = rsi[rsi.length - 1] < 45 && patternSenti === 'Bullish';
+    const techBear = rsi[rsi.length - 1] > 55 && patternSenti === 'Bearish';
 
     if (neuralProb > 0.75 && techBull) {
         const boost = 0.05 + (0.1 * (neuralProb - 0.75));
@@ -206,7 +208,7 @@ export const runRealAnalysis = async (ticker, marketStats, historicalData, user,
     // D. Generate Report Data
     const factors = [
         { name: `Neural Net (V5 LSTM)`, type: 'Deep Intelligence', w: weights.omega, p: neuralProb, value: fastMode ? 'Heuristic' : 'RMSE-Optimized' },
-        { name: `Pattern Recognition`, type: 'Geometric', w: weights.alpha, p: pattern.sentiment === 'Bullish' ? 0.8 : (pattern.sentiment === 'Bearish' ? 0.2 : 0.5), value: pattern.name },
+        { name: `Primary Pattern: ${patterns[0].name}`, type: 'Geometric', w: weights.alpha, p: patternSenti === 'Bullish' ? 0.8 : (patternSenti === 'Bearish' ? 0.2 : 0.5), value: patterns[0].name },
         { name: `Technical Alpha`, type: 'Confluence', w: weights.gamma, p: (rsi[rsi.length - 1] < 45 ? 0.8 : (rsi[rsi.length - 1] > 55 ? 0.2 : 0.5)), value: `RSI-ATR Sync` },
         { name: `Macro Sentiment`, type: 'Ensemble', w: 0.15, p: macroSentiment, value: `10Y-Alpha` },
         { name: `MTF Alignment`, type: 'V5 Bias', w: 0.15, p: mtfBias, value: mtfBias > 0.6 ? 'Bullish' : (mtfBias < 0.4 ? 'Bearish' : 'Neutral') },
@@ -256,10 +258,21 @@ export const runRealAnalysis = async (ticker, marketStats, historicalData, user,
     const generateStrategicOutlook = () => {
         const rsiVal = rsi[rsi.length - 1];
         let narrative = `V5 Institutional analysis of **${ticker}** identified a **${direction}** structure with **${confidence}%** mathematical confidence. `;
+
+        if (patterns.length > 0) {
+            const p = patterns[0];
+            narrative += `The detection of a **${p.name}** pattern suggests a dominant ${p.sentiment.toLowerCase()} sentiment in the current fractal. `;
+        }
+
         if (neuralProb > 0.7) narrative += "Deep LSTM detects aggressive institutional accumulation. ";
         else if (neuralProb < 0.3) narrative += "Neural inference highlights terminal distribution phases. ";
-        if (srLevels.strength.s > 3 || srLevels.strength.r > 3) narrative += `Major ${srLevels.strength.s > srLevels.strength.r ? 'support' : 'resistance'} detected with strength ${Math.max(srLevels.strength.s, srLevels.strength.r)}/5. `;
+
+        if (srLevels.strength.s > 3 || srLevels.strength.r > 3) {
+            narrative += `Major ${srLevels.strength.s > srLevels.strength.r ? 'support' : 'resistance'} detected at $${srLevels.strength.s > srLevels.strength.r ? srLevels.support.toFixed(tick) : srLevels.resistance.toFixed(tick)} with strength ${Math.max(srLevels.strength.s, srLevels.strength.r)}/5. `;
+        }
+
         if (volatilityRatio > 0.05) narrative += "High implied volatility suggests widened discovery ranges. ";
+
         return narrative;
     };
 
@@ -280,7 +293,7 @@ export const runRealAnalysis = async (ticker, marketStats, historicalData, user,
         finalProb: Number(finalProb),
         direction,
         confidence,
-        pattern,
+        patterns,
         factors,
         targets,
         riskMetrics,

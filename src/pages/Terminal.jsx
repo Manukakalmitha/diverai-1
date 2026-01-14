@@ -190,41 +190,48 @@ const ScanningHUD = ({ status }) => {
     );
 };
 
-const TradeTheoryModal = ({ targets, direction, onClose }) => {
+// Trade Blueprint Section (Previously Modal)
+const TradeBlueprint = ({ targets, direction }) => {
     const isBull = direction.includes('Bullish');
     const themeColor = isBull ? 'emerald' : 'rose';
+
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-slate-950/80 backdrop-blur-sm animate-in fade-in" onClick={(e) => e.target === e.currentTarget && onClose()}>
-            <div className="bg-slate-900 border border-slate-800 rounded-[32px] w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95 flex flex-col max-h-[90vh]">
-                <div className={`p-6 md:p-8 bg-gradient-to-br from-${themeColor}-500/10 to-transparent border-b border-slate-800 flex justify-between items-start shrink-0`}>
-                    <div>
-                        <h3 className="text-xl md:text-2xl font-black text-white flex items-center gap-2"><Zap className={`text-${themeColor}-400 w-5 h-5 md:w-6 md:h-6`} /> Trade Blueprint</h3>
-                        <p className="text-slate-500 text-[10px] font-mono mt-1 uppercase tracking-widest leading-none">Calculated Risk: {isBull ? 'Long' : 'Short'} Position</p>
-                    </div>
-                    <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full text-slate-500 hover:text-white transition-colors"><X className="w-6 h-6" /></button>
+        <div className="bg-slate-900/40 border border-slate-800 rounded-3xl overflow-hidden shadow-sm group">
+            <div className={`p-6 bg-gradient-to-br from-${themeColor}-500/5 to-transparent border-b border-slate-800/50 flex justify-between items-center`}>
+                <div>
+                    <h3 className="text-sm font-black text-white flex items-center gap-2 uppercase tracking-tight">
+                        <Zap className={`text-${themeColor}-400 w-4 h-4`} />
+                        Execution Blueprint
+                    </h3>
+                    <p className="text-slate-500 text-[9px] font-mono mt-0.5 uppercase tracking-widest leading-none">
+                        Institutional {isBull ? 'Long' : 'Short'} Logic
+                    </p>
                 </div>
-                <div className="p-6 md:p-8 space-y-6 overflow-y-auto scrollbar-none">
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="p-5 bg-slate-950/50 rounded-2xl border border-slate-800">
-                            <span className="text-[10px] text-slate-500 font-black uppercase mb-1 block leading-none">Entry Zone</span>
-                            <div className="text-xl md:text-2xl font-mono text-white">${targets.entry}</div>
-                        </div>
-                        <div className="p-5 bg-slate-950/50 rounded-2xl border border-slate-800">
-                            <span className="text-[10px] text-slate-500 font-black uppercase mb-1 block leading-none">Risk/Reward</span>
-                            <div className="text-xl md:text-2xl font-mono text-emerald-400">1 : {targets.rr}</div>
-                        </div>
-                    </div>
-                    <div className="space-y-3">
-                        {[{ label: 'Primary Target', val: targets.tp1, color: 'emerald', tag: 'TP1' }, { label: 'Extended Target', val: targets.tp2, color: 'emerald', tag: 'TP2' }, { label: 'Stop Loss', val: targets.sl, color: 'rose', tag: 'SL' }].map((t, i) => (
-                            <div key={t.tag} className={`flex items-center justify-between p-4 rounded-xl bg-slate-950/40 border border-${t.color}-500/20 group hover:border-${t.color}-500/40 transition-all`}>
-                                <div className="flex items-center gap-3">
-                                    <div className={`w-8 h-8 rounded-lg bg-${t.color}-500 flex items-center justify-center text-slate-950 font-black text-xs shadow-[0_0_15px_rgba(var(--${t.color}-rgb),0.3)]`}>{t.tag}</div>
-                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">{t.label}</span>
-                                </div>
-                                <div className={`text-xl md:text-2xl font-mono text-${t.color}-400 font-bold tabular-nums`}>${t.val}</div>
+                <div className="px-3 py-1 bg-slate-950/50 rounded-full border border-slate-800 text-[9px] font-mono text-emerald-400 font-bold">
+                    R/R: 1 : {targets.rr}
+                </div>
+            </div>
+
+            <div className="p-6">
+                <div className="flex items-center justify-between mb-6 p-4 bg-slate-950/50 rounded-2xl border border-slate-800/50">
+                    <span className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Entry Zone</span>
+                    <div className="text-2xl font-mono text-white font-black">${targets.entry}</div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    {[
+                        { label: 'Primary', val: targets.tp1, color: 'emerald', tag: 'TP1' },
+                        { label: 'Extended', val: targets.tp2, color: 'emerald', tag: 'TP2' },
+                        { label: 'Stop Loss', val: targets.sl, color: 'rose', tag: 'SL' }
+                    ].map((t) => (
+                        <div key={t.tag} className={`flex flex-col p-4 rounded-xl bg-slate-950/40 border border-${t.color}-500/10 group-hover:border-${t.color}-500/30 transition-all`}>
+                            <div className="flex items-center justify-between mb-2">
+                                <div className={`w-6 h-6 rounded bg-${t.color}-500/20 flex items-center justify-center text-${t.color}-400 font-black text-[9px]`}>{t.tag}</div>
+                                <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">{t.label}</span>
                             </div>
-                        ))}
-                    </div>
+                            <div className={`text-lg font-mono text-${t.color}-400 font-black tabular-nums`}>${t.val}</div>
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>
@@ -559,7 +566,6 @@ const AnalysisResult = ({ result, imagePreview, onVerify, isVerifying, isPro, on
     return (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6 pb-12 print:space-y-4 print:pb-0">
             <PrintHeader ticker={result.ticker} date={result.date} />
-            {showBlueprint && <TradeTheoryModal targets={result.targets} direction={result.direction} onClose={() => setShowBlueprint(false)} />}
 
             {/* Header / Meta */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-slate-800 pb-6 print:border-black">
@@ -594,15 +600,9 @@ const AnalysisResult = ({ result, imagePreview, onVerify, isVerifying, isPro, on
                     )}
                     <button
                         onClick={generatePDF}
-                        className="px-4 py-2 bg-slate-800 border border-slate-700 text-slate-300 hover:text-white rounded text-[10px] font-bold uppercase tracking-widest transition-colors"
+                        className="px-4 py-2 bg-slate-800 border border-slate-700 text-slate-300 hover:text-white rounded text-[10px] font-black uppercase tracking-widest transition-colors shadow-lg"
                     >
-                        Export Report
-                    </button>
-                    <button
-                        onClick={() => setShowBlueprint(true)}
-                        className={`px-4 py-2 ${colors.bg} ${colors.text} border ${colors.border} rounded text-[10px] font-bold uppercase tracking-widest hover:brightness-110 transition-all`}
-                    >
-                        Trade Protocol
+                        Export PDF
                     </button>
                     {isQuickShareMode && (
                         <button
@@ -610,7 +610,7 @@ const AnalysisResult = ({ result, imagePreview, onVerify, isVerifying, isPro, on
                             className="px-4 py-2 bg-emerald-500 text-black rounded text-[10px] font-black uppercase tracking-widest hover:brightness-110 transition-all flex items-center gap-2"
                         >
                             <Zap className="w-3 h-3 fill-current" />
-                            Back to Trading
+                            Return
                         </button>
                     )}
                 </div>
@@ -636,60 +636,92 @@ const AnalysisResult = ({ result, imagePreview, onVerify, isVerifying, isPro, on
                 </div>
             </div>
 
+            {/* Trade Blueprint Integrated */}
+            <TradeBlueprint targets={result.targets} direction={result.direction} />
+
             {/* Pro Feature: 10-Year Macro Trend */}
             <MacroFluctuationChart macroTrend={result.macroTrend} isPro={isPro} source={result.macroTrend?.source} />
 
-            {/* Main Content Layout */}
+            {/* Analysis Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                {/* Left Column: Narrative & Chart */}
+                {/* Left Column: Patterns & Narrative */}
                 <div className="lg:col-span-2 space-y-6">
+                    {/* Pattern Showcase */}
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {(result.patterns || []).map((p, i) => (
+                            <motion.div
+                                key={i}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.1 }}
+                                className={`p-4 rounded-2xl border ${p.sentiment === 'Bullish' ? 'bg-emerald-500/5 border-emerald-500/10' : (p.sentiment === 'Bearish' ? 'bg-rose-500/5 border-rose-500/10' : 'bg-slate-500/5 border-slate-500/10')} group hover:scale-[1.02] transition-all`}
+                            >
+                                <div className="flex items-center gap-3 mb-2">
+                                    <div className={`p-2 rounded-lg ${p.sentiment === 'Bullish' ? 'bg-emerald-500/20 text-emerald-400' : (p.sentiment === 'Bearish' ? 'bg-rose-500/20 text-rose-400' : 'bg-slate-500/20 text-slate-400')}`}>
+                                        <Zap className="w-4 h-4" />
+                                    </div>
+                                    <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{p.name}</span>
+                                </div>
+                                <div className={`text-[9px] font-bold ${p.sentiment === 'Bullish' ? 'text-emerald-500/60' : (p.sentiment === 'Bearish' ? 'text-rose-500/60' : 'text-slate-500/60')} uppercase`}>
+                                    {p.sentiment} Signal
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+
                     {/* Narrative Block */}
-                    <div className="bg-slate-900/30 p-6 border border-slate-800 rounded-lg shadow-sm print:bg-white print:border-gray-200">
-                        <div className="flex items-center gap-2 mb-4">
-                            <Activity className="w-4 h-4 text-slate-500" />
-                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Situational Analysis</h3>
+                    <div className="bg-slate-900/30 p-8 border border-slate-800 rounded-3xl shadow-sm print:bg-white print:border-gray-200 group relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                            <Cpu className="w-32 h-32" />
                         </div>
-                        <p className="text-slate-300 text-sm leading-relaxed font-mono print:text-black" dangerouslySetInnerHTML={{ __html: result.overview || result.summary.replace(/\*\*(.*?)\*\*/g, '<span class="text-white font-bold">$1</span>') }} />
+                        <div className="flex items-center gap-2 mb-6">
+                            <Activity className="w-4 h-4 text-emerald-500" />
+                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Neural Strategic Analysis</h3>
+                        </div>
+                        <p className="text-slate-300 text-sm md:text-base leading-relaxed font-mono print:text-black relative z-10" dangerouslySetInnerHTML={{ __html: result.overview || result.summary.replace(/\*\*(.*?)\*\*/g, '<span class="text-white font-bold">$1</span>') }} />
                     </div>
 
                     {/* Chart Preview */}
-                    <div className="border border-slate-800 rounded-lg overflow-hidden relative group h-64 print:h-80 print:border-gray-300">
-                        <div className="absolute top-3 left-3 z-10 bg-black/50 backdrop-blur px-2 py-1 rounded text-[9px] font-mono text-white border border-white/10 print:bg-white print:text-black print:border-gray-300">INPUT SOURCE</div>
-                        <img src={imagePreview} alt="Analyzed Chart" className="w-full h-full object-cover opacity-50 grayscale group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500 print:opacity-100 print:grayscale-0" />
+                    <div className="border border-slate-800 rounded-3xl overflow-hidden relative group h-80 print:h-96 print:border-gray-300 shadow-2xl">
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 to-transparent opacity-60 z-10" />
+                        <div className="absolute top-4 left-4 z-20 bg-emerald-500 text-slate-950 px-3 py-1 rounded-full text-[9px] font-black tracking-widest uppercase shadow-lg">DATA SOURCE: VISUAL SCAN</div>
+                        <img src={imagePreview} alt="Analyzed Chart" className="w-full h-full object-cover opacity-60 grayscale group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700 scale-105 group-hover:scale-100 print:opacity-100 print:grayscale-0" />
                     </div>
                 </div>
 
-                {/* Right Column: Factor Table */}
-                <div className="lg:col-span-1">
-                    <div className="border border-slate-800 rounded-lg overflow-hidden bg-[#020617] print:border-gray-200">
-                        <div className="bg-slate-900/50 px-4 py-3 border-b border-slate-800 flex justify-between items-center print:bg-gray-100">
-                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Alpha Factors</span>
+                {/* Right Column: Factor Table & Metrics */}
+                <div className="lg:col-span-1 space-y-6">
+                    <div className="bg-slate-900/20 border border-slate-800 rounded-3xl overflow-hidden print:border-gray-200">
+                        <div className="bg-slate-900/50 px-6 py-4 border-b border-slate-800 flex justify-between items-center print:bg-gray-100">
+                            <div className="flex items-center gap-2">
+                                <ShieldCheck className="w-4 h-4 text-blue-400" />
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Alpha Factors</span>
+                            </div>
                             {onVerify && (
-                                <button onClick={onVerify} disabled={isVerifying} className="text-[9px] text-blue-500 hover:text-blue-400 uppercase font-bold print:hidden">
-                                    {isVerifying ? 'Verifying...' : 'Verify Engine'}
+                                <button onClick={onVerify} disabled={isVerifying} className="text-[9px] text-blue-500 hover:text-blue-400 uppercase font-black print:hidden transition-colors">
+                                    {isVerifying ? 'CALIBRATING...' : 'VERIFY CORE'}
                                 </button>
                             )}
                         </div>
-                        <table className="w-full text-left text-[9px] md:text-[10px]">
-                            <tbody className="divide-y divide-slate-800/50 print:divide-gray-200">
+                        <table className="w-full text-left text-[10px]">
+                            <tbody className="divide-y divide-slate-800/30 print:divide-gray-200">
                                 {result.factors.map((f, i) => (
-                                    <tr key={i} className="hover:bg-slate-900/50 transition-colors">
-                                        <td className="px-4 py-3">
-                                            <div className="font-bold text-slate-300 print:text-black">{f.name}</div>
-                                            <div className="text-[8px] text-slate-600 font-mono mt-0.5 print:text-gray-500">{f.type}</div>
+                                    <tr key={i} className="hover:bg-white/5 transition-colors">
+                                        <td className="px-6 py-4">
+                                            <div className="font-black text-white uppercase tracking-tight print:text-black">{f.name}</div>
+                                            <div className="text-[8px] text-slate-500 font-bold uppercase mt-1 print:text-gray-500">{f.type}</div>
                                         </td>
-                                        <td className="px-4 py-3 text-right">
-                                            <div className={`font-mono font-bold ${f.p > 0.5 ? 'text-emerald-400' : 'text-slate-400'} print:text-black`}>{(f.p * 100).toFixed(1)}%</div>
+                                        <td className="px-6 py-4 text-right">
+                                            <div className={`font-mono font-black ${f.p > 0.6 ? 'text-emerald-400' : (f.p < 0.4 ? 'text-rose-400' : 'text-slate-400')} print:text-black`}>{(f.p * 100).toFixed(0)}%</div>
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
-                        {/* Macro Data Row */}
-                        <div className="px-4 py-3 border-t border-slate-800 bg-slate-900/20 flex justify-between items-center">
-                            <span className="text-[9px] font-bold text-slate-500 uppercase">Drawdown Risk</span>
-                            <span className="text-mono text-[10px] text-rose-400 font-bold">-{result.riskMetrics?.maxDrawdown || "0.00"}%</span>
+                        <div className="px-6 py-4 border-t border-slate-800/50 bg-slate-950/50 flex justify-between items-center">
+                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Drawdown Risk</span>
+                            <span className="font-mono text-[11px] text-rose-400 font-black">-{result.riskMetrics?.maxDrawdown || "0.00"}%</span>
                         </div>
                     </div>
                 </div>

@@ -103,38 +103,96 @@ export const calculateMACD = (prices, fast = 12, slow = 26, signal = 9) => {
 };
 
 // --- Pattern Recognition Logic ---
-export const detectPatterns = (prices) => {
-    if (prices.length < 50) return { name: 'Insufficient Data', sentiment: 'Neutral', confidence: 0 };
+export const detectPatterns = (prices, highs = [], lows = [], opens = []) => {
+    if (prices.length < 50) return [{ name: 'Insufficient Data', sentiment: 'Neutral', confidence: 0 }];
 
     const last = prices[prices.length - 1];
     const prev = prices[prices.length - 2];
+    const open = opens.length > 0 ? opens[opens.length - 1] : prev;
+    const high = highs.length > 0 ? highs[highs.length - 1] : Math.max(last, open);
+    const low = lows.length > 0 ? lows[lows.length - 1] : Math.min(last, open);
 
-    // 1. Trend Detection (Simple moving average slope)
+    const bodySize = Math.abs(last - open);
+    const candleRange = high - low || 0.0001;
+    const bodyCenter = (last + open) / 2;
+    const isBull = last > open;
+    const isBear = last < open;
+
+    let detected = [];
+
+    // 1. Candlestick Patterns (from CandlestickAnalysis.pdf)
+
+    // Doji: Open and Close are nearly identical
+    if (bodySize / candleRange < 0.1) {
+        if (bodyCenter > high - (candleRange * 0.2)) detected.push({ name: 'Dragonfly Doji', sentiment: 'Bullish', icon: 'zap' });
+        else if (bodyCenter < low + (candleRange * 0.2)) detected.push({ name: 'Gravestone Doji', sentiment: 'Bearish', icon: 'trending-down' });
+        else detected.push({ name: 'Doji Star', sentiment: 'Neutral', icon: 'minus' });
+    }
+
+    // Hammer: Long lower shadow, small body at top (Bullish Reversal)
+    const lowerShadow = Math.min(open, last) - low;
+    const upperShadow = high - Math.max(open, last);
+    if (lowerShadow > bodySize * 2 && upperShadow < bodySize * 0.5) {
+        detected.push({ name: 'Hammer', sentiment: 'Bullish', icon: 'thumbs-up' });
+    }
+
+    // Inverted Hammer / Shooting Star
+    if (upperShadow > bodySize * 2 && lowerShadow < bodySize * 0.5) {
+        detected.push({ name: isBull ? 'Inverted Hammer' : 'Shooting Star', sentiment: isBull ? 'Bullish' : 'Bearish', icon: isBull ? 'zap' : 'trending-down' });
+    }
+
+    // Engulfing Patterns
+    if (opens.length > 1) {
+        const prevOpen = opens[opens.length - 2];
+        const prevClose = prices[prices.length - 2];
+        const isPrevBear = prevClose < prevOpen;
+        const isPrevBull = prevClose > prevOpen;
+
+        if (isBull && isPrevBear && last > prevOpen && open < prevClose) {
+            detected.push({ name: 'Bullish Engulfing', sentiment: 'Bullish', icon: 'zap' });
+        } else if (isBear && isPrevBull && last < prevOpen && open > prevClose) {
+            detected.push({ name: 'Bearish Engulfing', sentiment: 'Bearish', icon: 'trending-down' });
+        }
+    }
+
+    // Harami (Inside Bar)
+    if (opens.length > 1) {
+        const prevOpen = opens[opens.length - 2];
+        const prevClose = prices[prices.length - 2];
+        const prevHigh = highs[highs.length - 2] || Math.max(prevOpen, prevClose);
+        const prevLow = lows[lows.length - 2] || Math.min(prevOpen, prevClose);
+
+        if (high < prevHigh && low > prevLow) {
+            detected.push({ name: 'Harami (Inside Bar)', sentiment: isBull ? 'Bullish' : 'Bearish', icon: 'activity' });
+        }
+    }
+
+    // Marubozu: Strong momentum candle
+    if (bodySize / candleRange > 0.9) {
+        detected.push({ name: isBull ? 'Bullish Marubozu' : 'Bearish Marubozu', sentiment: isBull ? 'Bullish' : 'Bearish', icon: 'zap' });
+    }
+
+    // 2. Trend & Momentum Analysis
     const shortMA = calculateSMA(prices.slice(-20), 10);
     const longMA = calculateSMA(prices.slice(-50), 40);
-    const isUptrend = shortMA[shortMA.length - 1] > longMA[longMA.length - 1];
+    const sLast = shortMA[shortMA.length - 1];
+    const lLast = longMA[longMA.length - 1];
+    const isUptrend = sLast > lLast;
 
-    // 2. Volatility Squeeze (Bollinger Bands)
-    const { upper, lower } = calculateBollingerBands(prices, 20);
-    const bandwidth = (upper[upper.length - 1] - lower[lower.length - 1]) / prices[prices.length - 1];
-    const isSqueeze = bandwidth < 0.05; // Tight bands
+    const { upper, lower: bbLower } = calculateBollingerBands(prices, 20);
+    const lastUpper = upper[upper.length - 1];
+    const lastLower = bbLower[bbLower.length - 1];
+    const bandwidth = (lastUpper - lastLower) / last;
 
-    // 3. RSI Divergence placeholder
-    const rsi = calculateRSI(prices, 14);
-    const lastRSI = rsi[rsi.length - 1];
-    const isOversold = lastRSI < 30;
-    const isOverbought = lastRSI > 70;
+    if (bandwidth < 0.05) detected.push({ name: 'Volatility Squeeze', sentiment: 'Neutral', icon: 'activity' });
 
-    let patterns = [];
+    // Fallback if no specific patterns found
+    if (detected.length === 0) {
+        if (isUptrend) detected.push({ name: 'Bullish Continuation', sentiment: 'Bullish', icon: 'trending-up' });
+        else detected.push({ name: 'Bearish Continuation', sentiment: 'Bearish', icon: 'trending-down' });
+    }
 
-    if (isSqueeze) patterns.push({ name: 'Volatility Squeeze', sentiment: 'Neutral' });
-    if (isUptrend && !isOverbought) patterns.push({ name: 'Bullish Continuation', sentiment: 'Bullish' });
-    if (!isUptrend && !isOversold) patterns.push({ name: 'Bearish Continuation', sentiment: 'Bearish' });
-    if (isUptrend && isOverbought) patterns.push({ name: 'Potential Reversal (Top)', sentiment: 'Bearish' });
-    if (!isUptrend && isOversold) patterns.push({ name: 'Potential Reversal (Bottom)', sentiment: 'Bullish' });
-
-    // Return the most significant pattern
-    return patterns.length > 0 ? patterns[0] : { name: 'Consolidation', sentiment: 'Neutral' };
+    return detected;
 };
 
 export const calculateATR = (highs, lows, closes, period = 14) => {
