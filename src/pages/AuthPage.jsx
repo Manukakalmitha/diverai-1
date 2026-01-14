@@ -260,7 +260,7 @@ const AuthPage = ({ initialMode = 'login' }) => {
                             </p>
                         </div>
 
-                        <div className="p-6 bg-slate-900/50 rounded-2xl border border-slate-800 text-left">
+                        <div className="p-6 bg-black-ash/50 rounded-2xl border border-slate-800 text-left">
                             <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] leading-relaxed">
                                 <span className="text-emerald-500 mr-2">●</span> EXT_ID: {extId?.substring(0, 12)}...
                                 <br />
@@ -300,7 +300,7 @@ const AuthPage = ({ initialMode = 'login' }) => {
                             </p>
                         </div>
 
-                        <div className="p-6 bg-slate-900/50 rounded-2xl border border-slate-800 text-left">
+                        <div className="p-6 bg-black-ash/50 rounded-2xl border border-slate-800 text-left">
                             <p className="text-xs text-slate-400 font-medium uppercase tracking-widest leading-relaxed">
                                 <span className="text-emerald-500 mr-2">●</span> Click the link to verify.
                                 <br />
@@ -349,7 +349,7 @@ const AuthPage = ({ initialMode = 'login' }) => {
                 <meta name="description" content="Access your Diver AI terminal or join our network of elite traders. Institutional-grade analysis is one click away." />
             </Helmet>
             {/* Left Column - Branding */}
-            <div className="hidden lg:flex lg:w-1/2 p-12 bg-slate-900 flex-col justify-between border-r border-slate-800 relative overflow-hidden">
+            <div className="hidden lg:flex lg:w-1/2 p-12 bg-black-ash flex-col justify-between border-r border-slate-800 relative overflow-hidden">
                 <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
                 <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
                     <Activity className="w-96 h-96" />
@@ -450,7 +450,7 @@ const AuthPage = ({ initialMode = 'login' }) => {
                                     required
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full bg-slate-900 border border-slate-800 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-600"
+                                    className="w-full bg-black-ash border border-slate-800 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-600"
                                     placeholder="name@example.com"
                                     autoComplete="username"
                                 />
@@ -465,7 +465,7 @@ const AuthPage = ({ initialMode = 'login' }) => {
                                     required
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full bg-slate-900 border border-slate-800 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-600"
+                                    className="w-full bg-black-ash border border-slate-800 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-600"
                                     placeholder="••••••••"
                                     autoComplete={isLogin ? "current-password" : "new-password"}
                                 />

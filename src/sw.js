@@ -10,15 +10,22 @@ self.addEventListener('fetch', (event) => {
     if (event.request.method === 'POST' && event.request.url.includes('/share-target')) {
         event.respondWith(
             (async () => {
-                const formData = await event.request.formData();
-                const file = formData.get('files');
+                try {
+                    const formData = await event.request.formData();
+                    const file = formData.get('media') || formData.get('files'); // Support both standard and custom field names
 
-                if (file) {
-                    const cache = await caches.open('shared-media');
-                    await cache.put('shared-image', new Response(file));
+                    if (file) {
+                        const cache = await caches.open('shared-media');
+                        await cache.put('shared-image', new Response(file));
+                    }
+
+                    // Success redirect
+                    return Response.redirect('/analysis?shared-image=true', 303);
+                } catch (err) {
+                    console.error('Share Target Error:', err);
+                    // Fallback redirect on error to prevent broken page
+                    return Response.redirect('/analysis?error=share_failed', 303);
                 }
-
-                return Response.redirect('/analysis?shared-image=true', 303);
             })()
         );
     }

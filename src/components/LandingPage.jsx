@@ -162,7 +162,7 @@ const InstallationGuideModal = ({ isOpen, onClose, platform }) => {
 
     return (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-sm">
-            <div className="relative w-full max-w-sm bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden">
+            <div className="relative w-full max-w-sm bg-black-ash border border-slate-700 rounded-xl shadow-2xl overflow-hidden">
                 <div className="p-6 border-b border-slate-700 flex justify-between items-center">
                     <h3 className="text-lg font-bold text-white">{guide.title}</h3>
                     <button onClick={onClose} className="text-slate-400 hover:text-white"><X className="w-5 h-5" /></button>

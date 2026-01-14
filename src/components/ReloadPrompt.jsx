@@ -25,7 +25,7 @@ function ReloadPrompt() {
 
     return (
         <div className="fixed bottom-20 left-4 right-4 md:bottom-6 md:right-6 md:left-auto z-[100] animate-in slide-in-from-bottom-5 duration-500">
-            <div className="bg-slate-900/90 backdrop-blur-xl border border-emerald-500/20 rounded-2xl p-4 shadow-2xl flex flex-col gap-3 min-w-[280px] max-w-sm">
+            <div className="bg-black-ash/90 backdrop-blur-xl border border-emerald-500/20 rounded-2xl p-4 shadow-2xl flex flex-col gap-3 min-w-[280px] max-w-sm">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex items-center gap-3">
                         <div className="bg-emerald-500/10 p-2 rounded-xl">

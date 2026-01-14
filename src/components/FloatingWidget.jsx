@@ -79,7 +79,7 @@ const FloatingWidget = ({ onPaste, onCapture, onCompanion }) => {
             <motion.button
                 layout
                 onClick={() => setIsOpen(!isOpen)}
-                className="pointer-events-auto relative w-16 h-16 bg-[#1e293b] rounded-[24px] border border-slate-700 shadow-[0_8px_32px_rgba(0,0,0,0.4)] flex items-center justify-center group overflow-hidden"
+                className="pointer-events-auto relative w-16 h-16 bg-black-ash rounded-[24px] border border-slate-700 shadow-[0_8px_32px_rgba(0,0,0,0.4)] flex items-center justify-center group overflow-hidden"
                 style={{ backdropFilter: 'blur(12px)' }}
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}

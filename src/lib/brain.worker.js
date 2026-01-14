@@ -1,9 +1,21 @@
 import * as tf from '@tensorflow/tfjs';
+
+// ATTEMPT HARDWARE ACCELERATION
+const initTf = async () => {
+    try {
+        await tf.setBackend('webgl');
+        await tf.ready();
+    } catch (e) {
+        await tf.setBackend('cpu');
+    }
+};
+initTf();
 import { calculateRSI, calculateMACD, detectPatterns, calculateATR } from './technicalAnalysis.js';
 
 // Hyperparameters (Industry Upgraded - V4 Precision)
+// OPTIMIZED FOR TWA: Reduced Epochs (25) to prevent timeouts, Deep Layers kept for accuracy.
 const WINDOW_SIZE = 45;
-const EPOCHS = 35;
+const EPOCHS = 25;
 const BATCH_SIZE = 32;
 const FEATURES = 4; // Price, RSI, MACD Histogram, ATR
 
@@ -76,9 +88,10 @@ const prepareData = (dataSeries, windowSize) => {
         yData.push((p[i + windowSize] - windowBasePrice) / (windowBasePrice || 1));
 
         // AUGMENTATION
-        const augmented = augmentPattern(pattern);
-        xData.push(augmented);
-        yData.push((p[i + windowSize] - windowBasePrice) / (windowBasePrice || 1) * (0.999 + Math.random() * 0.002));
+        // AUGMENTATION DISABLED FOR TWA PERFORMANCE (Community Brain Strategy)
+        // const augmented = augmentPattern(pattern);
+        // xData.push(augmented);
+        // yData.push((p[i + windowSize] - windowBasePrice) / (windowBasePrice || 1) * (0.999 + Math.random() * 0.002));
     }
 
     const xs = tf.tensor3d(xData, [xData.length, windowSize, FEATURES]);

@@ -11,14 +11,14 @@ const ArticlePage = () => {
 
     if (!article) {
         return (
-            <div className="min-h-screen bg-[#0f172a] flex items-center justify-center text-slate-400">
+            <div className="min-h-screen bg-black flex items-center justify-center text-slate-400">
                 Article not found.
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-[#0f172a] text-slate-200 font-sans selection:bg-blue-500/30 pt-24 pb-20">
+        <div className="min-h-screen bg-black text-slate-200 font-sans selection:bg-blue-500/30 pt-24 pb-20">
             <Helmet>
                 <title>{`${article.title} | Diver AI Insights`}</title>
                 <meta name="description" content={article.summary} />
@@ -48,7 +48,7 @@ const ArticlePage = () => {
                             <Clock className="w-4 h-4" /> {article.readTime}
                         </div>
                         <div className="flex-1 text-right">
-                            <button className="p-2 hover:bg-slate-900 rounded-full transition-colors" title="Share">
+                            <button className="p-2 hover:bg-black-ash rounded-full transition-colors" title="Share">
                                 <Share2 className="w-4 h-4" />
                             </button>
                         </div>
@@ -61,7 +61,7 @@ const ArticlePage = () => {
                 />
 
                 <footer className="mt-20 pt-12 border-t border-slate-800">
-                    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 md:p-12 text-center">
+                    <div className="bg-black-ash border border-slate-800 rounded-2xl p-8 md:p-12 text-center">
                         <h3 className="text-2xl font-bold text-white mb-4">Ready to test these concepts?</h3>
                         <p className="text-slate-400 mb-8 max-w-lg mx-auto">
                             See Diver AI's pattern recognition engine in action on live markets.

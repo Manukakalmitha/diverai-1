@@ -243,7 +243,7 @@ const UpdatesPage = () => {
                             {update.changes.map((change, changeIndex) => (
                                 <div
                                     key={changeIndex}
-                                    className="p-6 bg-slate-900/50 border border-slate-800 rounded-xl hover:border-slate-700 transition-colors group"
+                                    className="p-6 bg-black-ash/50 border border-slate-800 rounded-xl hover:border-slate-700 transition-colors group"
                                 >
                                     <div className="flex gap-4">
                                         <div className={`shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${change.type === 'feature'

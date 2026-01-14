@@ -11,7 +11,7 @@ const MobileNav = () => {
     if (location.pathname === '/') return null;
 
     return (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-xl border-t border-slate-800 z-50 pb-safe">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-black-ash/90 backdrop-blur-xl border-t border-slate-800 z-50 pb-safe">
             <div className="flex justify-around items-center h-16 px-2">
                 <Link to="/analysis" className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${isActive('/analysis') ? 'text-emerald-400' : 'text-slate-500'}`}>
                     <Activity className={`w-5 h-5 ${isActive('/analysis') ? 'fill-emerald-500/20' : ''}`} />

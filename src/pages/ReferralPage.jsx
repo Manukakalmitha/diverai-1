@@ -106,7 +106,7 @@ const ReferralPage = () => {
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-blue-200 uppercase tracking-widest">Your Referral Link</label>
                                 <div className="flex gap-3">
-                                    <div className="flex-1 bg-slate-900 border border-white/10 rounded-xl px-4 py-3 font-mono text-sm text-blue-400 overflow-hidden truncate">
+                                    <div className="flex-1 bg-black-ash border border-white/10 rounded-xl px-4 py-3 font-mono text-sm text-blue-400 overflow-hidden truncate">
                                         {profile?.referral_code ? referralLink : 'Initializing Code...'}
                                     </div>
                                     <button
@@ -126,21 +126,21 @@ const ReferralPage = () => {
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-8 hover:bg-slate-900 transition-all group">
+                    <div className="bg-black-ash/50 border border-slate-800 rounded-3xl p-8 hover:bg-black-ash transition-all group">
                         <div className="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center mb-6 border border-blue-500/20 group-hover:scale-110 transition-transform">
                             <Users className="w-6 h-6 text-blue-400" />
                         </div>
                         <div className="text-4xl font-black text-white mb-2">{profile?.referral_count || 0}</div>
                         <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">Active Referrals</div>
                     </div>
-                    <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-8 hover:bg-slate-900 transition-all group">
+                    <div className="bg-black-ash/50 border border-slate-800 rounded-3xl p-8 hover:bg-black-ash transition-all group">
                         <div className="w-12 h-12 bg-emerald-500/20 rounded-2xl flex items-center justify-center mb-6 border border-emerald-500/20 group-hover:scale-110 transition-transform">
                             <Zap className="w-6 h-6 text-emerald-400" />
                         </div>
                         <div className="text-4xl font-black text-white mb-2">{(profile?.referral_count || 0) * 30}</div>
                         <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">Days of Pro Gained</div>
                     </div>
-                    <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-8 hover:bg-slate-900 transition-all group">
+                    <div className="bg-black-ash/50 border border-slate-800 rounded-3xl p-8 hover:bg-black-ash transition-all group">
                         <div className="w-12 h-12 bg-purple-500/20 rounded-2xl flex items-center justify-center mb-6 border border-purple-500/20 group-hover:scale-110 transition-transform">
                             <Gift className="w-6 h-6 text-purple-400" />
                         </div>
@@ -152,12 +152,12 @@ const ReferralPage = () => {
                 {/* Recent Referrals */}
                 <div className="space-y-6">
                     <h3 className="text-2xl font-black text-white tracking-tight uppercase">Recent Activity</h3>
-                    <div className="bg-slate-900/30 border border-slate-800 rounded-3xl overflow-hidden">
+                    <div className="bg-black-ash/30 border border-slate-800 rounded-3xl overflow-hidden">
                         {loading ? (
                             <div className="p-12 text-center text-slate-500 animate-pulse uppercase tracking-[0.2em] font-black italic">Syncing Network Nodes...</div>
                         ) : referrals.length > 0 ? (
                             <table className="w-full text-left">
-                                <thead className="bg-slate-900/50 border-b border-slate-800">
+                                <thead className="bg-black-ash/50 border-b border-slate-800">
                                     <tr>
                                         <th className="px-8 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Referree</th>
                                         <th className="px-8 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Status</th>
@@ -167,7 +167,7 @@ const ReferralPage = () => {
                                 </thead>
                                 <tbody className="divide-y divide-slate-800/50">
                                     {referrals.map((ref) => (
-                                        <tr key={ref.id} className="hover:bg-slate-900/50 transition-colors">
+                                        <tr key={ref.id} className="hover:bg-black-ash/50 transition-colors">
                                             <td className="px-8 py-4">
                                                 <div className="text-sm font-bold text-white">{ref.referred_user?.email || 'Anonymous'}</div>
                                             </td>

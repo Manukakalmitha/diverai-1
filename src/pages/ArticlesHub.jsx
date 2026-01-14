@@ -6,7 +6,7 @@ import { Helmet } from 'react-helmet-async';
 
 const ArticlesHub = () => {
     return (
-        <div className="min-h-screen bg-[#0f172a] text-slate-200 font-sans selection:bg-blue-500/30 pt-24 pb-20">
+        <div className="min-h-screen bg-black text-slate-200 font-sans selection:bg-blue-500/30 pt-24 pb-20">
             <Helmet>
                 <title>Market Intelligence Hub | Diver AI Articles</title>
                 <meta name="description" content="Deep dives into algorithmic trading, pattern recognition theory, and market psychology. Learn the science behind Diver AI." />
@@ -32,7 +32,7 @@ const ArticlesHub = () => {
                         <Link
                             to={`/articles/${article.id}`}
                             key={article.id}
-                            className="group bg-slate-900 border border-slate-800 rounded-2xl p-8 hover:border-blue-500/30 transition-all hover:-translate-y-1 shadow-sm"
+                            className="group bg-black-ash border border-slate-800 rounded-2xl p-8 hover:border-blue-500/30 transition-all hover:-translate-y-1 shadow-sm"
                         >
                             <div className="mb-6 space-y-3">
                                 <div className="text-xs font-bold text-blue-500 uppercase tracking-widest">{article.date}</div>

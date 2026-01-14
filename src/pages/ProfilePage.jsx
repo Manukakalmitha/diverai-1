@@ -149,7 +149,7 @@ export default function ProfilePage() {
     if (!user) {
         return (
             <div className="min-h-[80vh] flex flex-col items-center justify-center text-center px-6">
-                <div className="w-20 h-20 bg-slate-900 rounded-3xl flex items-center justify-center mb-6 border border-slate-800 shadow-2xl">
+                <div className="w-20 h-20 bg-black-ash rounded-3xl flex items-center justify-center mb-6 border border-slate-800 shadow-2xl">
                     <User className="w-10 h-10 text-slate-500" />
                 </div>
                 <h2 className="text-3xl font-black text-white mb-2">Access Restricted</h2>
@@ -176,14 +176,14 @@ export default function ProfilePage() {
             <div className="max-w-5xl mx-auto space-y-10">
 
                 {/* Profile Header */}
-                <div className="flex flex-col md:flex-row items-center gap-8 bg-slate-900/40 border border-slate-800 rounded-[40px] p-8 md:p-12 relative overflow-hidden shadow-2xl">
-                    <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
+                <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 bg-black-ash/40 border border-slate-800 rounded-[32px] md:rounded-[40px] p-6 md:p-12 relative overflow-hidden shadow-2xl">
+                    <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none hidden md:block">
                         <User className="w-64 h-64 text-emerald-500" />
                     </div>
 
                     <div className="relative group">
                         <div className="w-32 h-32 md:w-40 md:h-40 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-[48px] p-1 shadow-2xl overflow-hidden relative">
-                            <div className="w-full h-full bg-slate-900 rounded-[44px] flex items-center justify-center overflow-hidden">
+                            <div className="w-full h-full bg-black-ash rounded-[44px] flex items-center justify-center overflow-hidden">
                                 {profile?.avatar_url ? (
                                     <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                                 ) : (
@@ -203,18 +203,18 @@ export default function ProfilePage() {
                         </div>
                     </div>
 
-                    <div className="flex-1 text-center md:text-left">
-                        <div className="flex flex-col md:flex-row md:items-center gap-3 mb-4">
-                            <h1 className="text-3xl md:text-5xl font-black text-white tracking-tighter" title={user.id}>
+                    <div className="flex-1 text-center md:text-left min-w-0">
+                        <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-3 md:mb-4">
+                            <h1 className="text-2xl md:text-5xl font-black text-white tracking-tighter truncate" title={user.id}>
                                 {profile?.full_name || user.email?.split('@')[0]}
                             </h1>
-                            <span className={`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em] self-center md:self-auto border ${profile?.subscription_tier === 'pro' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
-                                {profile?.subscription_tier === 'pro' ? 'PRO QUANT' : 'FREE ARCHITECTURE'}
+                            <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em] self-center md:self-auto border shrink-0 ${profile?.subscription_tier === 'pro' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
+                                {profile?.subscription_tier === 'pro' ? 'PRO QUANT' : 'FREE ARCH'}
                             </span>
                         </div>
-                        <div className="flex flex-wrap justify-center md:justify-start gap-4 text-xs font-mono text-slate-500">
-                            <div className="flex items-center gap-2"><Clock className="w-4 h-4" /> Member since {new Date(user.created_at).toLocaleDateString()}</div>
-                            <div className="flex items-center gap-2"><CreditCard className="w-4 h-4" /> ID: {user.id.slice(0, 8)}...</div>
+                        <div className="flex flex-wrap justify-center md:justify-start gap-3 md:gap-4 text-[10px] md:text-xs font-mono text-slate-500">
+                            <div className="flex items-center gap-1.5"><Clock className="w-3 h-3 md:w-4 md:h-4" /> Since {new Date(user.created_at).toLocaleDateString()}</div>
+                            <div className="flex items-center gap-1.5"><CreditCard className="w-3 h-3 md:w-4 md:h-4" /> ID: {user.id.slice(0, 8)}...</div>
                         </div>
                     </div>
 
@@ -236,7 +236,7 @@ export default function ProfilePage() {
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-slate-900 border border-slate-800 rounded-[32px] p-8 shadow-2xl hover:border-emerald-500/30 transition-colors group">
+                    <div className="bg-black-ash border border-slate-800 rounded-[32px] p-8 shadow-2xl hover:border-emerald-500/30 transition-colors group">
                         <div className="flex items-center justify-between mb-6">
                             <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-400 group-hover:scale-110 transition-transform"><Activity className="w-6 h-6" /></div>
                             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Neural Load</span>
@@ -255,7 +255,7 @@ export default function ProfilePage() {
                         </div>
                     </div>
 
-                    <div className="bg-slate-900 border border-slate-800 rounded-[32px] p-8 shadow-2xl hover:border-blue-500/30 transition-colors group">
+                    <div className="bg-black-ash border border-slate-800 rounded-[32px] p-8 shadow-2xl hover:border-blue-500/30 transition-colors group">
                         <div className="flex items-center justify-between mb-6">
                             <div className="p-3 bg-blue-500/10 rounded-2xl text-blue-400 group-hover:scale-110 transition-transform"><Target className="w-6 h-6" /></div>
                             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Model Trust</span>
@@ -272,7 +272,7 @@ export default function ProfilePage() {
                         </div>
                     </div>
 
-                    <div className="bg-slate-900 border border-slate-800 rounded-[32px] p-8 shadow-2xl hover:border-amber-500/30 transition-colors group">
+                    <div className="bg-black-ash border border-slate-800 rounded-[32px] p-8 shadow-2xl hover:border-amber-500/30 transition-colors group">
                         <div className="flex items-center justify-between mb-6">
                             <div className="p-3 bg-amber-500/10 rounded-2xl text-amber-500 group-hover:scale-110 transition-transform"><Zap className="w-6 h-6" /></div>
                             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Subscription</span>
@@ -295,20 +295,20 @@ export default function ProfilePage() {
 
                 {/* Account Settings (Pro Only) */}
                 {profile?.subscription_tier === 'pro' && (
-                    <div className="bg-slate-900/40 border border-slate-800 rounded-[40px] p-8 md:p-12 shadow-2xl relative overflow-hidden">
-                        <div className="flex items-center justify-between mb-10">
+                    <div className="bg-black-ash/40 border border-slate-800 rounded-[32px] md:rounded-[40px] p-6 md:p-12 shadow-2xl relative overflow-hidden">
+                        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 md:mb-10 gap-4">
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-400">
                                     <User className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h3 className="text-2xl font-black text-white tracking-tight leading-none mb-1">Account Customization</h3>
-                                    <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Premium Intelligence Dashboard</p>
+                                    <h3 className="text-xl md:text-2xl font-black text-white tracking-tight leading-none mb-1">Account Customization</h3>
+                                    <p className="text-[10px] md:text-xs text-slate-500 font-bold uppercase tracking-widest">Premium Intelligence Dashboard</p>
                                 </div>
                             </div>
                             <button
                                 onClick={() => setIsEditing(!isEditing)}
-                                className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${isEditing ? 'bg-rose-500/10 text-rose-500' : 'bg-emerald-500 text-slate-950'}`}
+                                className={`w-full md:w-auto px-6 py-3 md:py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${isEditing ? 'bg-rose-500/10 text-rose-500' : 'bg-emerald-500 text-slate-950 hover:bg-emerald-400'}`}
                             >
                                 {isEditing ? 'Cancel Edit' : 'Edit Profile'}
                             </button>
@@ -409,8 +409,8 @@ export default function ProfilePage() {
                 )}
 
                 {/* Recent Benchmarks */}
-                <div className="bg-slate-900/40 border border-slate-800 rounded-[32px] overflow-hidden">
-                    <div className="px-8 py-6 border-b border-slate-800 flex items-center justify-between bg-slate-900/60">
+                <div className="bg-black-ash/40 border border-slate-800 rounded-[32px] overflow-hidden">
+                    <div className="px-8 py-6 border-b border-slate-800 flex items-center justify-between bg-black-ash/60">
                         <h3 className="text-lg font-black text-white uppercase tracking-widest flex items-center gap-3">
                             <Activity className="w-5 h-5 text-emerald-400" /> Recent Neural Logs
                         </h3>
@@ -432,27 +432,31 @@ export default function ProfilePage() {
                         ) : (
                             <div className="space-y-3">
                                 {stats.recentHistory.map((item, i) => (
-                                    <div key={i} className="flex items-center justify-between p-5 bg-slate-900 border border-slate-800 rounded-2xl group hover:border-slate-700 transition-all cursor-pointer" onClick={() => navigate('/analysis')}>
-                                        <div className="flex items-center gap-6">
+                                    <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 md:p-5 bg-black-ash border border-slate-800 rounded-2xl group hover:border-slate-700 transition-all cursor-pointer gap-4" onClick={() => navigate('/analysis')}>
+                                        <div className="flex items-center gap-4 md:gap-6 w-full sm:w-auto">
                                             {item.imageUrl ? (
-                                                <div className="w-16 h-12 rounded-lg bg-slate-800 border border-slate-700 overflow-hidden flex-shrink-0">
+                                                <div className="w-14 h-12 md:w-16 md:h-12 rounded-lg bg-slate-800 border border-slate-700 overflow-hidden flex-shrink-0">
                                                     <img src={item.imageUrl} alt={item.ticker} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" referrerPolicy="no-referrer" />
                                                 </div>
                                             ) : (
-                                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-xs ${item.direction.includes('Bullish') ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${item.direction.includes('Bullish') ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
                                                     {item.ticker.slice(0, 3)}
                                                 </div>
                                             )}
-                                            <div>
-                                                <div className="text-white font-black uppercase tracking-tight mb-1 text-sm">{item.ticker} <span className="text-slate-500 text-[10px] ml-2 font-medium">{item.pattern.name}</span></div>
-                                                <div className="text-[10px] text-slate-500 font-mono">{new Date(item.date).toLocaleDateString()} • {item.confidence}% Match</div>
+                                            <div className="min-w-0">
+                                                <div className="text-white font-black uppercase tracking-tight mb-0.5 text-sm truncate flex items-center gap-2">
+                                                    {item.ticker}
+                                                    {item.pattern?.name && <span className="text-slate-500 text-[9px] font-medium px-1.5 py-0.5 bg-slate-800 rounded hidden sm:inline-block">{item.pattern.name}</span>}
+                                                </div>
+                                                <div className="text-[10px] text-slate-500 font-mono truncate">{new Date(item.date).toLocaleDateString()} • {item.confidence}% Match</div>
+                                                {item.pattern?.name && <div className="sm:hidden text-[9px] text-slate-600 font-medium mt-1 uppercase">{item.pattern.name}</div>}
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-4">
+                                        <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto border-t border-slate-800/50 pt-3 sm:pt-0 sm:border-0">
                                             <span className={`text-[9px] font-black px-3 py-1 rounded-md uppercase tracking-tighter ${item.feedback === 'win' ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20' : (item.feedback === 'loss' ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' : 'bg-slate-800 text-slate-500')}`}>
                                                 {item.feedback || 'Pending'}
                                             </span>
-                                            <ArrowUpRight className="w-5 h-5 text-slate-700 group-hover:text-white transition-colors" />
+                                            <ArrowUpRight className="w-4 h-4 md:w-5 md:h-5 text-slate-700 group-hover:text-white transition-colors" />
                                         </div>
                                     </div>
                                 ))}

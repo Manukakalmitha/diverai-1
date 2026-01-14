@@ -12,12 +12,12 @@ const Layout = ({ children, showNav = true, showTicker = true, navStyle }) => {
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen bg-[#0f172a] text-slate-200 font-sans selection:bg-blue-500/30 overflow-x-hidden">
+        <div className="min-h-screen bg-black text-slate-200 font-sans selection:bg-blue-500/30 overflow-x-hidden">
 
             {/* Professional Header */}
             {showNav && (
-                <header className={`flex flex-col z-50 sticky top-0 shadow-sm border-b border-slate-800 bg-[#0f172a] ${navStyle === 'minimal' ? 'h-14' : ''}`}>
-                    <div className={`flex items-center justify-between px-6 ${navStyle === 'minimal' ? 'h-14' : 'h-16'} bg-[#0f172a]`}>
+                <header className={`flex flex-col z-50 sticky top-0 shadow-sm border-b border-ash bg-black/80 backdrop-blur-md ${navStyle === 'minimal' ? 'h-14' : ''}`}>
+                    <div className={`flex items-center justify-between px-6 ${navStyle === 'minimal' ? 'h-14' : 'h-16'} bg-transparent`}>
                         <Link to="/" className="flex items-center gap-2 cursor-pointer group">
                             <div className="bg-blue-600 rounded-lg p-1.5 shadow-sm group-hover:bg-blue-500 transition-colors">
                                 <Activity className="text-white w-5 h-5" />

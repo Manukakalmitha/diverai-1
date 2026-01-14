@@ -99,7 +99,7 @@ const Pricing = ({ user, profile, onClose, onUpgrade }) => {
     ];
 
     return (
-        <div className="w-full min-h-screen bg-[#0f172a] text-white selection:bg-emerald-500/30">
+        <div className="w-full min-h-screen bg-black text-white selection:bg-emerald-500/30">
             {/* Background elements */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/5 blur-[120px] rounded-full" />
@@ -205,7 +205,7 @@ const Pricing = ({ user, profile, onClose, onUpgrade }) => {
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.5 }}
-                        className="group relative bg-[#0f172a] border border-emerald-500/30 rounded-[32px] p-10 flex flex-col shadow-2xl shadow-emerald-500/10 overflow-hidden"
+                        className="group relative bg-black-ash border border-emerald-500/30 rounded-[32px] p-10 flex flex-col shadow-2xl shadow-emerald-500/10 overflow-hidden"
                     >
                         {/* Premium Gradient Overlay */}
                         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent opacity-50" />

@@ -520,11 +520,14 @@ export const loadGlobalModel = async (user, name) => {
     if (!user) return null;
 
     try {
+        // COMMUNITY BRAIN V1: Search for the LATEST, specified model (ticker) from ANY user
+        // We order by created_at desc to get the freshest brain
         const { data, error } = await supabase
             .from('neural_models')
             .select('model_json')
-            .eq('user_id', user.id)
             .eq('name', name)
+            .order('created_at', { ascending: false })
+            .limit(1)
             .maybeSingle();
 
         if (error || !data) return null;

@@ -126,7 +126,7 @@ export default function ReviewSection() {
                     <motion.div
                         layout
                         key={rev.id}
-                        className="break-inside-avoid bg-slate-900 border border-slate-800 rounded-xl p-8 hover:border-slate-700 transition-all shadow-xl group cursor-default"
+                        className="break-inside-avoid bg-black-ash border border-slate-800 rounded-xl p-8 hover:border-slate-700 transition-all shadow-xl group cursor-default"
                     >
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex -space-x-1">

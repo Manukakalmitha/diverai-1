@@ -17,6 +17,7 @@ import { runRealAnalysis } from '../lib/analysis';
 import { Helmet } from 'react-helmet-async';
 import FloatingWidget from '../components/FloatingWidget';
 import { companion } from '../lib/companion';
+import CandlestickVisual from '../components/CandlestickVisuals';
 
 // --- ENGINE LOGIC (Real Implementation) ---
 
@@ -32,7 +33,7 @@ import { companion } from '../lib/companion';
 
 // --- Child Components ---
 const Sparkline = ({ data, color = 'emerald' }) => {
-    if (!data || data.length < 2) return <div className="w-12 h-4 bg-slate-900/50 rounded animate-pulse" />;
+    if (!data || data.length < 2) return <div className="w-12 h-4 bg-black-ash/50 rounded animate-pulse" />;
     const min = Math.min(...data);
     const max = Math.max(...data);
     const range = max - min || 1;
@@ -55,12 +56,12 @@ const Sparkline = ({ data, color = 'emerald' }) => {
 
 const TickerTape = ({ items }) => {
     if (!items || items.length === 0) return (
-        <div className="w-full bg-slate-950 border-y border-slate-900 h-10 flex items-center justify-center">
+        <div className="w-full bg-ash border-y border-slate-900 h-10 flex items-center justify-center">
             <div className="text-[9px] font-black text-slate-700 uppercase tracking-[0.3em] animate-pulse">Initializing Global Stream...</div>
         </div>
     );
     return (
-        <div className="w-full bg-slate-950 border-y border-slate-900 overflow-hidden relative h-10 flex items-center shrink-0 shadow-2xl z-50">
+        <div className="w-full bg-ash border-y border-slate-900 overflow-hidden relative h-10 flex items-center shrink-0 shadow-2xl z-50">
             <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-slate-950 to-transparent z-10" />
             <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-slate-950 to-transparent z-10" />
             <div className="flex animate-marquee whitespace-nowrap gap-12 items-center px-4">
@@ -100,7 +101,7 @@ const SentimentGauge = ({ probability, direction }) => {
 
     return (
         <div className="relative w-full space-y-2 py-4">
-            <div className="relative h-6 bg-slate-950 rounded-md border border-slate-800/50 overflow-hidden shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)]">
+            <div className="relative h-6 bg-ash rounded-md border border-ash/50 overflow-hidden shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)]">
                 {/* Background Regions */}
                 <div className="absolute inset-0 flex">
                     <div className="flex-1 bg-rose-500/5 border-r border-rose-500/10" />
@@ -152,9 +153,9 @@ const ScanningHUD = ({ status }) => {
     }, []);
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-[500px] relative overflow-hidden bg-slate-950 rounded-[40px] border border-slate-900 shadow-2xl">
+        <div className="flex flex-col items-center justify-center min-h-[500px] relative overflow-hidden bg-ash rounded-[40px] border border-slate-900 shadow-2xl">
             {/* Grid Overlay */}
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-20" />
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#262626_1px,transparent_1px),linear-gradient(to_bottom,#262626_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-20" />
 
             <div className="relative z-10 flex flex-col items-center">
                 <div className="relative w-32 h-32 mb-12">
@@ -196,8 +197,8 @@ const TradeBlueprint = ({ targets, direction }) => {
     const themeColor = isBull ? 'emerald' : 'rose';
 
     return (
-        <div className="bg-slate-900/40 border border-slate-800 rounded-3xl overflow-hidden shadow-sm group">
-            <div className={`p-6 bg-gradient-to-br from-${themeColor}-500/5 to-transparent border-b border-slate-800/50 flex justify-between items-center`}>
+        <div className="bg-black-ash/40 border border-ash rounded-3xl overflow-hidden shadow-sm group">
+            <div className={`p-6 bg-gradient-to-br from-${themeColor}-500/5 to-transparent border-b border-ash/50 flex justify-between items-center`}>
                 <div>
                     <h3 className="text-sm font-black text-white flex items-center gap-2 uppercase tracking-tight">
                         <Zap className={`text-${themeColor}-400 w-4 h-4`} />
@@ -207,13 +208,13 @@ const TradeBlueprint = ({ targets, direction }) => {
                         Institutional {isBull ? 'Long' : 'Short'} Logic
                     </p>
                 </div>
-                <div className="px-3 py-1 bg-slate-950/50 rounded-full border border-slate-800 text-[9px] font-mono text-emerald-400 font-bold">
+                <div className="px-3 py-1 bg-ash/50 rounded-full border border-ash text-[9px] font-mono text-emerald-400 font-bold">
                     R/R: 1 : {targets.rr}
                 </div>
             </div>
 
             <div className="p-6">
-                <div className="flex items-center justify-between mb-6 p-4 bg-slate-950/50 rounded-2xl border border-slate-800/50">
+                <div className="flex items-center justify-between mb-6 p-4 bg-ash/50 rounded-2xl border border-ash/50">
                     <span className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Entry Zone</span>
                     <div className="text-2xl font-mono text-white font-black">${targets.entry}</div>
                 </div>
@@ -224,7 +225,7 @@ const TradeBlueprint = ({ targets, direction }) => {
                         { label: 'Extended', val: targets.tp2, color: 'emerald', tag: 'TP2' },
                         { label: 'Stop Loss', val: targets.sl, color: 'rose', tag: 'SL' }
                     ].map((t) => (
-                        <div key={t.tag} className={`flex flex-col p-4 rounded-xl bg-slate-950/40 border border-${t.color}-500/10 group-hover:border-${t.color}-500/30 transition-all`}>
+                        <div key={t.tag} className={`flex flex-col p-4 rounded-xl bg-ash/40 border border-${t.color}-500/10 group-hover:border-${t.color}-500/30 transition-all`}>
                             <div className="flex items-center justify-between mb-2">
                                 <div className={`w-6 h-6 rounded bg-${t.color}-500/20 flex items-center justify-center text-${t.color}-400 font-black text-[9px]`}>{t.tag}</div>
                                 <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">{t.label}</span>
@@ -242,8 +243,8 @@ const TradeBlueprint = ({ targets, direction }) => {
 const ManualTickerModal = ({ onSubmit, onClose }) => {
     const [input, setInput] = useState('');
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md animate-in fade-in">
-            <div className="bg-slate-900 border border-slate-800 rounded-[32px] w-full max-w-sm overflow-hidden shadow-2xl p-8 text-center animate-in zoom-in-95">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-ash/90 backdrop-blur-md animate-in fade-in">
+            <div className="bg-black-ash border border-ash rounded-[32px] w-full max-w-sm overflow-hidden shadow-2xl p-8 text-center animate-in zoom-in-95">
                 <div className="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-6 text-slate-400"><Keyboard className="w-8 h-8" /></div>
                 <h3 className="text-2xl font-black text-white mb-2 leading-none">Optical Scan Failed</h3>
                 <p className="text-slate-500 text-sm font-bold mb-6">The neural core could not identify the asset ticker from the image. Please enter it manually.</p>
@@ -252,11 +253,11 @@ const ManualTickerModal = ({ onSubmit, onClose }) => {
                     value={input}
                     onChange={(e) => setInput(e.target.value.toUpperCase())}
                     placeholder="e.g. BTC, ETH, SOL"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-center text-white font-black tracking-widest uppercase mb-6 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                    className="w-full bg-ash border border-ash rounded-xl px-4 py-3 text-center text-white font-black tracking-widest uppercase mb-6 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                     autoFocus
                 />
                 <div className="flex gap-3">
-                    <button onClick={onClose} className="flex-1 py-3 rounded-xl border border-slate-800 text-slate-500 font-bold hover:bg-slate-800 transition-colors">Cancel</button>
+                    <button onClick={onClose} className="flex-1 py-3 rounded-xl border border-ash text-slate-500 font-bold hover:bg-slate-800 transition-colors">Cancel</button>
                     <button onClick={() => input && onSubmit(input)} disabled={!input} className="flex-1 py-3 rounded-xl bg-emerald-500 text-slate-950 font-black hover:bg-emerald-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Proceed</button>
                 </div>
             </div>
@@ -271,9 +272,9 @@ const VerificationModal = ({ validationResult, ticker, onClose, onCalibrate }) =
     if (!hits || !recommendedWeights || !predictions) return null;
 
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md animate-in fade-in" onClick={(e) => e.target === e.currentTarget && onClose()}>
-            <div className="bg-slate-900 border border-slate-800 rounded-[32px] w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh] animate-in zoom-in-95">
-                <div className="p-6 md:p-8 border-b border-slate-800 flex justify-between items-start shrink-0">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-ash/90 backdrop-blur-md animate-in fade-in" onClick={(e) => e.target === e.currentTarget && onClose()}>
+            <div className="bg-black-ash border border-ash rounded-[32px] w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh] animate-in zoom-in-95">
+                <div className="p-6 md:p-8 border-b border-ash flex justify-between items-start shrink-0">
                     <div>
                         <h3 className="text-xl md:text-2xl font-black text-white flex items-center gap-2">
                             <ShieldCheck className={isGood ? "text-emerald-400" : "text-amber-400"} />
@@ -294,7 +295,7 @@ const VerificationModal = ({ validationResult, ticker, onClose, onCalibrate }) =
                             <div className={`text-4xl font-black ${isGood ? 'text-emerald-400' : 'text-amber-400'}`}>{accuracy}<span className="text-lg">%</span></div>
                             <p className="text-[10px] text-slate-500 mt-2 leading-tight">Directional correctness over the validation period.</p>
                         </div>
-                        <div className="p-6 rounded-2xl border bg-slate-950/50 border-slate-800">
+                        <div className="p-6 rounded-2xl border bg-ash/50 border-ash">
                             <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2">Technological Hits</span>
                             <div className="flex gap-4">
                                 <div><div className="text-xl font-black text-white">{hits.neural}</div><div className="text-[8px] text-slate-500 uppercase">Neural</div></div>
@@ -340,7 +341,7 @@ const VerificationModal = ({ validationResult, ticker, onClose, onCalibrate }) =
                     </div>
 
                     {/* Simple Visualization Chart (SVG) */}
-                    <div className="h-48 w-full bg-slate-950/50 rounded-2xl border border-slate-800 relative flex items-end px-4 pb-4 pt-8 gap-1">
+                    <div className="h-48 w-full bg-ash/50 rounded-2xl border border-ash relative flex items-end px-4 pb-4 pt-8 gap-1">
                         {predictions.map((p, i) => {
                             // Normalize for height (0-100%)
                             // We find min/max of this small set for drawing
@@ -379,22 +380,22 @@ const VerificationModal = ({ validationResult, ticker, onClose, onCalibrate }) =
 const ApiKeyModal = ({ ticker, onSubmit, onClose }) => {
     const [input, setInput] = useState('');
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md animate-in fade-in">
-            <div className="bg-slate-900 border border-slate-800 rounded-[32px] w-full max-w-sm overflow-hidden shadow-2xl p-8 text-center animate-in zoom-in-95">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-ash/90 backdrop-blur-md animate-in fade-in">
+            <div className="bg-black-ash border border-ash rounded-[32px] w-full max-w-sm overflow-hidden shadow-2xl p-8 text-center animate-in zoom-in-95">
                 <div className="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-6 text-emerald-400"><Key className="w-8 h-8" /></div>
                 <h3 className="text-2xl font-black text-white mb-2 leading-none">Stock Data Access</h3>
                 <p className="text-slate-500 text-sm font-bold mb-4">You are analyzing <span className="text-emerald-400">{ticker}</span>. To access real-time S&P 500 data, a free Finnhub.io API Token is required.</p>
-                <p className="text-xs text-slate-600 mb-6 bg-slate-950 p-2 rounded-lg border border-slate-800">Your key is stored locally in your browser and never shared.</p>
+                <p className="text-xs text-slate-600 mb-6 bg-ash p-2 rounded-lg border border-ash">Your key is stored locally in your browser and never shared.</p>
                 <input
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Paste Finnhub API Key"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-center text-white font-mono text-sm mb-6 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                    className="w-full bg-ash border border-ash rounded-xl px-4 py-3 text-center text-white font-mono text-sm mb-6 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                     autoFocus
                 />
                 <div className="flex gap-3">
-                    <button onClick={onClose} className="flex-1 py-3 rounded-xl border border-slate-800 text-slate-500 font-bold hover:bg-slate-800 transition-colors">Cancel</button>
+                    <button onClick={onClose} className="flex-1 py-3 rounded-xl border border-ash text-slate-500 font-bold hover:bg-slate-800 transition-colors">Cancel</button>
                     <button onClick={() => input && onSubmit(input)} disabled={!input} className="flex-1 py-3 rounded-xl bg-emerald-500 text-slate-950 font-black hover:bg-emerald-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Save & Scan</button>
                 </div>
                 <a href="https://finnhub.io/register" target="_blank" rel="noreferrer" className="block mt-4 text-xs text-blue-500 hover:underline">Get a free API Key →</a>
@@ -405,8 +406,8 @@ const ApiKeyModal = ({ ticker, onSubmit, onClose }) => {
 
 const LimitModal = ({ message, type, onClose, onLogin }) => {
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md animate-in fade-in">
-            <div className="bg-slate-900 border border-slate-800 rounded-[32px] w-full max-w-sm overflow-hidden shadow-2xl p-8 text-center animate-in zoom-in-95">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-ash/90 backdrop-blur-md animate-in fade-in">
+            <div className="bg-black-ash border border-ash rounded-[32px] w-full max-w-sm overflow-hidden shadow-2xl p-8 text-center animate-in zoom-in-95">
                 <div className="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-6 text-rose-500 shadow-[0_0_20px_rgba(244,63,94,0.2)]"><Lock className="w-8 h-8" /></div>
                 <h3 className="text-2xl font-black text-white mb-2 leading-none uppercase tracking-tight">Access Restricted</h3>
                 <p className="text-slate-500 text-sm font-bold mb-8 leading-relaxed">{message}</p>
@@ -418,7 +419,7 @@ const LimitModal = ({ message, type, onClose, onLogin }) => {
                     ) : (
                         <button onClick={onClose} className="w-full py-4 rounded-xl bg-slate-800 text-white font-black hover:bg-slate-700 transition-all uppercase tracking-widest text-xs">Check Inbox</button>
                     )}
-                    <button onClick={onClose} className="w-full py-3 rounded-xl border border-slate-800 text-slate-500 font-bold hover:bg-slate-800 transition-colors uppercase tracking-widest text-[10px]">Close Terminal</button>
+                    <button onClick={onClose} className="w-full py-3 rounded-xl border border-ash text-slate-500 font-bold hover:bg-slate-800 transition-colors uppercase tracking-widest text-[10px]">Close Terminal</button>
                 </div>
             </div>
         </div>
@@ -431,7 +432,7 @@ const FileUpload = ({ onFileSelect, isAnalyzing, statusMessage }) => {
     return (
         <div
             onDragOver={handleDrag} onDragLeave={handleDrag} onDrop={(e) => { e.preventDefault(); setIsDragging(false); if (e.dataTransfer.files[0]) onFileSelect(e.dataTransfer.files[0]); }}
-            className={`relative group h-96 rounded-[40px] border-4 border-dashed transition-all duration-500 flex flex-col items-center justify-center cursor-pointer overflow-hidden ${isDragging ? 'border-emerald-500 bg-emerald-500/5 scale-[0.99] shadow-inner' : 'border-slate-800 bg-slate-900/50 hover:border-slate-700 hover:bg-slate-900 shadow-2xl'}`}
+            className={`relative group h-96 rounded-[40px] border-4 border-dashed transition-all duration-500 flex flex-col items-center justify-center cursor-pointer overflow-hidden ${isDragging ? 'border-emerald-500 bg-emerald-500/5 scale-[0.99] shadow-inner' : 'border-ash bg-black-ash/50 hover:border-slate-700 hover:bg-black-ash shadow-2xl'}`}
         >
             <input type="file" className="absolute inset-0 opacity-0 cursor-pointer z-10" onChange={e => onFileSelect(e.target.files[0])} accept="image/*" />
             {isAnalyzing && !analysisResult ? (
@@ -479,7 +480,7 @@ const MacroFluctuationChart = ({ macroTrend, isPro, source }) => {
     const maxVal = Math.max(...bars.map(b => Math.abs(b.change)), 10); // Scale
 
     return (
-        <div className="bg-[#020617] border border-slate-800 rounded-lg p-4 print:border-gray-300 print:bg-white">
+        <div className="bg-[#020617] border border-ash rounded-lg p-4 print:border-gray-300 print:bg-white">
             <div className="flex justify-between items-center mb-4">
                 <div className="flex items-center gap-2">
                     <Activity className="w-4 h-4 text-slate-500" />
@@ -509,7 +510,7 @@ const MacroFluctuationChart = ({ macroTrend, isPro, source }) => {
                                     }}
                                 >
                                     {/* Tooltip */}
-                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-slate-900 border border-slate-800 text-white text-[9px] font-mono px-2 py-1 rounded whitespace-nowrap z-50 shadow-xl">
+                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-black-ash border border-ash text-white text-[9px] font-mono px-2 py-1 rounded whitespace-nowrap z-50 shadow-xl">
                                         <div className="font-bold">{bar.year}</div>
                                         <div className={isPos ? 'text-emerald-400' : 'text-rose-400'}>{bar.change > 0 ? '+' : ''}{bar.change.toFixed(1)}%</div>
                                     </div>
@@ -521,7 +522,7 @@ const MacroFluctuationChart = ({ macroTrend, isPro, source }) => {
                 })}
             </div>
             {/* Footer Note */}
-            <div className="mt-4 pt-3 border-t border-slate-800 text-center">
+            <div className="mt-4 pt-3 border-t border-ash text-center">
                 <p className="text-[9px] text-slate-500 font-medium uppercase tracking-wider">
                     Historic data via {source || "Institutional Feed"} • {isPro ? 'Pro Access' : 'Preview'}
                 </p>
@@ -533,7 +534,7 @@ const MacroFluctuationChart = ({ macroTrend, isPro, source }) => {
 const PrintHeader = ({ ticker, date }) => (
     <div className="hidden print:flex justify-between items-center border-b-2 border-slate-900 pb-4 mb-8">
         <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-black-ash rounded-lg flex items-center justify-center">
                 <Cpu className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -568,7 +569,7 @@ const AnalysisResult = ({ result, imagePreview, onVerify, isVerifying, isPro, on
             <PrintHeader ticker={result.ticker} date={result.date} />
 
             {/* Header / Meta */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-slate-800 pb-6 print:border-black">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-ash pb-6 print:border-black">
                 <div className="space-y-1">
                     <div className="flex items-center gap-3">
                         <div className={`p-1.5 rounded ${colors.bg} border ${colors.border} print:hidden`}>
@@ -617,20 +618,20 @@ const AnalysisResult = ({ result, imagePreview, onVerify, isVerifying, isPro, on
             </div>
 
             {/* Key Metrics Grid (Dense) */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-slate-800 border border-slate-800 rounded-lg overflow-hidden print:border-gray-300 print:bg-gray-300">
-                <div className="bg-[#020617] p-4 flex flex-col justify-between hover:bg-slate-900 transition-colors print:bg-white">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-slate-800 border border-ash rounded-lg overflow-hidden print:border-gray-300 print:bg-gray-300">
+                <div className="bg-[#020617] p-4 flex flex-col justify-between hover:bg-black-ash transition-colors print:bg-white">
                     <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Confidence</span>
                     <span className={`text-2xl font-mono font-bold ${colors.text} print:text-black`}>{result.confidence}%</span>
                 </div>
-                <div className="bg-[#020617] p-4 flex flex-col justify-between hover:bg-slate-900 transition-colors print:bg-white">
+                <div className="bg-[#020617] p-4 flex flex-col justify-between hover:bg-black-ash transition-colors print:bg-white">
                     <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Volatility (ATR)</span>
                     <span className="text-2xl font-mono font-bold text-white print:text-black">{result.riskMetrics?.volatility || "0.00"}%</span>
                 </div>
-                <div className="bg-[#020617] p-4 flex flex-col justify-between hover:bg-slate-900 transition-colors print:bg-white">
+                <div className="bg-[#020617] p-4 flex flex-col justify-between hover:bg-black-ash transition-colors print:bg-white">
                     <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Sharpe (Est.)</span>
                     <span className="text-2xl font-mono font-bold text-blue-400 print:text-black">{result.riskMetrics?.sharpeRatio || "0.00"}</span>
                 </div>
-                <div className="bg-[#020617] p-4 flex flex-col justify-between hover:bg-slate-900 transition-colors print:bg-white">
+                <div className="bg-[#020617] p-4 flex flex-col justify-between hover:bg-black-ash transition-colors print:bg-white">
                     <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Reward/Risk</span>
                     <span className="text-2xl font-mono font-bold text-emerald-400 print:text-black">{result.targets.rr}x</span>
                 </div>
@@ -658,8 +659,8 @@ const AnalysisResult = ({ result, imagePreview, onVerify, isVerifying, isPro, on
                                 className={`p-4 rounded-2xl border ${p.sentiment === 'Bullish' ? 'bg-emerald-500/5 border-emerald-500/10' : (p.sentiment === 'Bearish' ? 'bg-rose-500/5 border-rose-500/10' : 'bg-slate-500/5 border-slate-500/10')} group hover:scale-[1.02] transition-all`}
                             >
                                 <div className="flex items-center gap-3 mb-2">
-                                    <div className={`p-2 rounded-lg ${p.sentiment === 'Bullish' ? 'bg-emerald-500/20 text-emerald-400' : (p.sentiment === 'Bearish' ? 'bg-rose-500/20 text-rose-400' : 'bg-slate-500/20 text-slate-400')}`}>
-                                        <Zap className="w-4 h-4" />
+                                    <div className={`p-1 rounded-lg ${p.sentiment === 'Bullish' ? 'bg-emerald-500/10' : (p.sentiment === 'Bearish' ? 'bg-rose-500/10' : 'bg-slate-500/10')}`}>
+                                        <CandlestickVisual pattern={p.name} sentiment={p.sentiment} />
                                     </div>
                                     <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{p.name}</span>
                                 </div>
@@ -671,7 +672,7 @@ const AnalysisResult = ({ result, imagePreview, onVerify, isVerifying, isPro, on
                     </div>
 
                     {/* Narrative Block */}
-                    <div className="bg-slate-900/30 p-8 border border-slate-800 rounded-3xl shadow-sm print:bg-white print:border-gray-200 group relative overflow-hidden">
+                    <div className="bg-black-ash/30 p-8 border border-ash rounded-3xl shadow-sm print:bg-white print:border-gray-200 group relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
                             <Cpu className="w-32 h-32" />
                         </div>
@@ -683,7 +684,7 @@ const AnalysisResult = ({ result, imagePreview, onVerify, isVerifying, isPro, on
                     </div>
 
                     {/* Chart Preview */}
-                    <div className="border border-slate-800 rounded-3xl overflow-hidden relative group h-80 print:h-96 print:border-gray-300 shadow-2xl">
+                    <div className="border border-ash rounded-3xl overflow-hidden relative group h-80 print:h-96 print:border-gray-300 shadow-2xl">
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 to-transparent opacity-60 z-10" />
                         <div className="absolute top-4 left-4 z-20 bg-emerald-500 text-slate-950 px-3 py-1 rounded-full text-[9px] font-black tracking-widest uppercase shadow-lg">DATA SOURCE: VISUAL SCAN</div>
                         <img src={imagePreview} alt="Analyzed Chart" className="w-full h-full object-cover opacity-60 grayscale group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700 scale-105 group-hover:scale-100 print:opacity-100 print:grayscale-0" />
@@ -692,8 +693,8 @@ const AnalysisResult = ({ result, imagePreview, onVerify, isVerifying, isPro, on
 
                 {/* Right Column: Factor Table & Metrics */}
                 <div className="lg:col-span-1 space-y-6">
-                    <div className="bg-slate-900/20 border border-slate-800 rounded-3xl overflow-hidden print:border-gray-200">
-                        <div className="bg-slate-900/50 px-6 py-4 border-b border-slate-800 flex justify-between items-center print:bg-gray-100">
+                    <div className="bg-black-ash/20 border border-ash rounded-3xl overflow-hidden print:border-gray-200">
+                        <div className="bg-black-ash/50 px-6 py-4 border-b border-ash flex justify-between items-center print:bg-gray-100">
                             <div className="flex items-center gap-2">
                                 <ShieldCheck className="w-4 h-4 text-blue-400" />
                                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Alpha Factors</span>
@@ -719,7 +720,7 @@ const AnalysisResult = ({ result, imagePreview, onVerify, isVerifying, isPro, on
                                 ))}
                             </tbody>
                         </table>
-                        <div className="px-6 py-4 border-t border-slate-800/50 bg-slate-950/50 flex justify-between items-center">
+                        <div className="px-6 py-4 border-t border-ash/50 bg-ash/50 flex justify-between items-center">
                             <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Drawdown Risk</span>
                             <span className="font-mono text-[11px] text-rose-400 font-black">-{result.riskMetrics?.maxDrawdown || "0.00"}%</span>
                         </div>
@@ -734,13 +735,13 @@ const AnalysisResult = ({ result, imagePreview, onVerify, isVerifying, isPro, on
 const HistorySidebar = ({ history, onSelect, onDelete, onFeedback }) => {
     return (
         <div className="h-full flex flex-col bg-[#020617] border-l border-slate-900 shadow-2xl overflow-hidden">
-            <div className="p-6 border-b border-slate-900 bg-slate-950/50 backdrop-blur-xl">
+            <div className="p-6 border-b border-slate-900 bg-ash/50 backdrop-blur-xl">
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                         <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
                         <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Terminal Log</h3>
                     </div>
-                    <span className="text-[8px] font-mono text-slate-600 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">CORE v5.0</span>
+                    <span className="text-[8px] font-mono text-slate-600 bg-black-ash px-2 py-0.5 rounded border border-ash">CORE v5.0</span>
                 </div>
                 <div className="flex items-center justify-between text-[8px] font-black text-slate-500 uppercase tracking-widest px-1">
                     <span>Recent Activity</span>
@@ -758,7 +759,7 @@ const HistorySidebar = ({ history, onSelect, onDelete, onFeedback }) => {
                         <div
                             key={item.db_id}
                             onClick={() => onSelect(item)}
-                            className="group relative bg-slate-900/40 border border-slate-800/50 rounded-xl p-4 cursor-pointer hover:bg-slate-800/40 transition-all hover:border-slate-700/50 overflow-hidden"
+                            className="group relative bg-black-ash/40 border border-ash/50 rounded-xl p-4 cursor-pointer hover:bg-slate-800/40 transition-all hover:border-slate-700/50 overflow-hidden"
                         >
                             {/* Status Indicator */}
                             <div className={`absolute top-0 right-0 w-24 h-24 bg-${color}-500/5 blur-2xl -translate-y-1/2 translate-x-1/2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity`} />
@@ -782,17 +783,17 @@ const HistorySidebar = ({ history, onSelect, onDelete, onFeedback }) => {
                                 </div>
                             </div>
 
-                            <div className="mt-4 pt-4 border-t border-slate-800/30 flex items-center justify-between relative z-10">
+                            <div className="mt-4 pt-4 border-t border-ash/30 flex items-center justify-between relative z-10">
                                 <div className="flex gap-2">
                                     <button
                                         onClick={(e) => { e.stopPropagation(); onFeedback(item.db_id, true); }}
-                                        className={`p-1.5 rounded-lg border border-slate-800/50 transition-all ${item.feedback === 'win' ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' : 'text-slate-600 hover:text-emerald-400 hover:bg-emerald-500/10'}`}
+                                        className={`p-1.5 rounded-lg border border-ash/50 transition-all ${item.feedback === 'win' ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' : 'text-slate-600 hover:text-emerald-400 hover:bg-emerald-500/10'}`}
                                     >
                                         <ThumbsUp className="w-3 h-3" />
                                     </button>
                                     <button
                                         onClick={(e) => { e.stopPropagation(); onFeedback(item.db_id, false); }}
-                                        className={`p-1.5 rounded-lg border border-slate-800/50 transition-all ${item.feedback === 'loss' ? 'bg-rose-500/20 border-rose-500/30 text-rose-400' : 'text-slate-600 hover:text-rose-400 hover:bg-rose-500/10'}`}
+                                        className={`p-1.5 rounded-lg border border-ash/50 transition-all ${item.feedback === 'loss' ? 'bg-rose-500/20 border-rose-500/30 text-rose-400' : 'text-slate-600 hover:text-rose-400 hover:bg-rose-500/10'}`}
                                     >
                                         <ThumbsDown className="w-3 h-3" />
                                     </button>

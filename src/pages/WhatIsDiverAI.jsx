@@ -7,7 +7,7 @@ const WhatIsDiverAI = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen bg-[#0f172a] text-slate-200 font-sans selection:bg-blue-500/30 pt-20 pb-20">
+        <div className="min-h-screen bg-black text-slate-200 font-sans selection:bg-blue-500/30 pt-20 pb-20">
             <Helmet>
                 <title>What is Diver AI? | Understanding OPR & Neural Engine</title>
                 <meta name="description" content="Learn about Diver AI's Institutional-grade trading intelligence. Explore Optical Pattern Recognition and Bayesian Neural Networks." />
@@ -30,7 +30,7 @@ const WhatIsDiverAI = () => {
                 <main className="space-y-20">
 
                     {/* What It Is */}
-                    <section className="bg-slate-900 border border-slate-800 rounded-2xl p-8 md:p-12 relative overflow-hidden">
+                    <section className="bg-black-ash border border-slate-800 rounded-2xl p-8 md:p-12 relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-20 bg-blue-500/5 rounded-full blur-[80px]"></div>
                         <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
                             <Zap className="w-6 h-6 text-blue-500" />
@@ -45,7 +45,7 @@ const WhatIsDiverAI = () => {
                     </section>
 
                     {/* What It Is NOT */}
-                    <section className="bg-slate-900 border border-slate-800 rounded-2xl p-8 md:p-12 relative overflow-hidden">
+                    <section className="bg-black-ash border border-slate-800 rounded-2xl p-8 md:p-12 relative overflow-hidden">
                         <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
                             <X className="w-6 h-6 text-rose-500" />
                             What It Is NOT
@@ -64,14 +64,14 @@ const WhatIsDiverAI = () => {
 
                     {/* How It Works */}
                     <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 hover:border-blue-500/30 transition-colors">
+                        <div className="bg-black-ash border border-slate-800 rounded-2xl p-8 hover:border-blue-500/30 transition-colors">
                             <Search className="w-8 h-8 text-blue-500 mb-6" />
                             <h3 className="text-xl font-bold text-white mb-4">1. Optical Scan</h3>
                             <p className="text-slate-400 leading-relaxed">
                                 The engine takes a snapshot of your chart and uses Computer Vision to identify geometric structures (Head & Shoulders, Flags, Wedges) and key support/resistance zones.
                             </p>
                         </div>
-                        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 hover:border-blue-500/30 transition-colors">
+                        <div className="bg-black-ash border border-slate-800 rounded-2xl p-8 hover:border-blue-500/30 transition-colors">
                             <Target className="w-8 h-8 text-blue-500 mb-6" />
                             <h3 className="text-xl font-bold text-white mb-4">2. Probability Fusion</h3>
                             <p className="text-slate-400 leading-relaxed">
@@ -81,7 +81,7 @@ const WhatIsDiverAI = () => {
                     </section>
 
                     {/* Who It's For */}
-                    <section className="bg-slate-900 border border-slate-800 rounded-2xl p-8 md:p-12 text-center">
+                    <section className="bg-black-ash border border-slate-800 rounded-2xl p-8 md:p-12 text-center">
                         <h2 className="text-2xl font-bold text-white mb-6">Who Is Diver AI For?</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
                             <div className="p-6 bg-slate-950 rounded-xl border border-slate-800">
@@ -106,11 +106,11 @@ const WhatIsDiverAI = () => {
                             <h2 className="text-xl font-bold text-white uppercase tracking-tight">Quick FAQs</h2>
                         </div>
                         <div className="space-y-4">
-                            <div className="p-6 bg-slate-900 border border-slate-800 rounded-xl">
+                            <div className="p-6 bg-black-ash border border-slate-800 rounded-xl">
                                 <h4 className="font-bold text-white mb-2">Is Diver AI free?</h4>
                                 <p className="text-slate-400">We offer a free tier with daily limits using our core OCR engine. Pro Quant plans unlock unlimited scans and institutional data feeds.</p>
                             </div>
-                            <div className="p-6 bg-slate-900 border border-slate-800 rounded-xl">
+                            <div className="p-6 bg-black-ash border border-slate-800 rounded-xl">
                                 <h4 className="font-bold text-white mb-2">Does it place trades for me?</h4>
                                 <p className="text-slate-400">No. Diver AI is a <strong>non-custodial intelligence tool</strong>. We provide the map; you drive the car.</p>
                             </div>
