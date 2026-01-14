@@ -1,0 +1,22 @@
+
+> diver-ai@2.5.1 build:extension
+> vite build -c vite.extension.config.js
+
+You are using Node.js 20.18.0. Vite requires Node.js version 20.19+ or 22.12+. Please upgrade your Node.js version.
+[36mvite v7.3.0 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32m✓[39m 3401 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist-extension/[22m[32mchrome-extension/sidepanel.html  [39m[1m[2m    1.40 kB[22m[1m[22m[2m │ gzip:   0.65 kB[22m
+[2mdist-extension/[22m[32massets/brain.worker-B2-ZMDfl.js  [39m[1m[2m  880.02 kB[22m[1m[22m
+[2mdist-extension/[22m[35massets/sidepanel.css             [39m[1m[2m   68.93 kB[22m[1m[22m[2m │ gzip:  11.28 kB[22m
+[2mdist-extension/[22m[36mbackground.js                    [39m[1m[2m    1.18 kB[22m[1m[22m[2m │ gzip:   0.70 kB[22m
+[2mdist-extension/[22m[36mcontent.js                       [39m[1m[2m    3.62 kB[22m[1m[22m[2m │ gzip:   1.81 kB[22m
+[2mdist-extension/[22m[36msidepanel.js                     [39m[1m[33m1,642.99 kB[39m[22m[2m │ gzip: 448.88 kB[22m
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[32m✓ built in 32.49s[39m

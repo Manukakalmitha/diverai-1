@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Activity, Zap, Search, AlertTriangle, CheckCircle2, Lock, User, LogOut, ChevronLeft, Cpu, TrendingUp, TrendingDown, Minus, Clock, ShieldCheck, Key, History, Trash2, BarChart3, Fingerprint, Share2, Trophy, Copy } from 'lucide-react';
-import { supabase } from '../src/lib/supabase';
+import { supabase } from '../lib/supabase';
 import { useAppContext } from '../src/context/AppContext';
 import { runRealAnalysis } from '../src/lib/analysis';
 import { detectTicker, detectPrice, fetchTickerData, fetchMarketData, fetchHistoricalData, fetchYahooData, fetchStockData, fetchStockHistory, STOCK_MAP } from '../src/lib/marketData';

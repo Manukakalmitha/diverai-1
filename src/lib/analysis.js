@@ -1,5 +1,14 @@
 
-import { calculateRSI as calcRSI, calculateMACD, calculateBollingerBands, detectPatterns, calculateATR, findSupportResistance } from './technicalAnalysis.js';
+import {
+    calculateRSI as calcRSI,
+    calculateMACD,
+    calculateBollingerBands,
+    detectPatterns,
+    calculateATR,
+    findSupportResistance,
+    calculateVWAP,
+    calculateTrendBias
+} from './technicalAnalysis.js';
 import { calculateStats, predictNextPrice, runBackgroundTraining, loadGlobalModel, saveGlobalModelArtifacts, disposeModel, WINDOW_SIZE } from './brain.js';
 import { fetchMacroHistory, calculateMacroSentiment } from './marketData.js';
 import { supabase } from './supabase.js';
@@ -98,7 +107,7 @@ export const runRealAnalysis = async (ticker, marketStats, historicalData, user,
 
     // V5: Institutional Volume & Trend Indicators
     const vwap = (historicalData.volumes && historicalData.volumes.length > 0)
-        ? (await import('./technicalAnalysis.js')).calculateVWAP(highs, lows, closes, historicalData.volumes)
+        ? calculateVWAP(highs, lows, closes, historicalData.volumes)
         : closes;
 
     // C. Multi-Timeframe Alignment
@@ -107,7 +116,7 @@ export const runRealAnalysis = async (ticker, marketStats, historicalData, user,
         setStatusMessage("Aligning Multi-Timeframe Bias (Daily)...");
         const dailyData = await fetchMacroHistory(ticker);
         if (dailyData?.prices) {
-            mtfBias = (await import('./technicalAnalysis.js')).calculateTrendBias(dailyData.prices);
+            mtfBias = calculateTrendBias(dailyData.prices);
         }
     } catch (mtfErr) {
         console.warn("MTF Alignment failed, using neutral bias:", mtfErr);

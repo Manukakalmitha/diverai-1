@@ -1,0 +1,19 @@
+
+> diver-ai@2.5.1 build:extension
+> vite build -c vite.extension.config.js
+
+You are using Node.js 20.18.0. Vite requires Node.js version 20.19+ or 22.12+. Please upgrade your Node.js version.
+[36mvite v7.3.0 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32m✓[39m 1013 modules transformed.
+✗ Build failed in 3.03s
+error during build:
+[vite:worker-import-meta-url] Expected worker options type property to be a literal value.
+file: C:/Users/manuk/diverai/src/lib/brain.js
+    at err$1 (file:///C:/Users/manuk/diverai/node_modules/vite/dist/node/chunks/config.js:27526:18)
+    at extractWorkerTypeFromAst (file:///C:/Users/manuk/diverai/node_modules/vite/dist/node/chunks/config.js:27557:52)
+    at parseWorkerOptions (file:///C:/Users/manuk/diverai/node_modules/vite/dist/node/chunks/config.js:27566:16)
+    at getWorkerType (file:///C:/Users/manuk/diverai/node_modules/vite/dist/node/chunks/config.js:27585:21)
+    at Object.handler (file:///C:/Users/manuk/diverai/node_modules/vite/dist/node/chunks/config.js:27618:25)
+    at transform (file:///C:/Users/manuk/diverai/node_modules/rollup/dist/es/shared/node-entry.js:21234:16)
+    at ModuleLoader.addModuleSource (file:///C:/Users/manuk/diverai/node_modules/rollup/dist/es/shared/node-entry.js:21448:36)

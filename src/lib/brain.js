@@ -20,7 +20,7 @@ const TRAINING_TIMEOUT_MS = 300000;
 
 export const runBackgroundTraining = (data) => {
     return new Promise((resolve, reject) => {
-        const worker = new Worker(new URL('./brain.worker.js', import.meta.url), { type: 'module' });
+        const worker = new Worker(new URL('./brain.worker.js', import.meta.url), { type: "module" });
         let isSettled = false;
 
         // Timeout handler to prevent indefinite hangs on slow devices
@@ -72,7 +72,7 @@ export const runBackgroundTraining = (data) => {
 
 export const runBackgroundAssessment = (fullPrices, onProgress) => {
     return new Promise((resolve, reject) => {
-        const worker = new Worker(new URL('./brain.worker.js', import.meta.url), { type: 'module' });
+        const worker = new Worker(new URL('./brain.worker.js', import.meta.url), { type: "module" });
         let isSettled = false;
 
         // Assessment timeout: 5 minutes
