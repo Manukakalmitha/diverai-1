@@ -11,7 +11,7 @@ export default defineConfig({
       strategies: 'injectManifest',
       srcDir: 'src',
       filename: 'sw.js',
-      includeAssets: ['favicon.png', 'apple-touch-icon.png', 'widget_ticker.html'],
+      includeAssets: ['favicon.png', 'apple-touch-icon.png', 'widget_ticker.html', 'icon-16.png', 'icon-48.png'],
       manifest: {
         id: 'com.diverai.app',
         name: 'Diver AI Trading',
