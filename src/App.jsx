@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import { AppProvider } from './context/AppContext';
 import Layout from './components/Layout';
 import Home from './pages/Home';
@@ -62,6 +63,7 @@ function App() {
             </Suspense>
           </Router>
           <ReloadPrompt />
+          <Analytics />
         </AppProvider>
       </HelmetProvider>
     </ErrorBoundary>
