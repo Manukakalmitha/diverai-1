@@ -241,20 +241,20 @@ const AuthPage = ({ initialMode = 'login' }) => {
 
     if (isExtAuthSuccess) {
         return (
-            <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4">
+            <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
                 <div className="w-full max-w-md space-y-8 animate-in fade-in zoom-in-95 duration-500">
                     <div className="text-center space-y-6">
                         <div className="relative mx-auto w-24 h-24">
-                            <div className="absolute inset-0 bg-emerald-500/20 rounded-full animate-ping"></div>
-                            <div className="relative bg-emerald-500 rounded-full w-24 h-24 flex items-center justify-center shadow-2xl shadow-emerald-500/20">
-                                <CheckCircle2 className="w-12 h-12 text-slate-950" />
+                            <div className="absolute inset-0 bg-brand/20 rounded-full animate-ping"></div>
+                            <div className="relative bg-brand rounded-full w-24 h-24 flex items-center justify-center shadow-2xl shadow-brand/20">
+                                <CheckCircle2 className="text-slate-950 w-12 h-12" />
                             </div>
                         </div>
 
                         <div className="space-y-4">
                             <h2 className="text-3xl md:text-4xl font-black text-white tracking-tighter uppercase leading-none">Terminal Auth Sync</h2>
                             <p className="text-slate-400 text-base font-medium leading-relaxed">
-                                Your secure session has been transmitted to the <span className="text-emerald-400 font-bold">Diver AI Companion</span>.
+                                Your secure session has been transmitted to the <span className="text-brand font-bold">Diver AI Companion</span>.
                                 <br />
                                 You may now close this tab.
                             </p>
@@ -262,15 +262,15 @@ const AuthPage = ({ initialMode = 'login' }) => {
 
                         <div className="p-6 bg-black-ash/50 rounded-2xl border border-slate-800 text-left">
                             <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] leading-relaxed">
-                                <span className="text-emerald-500 mr-2">●</span> EXT_ID: {extId?.substring(0, 12)}...
+                                <span className="text-brand mr-2">●</span> EXT_ID: {extId?.substring(0, 12)}...
                                 <br />
-                                <span className="text-emerald-500 mr-2">●</span> STATUS: SYNCHRONIZED
+                                <span className="text-brand mr-2">●</span> STATUS: SYNCHRONIZED
                             </p>
                         </div>
 
                         <button
                             onClick={() => window.close()}
-                            className="w-full py-4 bg-white text-slate-950 font-black rounded-xl transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-widest hover:bg-emerald-400"
+                            className="btn-flame w-full !py-4"
                         >
                             Return to Chart
                         </button>
@@ -282,12 +282,12 @@ const AuthPage = ({ initialMode = 'login' }) => {
 
     if (isEmailSent) {
         return (
-            <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4">
+            <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
                 <div className="w-full max-w-md space-y-8 animate-in fade-in zoom-in-95 duration-500">
                     <div className="text-center space-y-6">
                         <div className="relative mx-auto w-24 h-24">
-                            <div className="absolute inset-0 bg-emerald-500/20 rounded-full animate-ping"></div>
-                            <div className="relative bg-emerald-500 rounded-full w-24 h-24 flex items-center justify-center shadow-2xl shadow-emerald-500/20">
+                            <div className="absolute inset-0 bg-brand/20 rounded-full animate-ping"></div>
+                            <div className="relative bg-brand rounded-full w-24 h-24 flex items-center justify-center shadow-2xl shadow-brand/20">
                                 <Mail className="w-12 h-12 text-slate-950 animate-bounce" />
                             </div>
                         </div>
@@ -296,15 +296,15 @@ const AuthPage = ({ initialMode = 'login' }) => {
                             <h2 className="text-3xl md:text-4xl font-black text-white tracking-tighter uppercase">Check Your Inbox</h2>
                             <p className="text-slate-400 text-base font-medium leading-relaxed">
                                 We've sent a magic link to <br />
-                                <span className="text-emerald-400 font-bold">{email}</span>
+                                <span className="text-brand font-bold">{email}</span>
                             </p>
                         </div>
 
                         <div className="p-6 bg-black-ash/50 rounded-2xl border border-slate-800 text-left">
                             <p className="text-xs text-slate-400 font-medium uppercase tracking-widest leading-relaxed">
-                                <span className="text-emerald-500 mr-2">●</span> Click the link to verify.
+                                <span className="text-brand mr-2">●</span> Click the link to verify.
                                 <br />
-                                <span className="text-emerald-500 mr-2">●</span> Your terminal will unlock automatically.
+                                <span className="text-brand mr-2">●</span> Your terminal will unlock automatically.
                             </p>
                         </div>
 
@@ -318,7 +318,7 @@ const AuthPage = ({ initialMode = 'login' }) => {
                             <button
                                 onClick={checkVerificationStatus}
                                 disabled={checkingStatus}
-                                className="w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-widest disabled:opacity-50"
+                                className="btn-flame w-full !py-4"
                             >
                                 {checkingStatus ? <Loader2 className="w-4 h-4 animate-spin" /> : 'I Have Verified'}
                             </button>
@@ -343,7 +343,7 @@ const AuthPage = ({ initialMode = 'login' }) => {
     }
 
     return (
-        <div className="min-h-screen bg-slate-950 flex flex-col lg:flex-row">
+        <div className="min-h-screen bg-black flex flex-col lg:flex-row">
             <Helmet>
                 <title>{isLogin ? 'Login | Diver AI' : 'Sign Up | Diver AI'}</title>
                 <meta name="description" content="Access your Diver AI terminal or join our network of elite traders. Institutional-grade analysis is one click away." />
@@ -357,10 +357,10 @@ const AuthPage = ({ initialMode = 'login' }) => {
 
                 <div className="relative z-10">
                     <Link to="/" className="inline-flex items-center gap-2 text-white mb-8 hover:opacity-80 transition-opacity">
-                        <div className="bg-blue-600 rounded-lg p-1.5 shadow-sm">
-                            <Activity className="text-white w-5 h-5" />
+                        <div className="bg-brand rounded-lg p-1.5 shadow-sm">
+                            <Activity className="text-slate-950 w-5 h-5" />
                         </div>
-                        <span className="text-xl font-bold tracking-tight">Diver<span className="text-blue-500">AI</span></span>
+                        <span className="text-xl font-bold tracking-tight">Diver<span className="text-brand">AI</span></span>
                     </Link>
                 </div>
 
@@ -375,20 +375,20 @@ const AuthPage = ({ initialMode = 'login' }) => {
 
                 <div className="relative z-10 pt-12">
                     <p className="text-xs text-slate-500 font-mono">
-                        System Status: <span className="text-emerald-500">Operational</span>
+                        System Status: <span className="text-brand">Operational</span>
                         <br />
-                        Latency: <span className="text-emerald-500">12ms</span>
+                        Latency: <span className="text-brand">12ms</span>
                     </p>
                 </div>
             </div>
 
             {/* Right Column - Form */}
-            <div className="w-full lg:w-1/2 p-6 md:p-8 lg:p-24 flex flex-col justify-center bg-slate-950">
+            <div className="w-full lg:w-1/2 p-6 md:p-8 lg:p-24 flex flex-col justify-center bg-black">
                 <div className="w-full max-w-md mx-auto space-y-8">
                     <div className="text-center lg:text-left">
                         <Link to="/" className="inline-flex lg:hidden items-center gap-2 text-white mb-8 hover:opacity-80 transition-opacity">
-                            <Activity className="text-emerald-500 w-6 h-6" />
-                            <span className="text-xl font-bold tracking-tight">Diver<span className="text-emerald-500">AI</span></span>
+                            <Activity className="text-brand w-6 h-6" />
+                            <span className="text-xl font-bold tracking-tight">Diver<span className="text-brand">AI</span></span>
                         </Link>
                         <h2 className="text-2xl font-bold text-white mb-2">{isLogin ? 'Sign In to Account' : 'Create Account'}</h2>
                         <p className="text-slate-400 text-sm">
@@ -435,7 +435,7 @@ const AuthPage = ({ initialMode = 'login' }) => {
                                 <span className="w-full border-t border-slate-800" />
                             </div>
                             <div className="relative flex justify-center text-xs uppercase">
-                                <span className="bg-slate-950 px-2 text-slate-500 font-bold tracking-widest">Or continue with email</span>
+                                <span className="bg-black px-2 text-slate-500 font-bold tracking-widest">Or continue with email</span>
                             </div>
                         </div>
                     </div>
@@ -450,7 +450,7 @@ const AuthPage = ({ initialMode = 'login' }) => {
                                     required
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full bg-black-ash border border-slate-800 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-600"
+                                    className="w-full bg-black-ash border border-slate-800 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all placeholder:text-slate-600"
                                     placeholder="name@example.com"
                                     autoComplete="username"
                                 />
@@ -465,7 +465,7 @@ const AuthPage = ({ initialMode = 'login' }) => {
                                     required
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full bg-black-ash border border-slate-800 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-600"
+                                    className="w-full bg-black-ash border border-slate-800 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all placeholder:text-slate-600"
                                     placeholder="••••••••"
                                     autoComplete={isLogin ? "current-password" : "new-password"}
                                 />
@@ -474,7 +474,7 @@ const AuthPage = ({ initialMode = 'login' }) => {
 
                         <button
                             disabled={loading}
-                            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 text-sm uppercase tracking-wider shadow-lg shadow-blue-500/20"
+                            className="btn-flame w-full !py-4"
                         >
                             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (isLogin ? 'Sign In' : 'Create Account')}
                         </button>
@@ -482,7 +482,7 @@ const AuthPage = ({ initialMode = 'login' }) => {
 
                     <p className="text-center text-sm text-slate-500">
                         {isLogin ? "Don't have an account? " : "Already have an account? "}
-                        <Link to={isLogin ? "/signup" : "/login"} onClick={() => setIsLogin(!isLogin)} className="text-blue-500 hover:text-blue-400 font-bold transition-colors">
+                        <Link to={isLogin ? "/signup" : "/login"} onClick={() => setIsLogin(!isLogin)} className="text-brand hover:text-brand-light font-bold transition-colors">
                             {isLogin ? 'Sign up' : 'Sign in'}
                         </Link>
                     </p>

@@ -19,11 +19,11 @@ const Documentation = ({ onClose }) => {
     ];
 
     return (
-        <div className="fixed inset-0 z-40 top-16 bg-[#050B14] text-white flex overflow-hidden font-sans">
+        <div className="fixed inset-0 z-40 top-16 bg-black text-white flex overflow-hidden font-sans">
             {/* Left Sidebar */}
-            <aside className="w-64 border-r border-slate-800 bg-[#050B14] hidden md:flex flex-col">
+            <aside className="w-64 border-r border-slate-800 bg-black hidden md:flex flex-col">
                 <div className="p-4 border-b border-slate-800 flex items-center gap-3">
-                    <BookOpen className="w-5 h-5 text-emerald-500" />
+                    <BookOpen className="w-5 h-5 text-brand" />
                     <span className="font-bold tracking-tight">Diver Docs</span>
                 </div>
 
@@ -47,7 +47,7 @@ const Documentation = ({ onClose }) => {
                                 <button
                                     key={section.id}
                                     onClick={() => scrollToSection(section.id)}
-                                    className={`w-full text-left px-2 py-1.5 rounded-md text-sm transition-colors ${activeSection === section.id ? 'bg-emerald-500/10 text-emerald-400 font-medium' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
+                                    className={`w-full text-left px-2 py-1.5 rounded-md text-sm transition-colors ${activeSection === section.id ? 'bg-brand/10 text-brand font-medium' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
                                 >
                                     {section.title}
                                 </button>
@@ -74,11 +74,11 @@ const Documentation = ({ onClose }) => {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 overflow-y-auto relative scroll-smooth bg-[#050B14]">
+            <main className="flex-1 overflow-y-auto relative scroll-smooth bg-black">
                 {/* Mobile Header */}
-                <div className="md:hidden p-4 border-b border-slate-800 flex justify-between items-center sticky top-0 bg-[#050B14]/90 backdrop-blur z-20">
+                <div className="md:hidden p-4 border-b border-slate-800 flex justify-between items-center sticky top-0 bg-black/90 backdrop-blur z-20">
                     <div className="flex items-center gap-2">
-                        <BookOpen className="w-5 h-5 text-emerald-500" />
+                        <BookOpen className="w-5 h-5 text-brand" />
                         <span className="font-bold">Docs</span>
                     </div>
                     <button onClick={onClose}><X className="w-5 h-5 text-slate-400" /></button>
@@ -86,7 +86,7 @@ const Documentation = ({ onClose }) => {
 
                 <div className="max-w-4xl mx-auto px-8 py-12 md:py-16">
                     <div className="mb-12">
-                        <div className="flex items-center gap-2 text-emerald-500 text-xs font-bold uppercase tracking-widest mb-4">
+                        <div className="flex items-center gap-2 text-brand text-xs font-bold uppercase tracking-widest mb-4">
                             Introduction
                         </div>
                         <h1 className="text-4xl md:text-5xl font-black text-white mb-6 tracking-tighter">Quantitative Manual</h1>
@@ -108,7 +108,7 @@ const Documentation = ({ onClose }) => {
                             </p>
 
                             <div className="relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/50">
-                                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 via-cyan-500 to-blue-500"></div>
+                                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand via-brand-light to-brand-dark"></div>
                                 <div className="p-8">
                                     <h3 className="text-white font-bold mb-6 uppercase tracking-wider text-xs flex items-center gap-2">
                                         <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" /> Execution Pipeline
@@ -116,7 +116,7 @@ const Documentation = ({ onClose }) => {
                                     <ol className="relative border-l border-slate-800 ml-3 space-y-8">
                                         <li className="ml-6">
                                             <span className="absolute -left-1.5 flex h-3 w-3 items-center justify-center rounded-full bg-slate-800 ring-4 ring-[#050B14]">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                                                <div className="w-1.5 h-1.5 rounded-full bg-brand"></div>
                                             </span>
                                             <h4 className="flex items-center mb-1 text-sm font-bold text-white">Ingestion</h4>
                                             <p className="text-sm text-slate-400">Optical capture of raw chart data via singleton OCR engine. Baseline price and ticker extraction.</p>
@@ -149,14 +149,14 @@ const Documentation = ({ onClose }) => {
 
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                 <div className="p-6 bg-slate-900/30 border border-slate-800 rounded-xl hover:border-emerald-500/30 transition-colors">
-                                    <div className="w-8 h-8 bg-emerald-500/10 rounded-lg flex items-center justify-center mb-4">
-                                        <CheckCircle className="w-4 h-4 text-emerald-500" />
+                                    <div className="w-8 h-8 bg-brand/10 rounded-lg flex items-center justify-center mb-4">
+                                        <CheckCircle className="w-4 h-4 text-brand" />
                                     </div>
                                     <h3 className="text-white font-bold mb-2">Optimal Performance</h3>
                                     <p className="text-slate-400 text-sm mb-4 leading-relaxed">The engine is tuned for high-volume, high-liquidity assets where technical patterns are statistically significant.</p>
                                     <div className="flex flex-wrap gap-2">
                                         {['BTC', 'ETH', 'SOL', 'AAPL', 'TSLA', 'NVDA'].map(t => (
-                                            <span key={t} className="px-2 py-1 bg-slate-800 rounded text-[10px] font-mono text-emerald-400 font-bold border border-slate-700">{t}</span>
+                                            <span key={t} className="px-2 py-1 bg-slate-800 rounded text-[10px] font-mono text-brand font-bold border border-slate-700">{t}</span>
                                         ))}
                                     </div>
                                 </div>
@@ -187,17 +187,17 @@ const Documentation = ({ onClose }) => {
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div className="p-5 bg-slate-900/40 border border-slate-800 rounded-xl">
-                                    <div className="text-emerald-500 font-bold text-xs uppercase mb-3 tracking-tighter italic">Next-Candle Rule</div>
+                                    <div className="text-brand font-bold text-xs uppercase mb-3 tracking-tighter italic">Next-Candle Rule</div>
                                     <h4 className="text-white font-bold text-sm mb-2">Temporal Window</h4>
                                     <p className="text-xs text-slate-400 leading-relaxed">The Neural Core (LSTM) minimizes loss by targeting the immediate next candle of your current timeframe.</p>
                                 </div>
                                 <div className="p-5 bg-slate-900/40 border border-slate-800 rounded-xl">
-                                    <div className="text-emerald-500 font-bold text-xs uppercase mb-3 tracking-tighter italic">Setup Decay</div>
+                                    <div className="text-brand font-bold text-xs uppercase mb-3 tracking-tighter italic">Setup Decay</div>
                                     <h4 className="text-white font-bold text-sm mb-2">ATR Logic</h4>
                                     <p className="text-xs text-slate-400 leading-relaxed">Trade protocols are valid for 3-5 candles. If targets aren't reached within this window, the setup is considered neutral.</p>
                                 </div>
                                 <div className="p-5 bg-slate-900/40 border border-slate-800 rounded-xl">
-                                    <div className="text-emerald-500 font-bold text-xs uppercase mb-3 tracking-tighter italic">Alpha Drift</div>
+                                    <div className="text-brand font-bold text-xs uppercase mb-3 tracking-tighter italic">Alpha Drift</div>
                                     <h4 className="text-white font-bold text-sm mb-2">Dynamic Refresh</h4>
                                     <p className="text-xs text-slate-400 leading-relaxed">If market price diverges &gt;1 ATR from the Entry Zone shown in the report, a full system rescan is mandatory.</p>
                                 </div>
@@ -218,7 +218,7 @@ const Documentation = ({ onClose }) => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-2">
-                                        <Share2 className="w-5 h-5 text-emerald-400" />
+                                        <Share2 className="w-5 h-5 text-brand" />
                                         <h3 className="text-white font-bold">Method A: System Share</h3>
                                     </div>
                                     <div className="p-5 bg-slate-900/50 border border-slate-800 rounded-2xl space-y-3">
@@ -231,16 +231,16 @@ const Documentation = ({ onClose }) => {
                                             Open your Gallery/Photos and click "Share".
                                         </div>
                                         <div className="flex gap-3 items-center text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                                            <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center text-slate-950">3</div>
+                                            <div className="w-5 h-5 rounded-full bg-brand flex items-center justify-center text-slate-950">3</div>
                                             Select "Diver AI" from the list.
                                         </div>
-                                        <p className="text-[10px] text-emerald-500/60 font-medium italic mt-2">Requires PWA Installation: Add to Home Screen.</p>
+                                        <p className="text-[10px] text-brand/60 font-medium italic mt-2">Requires PWA Installation: Add to Home Screen.</p>
                                     </div>
                                 </div>
 
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-2">
-                                        <Clipboard className="w-5 h-5 text-blue-400" />
+                                        <Clipboard className="w-5 h-5 text-brand" />
                                         <h3 className="text-white font-bold">Method B: Smart Paste</h3>
                                     </div>
                                     <div className="p-5 bg-slate-900/50 border border-slate-800 rounded-2xl space-y-3">
@@ -253,7 +253,7 @@ const Documentation = ({ onClose }) => {
                                             Switch to Diver AI Terminal.
                                         </div>
                                         <div className="flex gap-3 items-center text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                                            <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white">3</div>
+                                            <div className="w-5 h-5 rounded-full bg-brand flex items-center justify-center text-white">3</div>
                                             Click the Pulse Widget and select "Paste Chart".
                                         </div>
                                     </div>
@@ -281,10 +281,10 @@ const Documentation = ({ onClose }) => {
                                 </div>
                             </div>
 
-                            <div className="bg-blue-500/5 border border-blue-500/20 rounded-2xl p-6">
-                                <h4 className="text-white font-bold text-sm mb-2 flex items-center gap-2"><Smartphone className="w-4 h-4 text-blue-400" /> Pro Tip: Kiwi Browser</h4>
+                            <div className="bg-brand/5 border border-brand/20 rounded-2xl p-6">
+                                <h4 className="text-white font-bold text-sm mb-2 flex items-center gap-2"><Smartphone className="w-4 h-4 text-brand" /> Pro Tip: Kiwi Browser</h4>
                                 <p className="text-sm text-slate-400">
-                                    Android users can run the <strong>Diver AI Chrome Extension</strong> natively by using <a href="https://kiwibrowser.com/" target="_blank" className="text-blue-400 underline">Kiwi Browser</a>. This allows the Floating Widget to appear directly over TradingView on mobile.
+                                    Android users can run the <strong>Diver AI Chrome Extension</strong> natively by using <a href="https://kiwibrowser.com/" target="_blank" className="text-brand underline">Kiwi Browser</a>. This allows the Floating Widget to appear directly over TradingView on mobile.
                                 </p>
                             </div>
                         </section>
@@ -292,7 +292,7 @@ const Documentation = ({ onClose }) => {
                         <footer className="mt-32 pt-12 border-t border-slate-800 pb-12">
                             <div className="flex justify-between items-center text-xs text-slate-500">
                                 <div>Last updated: Jan 12, 2026</div>
-                                <div>© 2026 Diver AI by <a href="https://flisoft.agency" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-500 transition-colors">Fli SOFT</a></div>
+                                <div>© 2026 Diver AI by <a href="https://flisoft.agency" target="_blank" rel="noopener noreferrer" className="hover:text-brand transition-colors">Fli SOFT</a></div>
                             </div>
                         </footer>
                     </div>
@@ -300,17 +300,17 @@ const Documentation = ({ onClose }) => {
             </main>
 
             {/* Right TOC */}
-            <aside className="w-64 border-l border-slate-800 bg-[#050B14] hidden xl:block p-6">
+            <aside className="w-64 border-l border-slate-800 bg-black hidden xl:block p-6">
                 <div className="fixed w-52">
                     <h5 className="text-xs font-bold text-white mb-4 flex items-center gap-2">
-                        <Menu className="w-3 h-3 text-emerald-500" /> On this page
+                        <Menu className="w-3 h-3 text-brand" /> On this page
                     </h5>
                     <div className="space-y-1 relative border-l border-slate-800 ml-1.5">
                         {sections.map(section => (
                             <button
                                 key={section.id}
                                 onClick={() => scrollToSection(section.id)}
-                                className={`block w-full text-left pl-4 py-1 text-xs border-l -ml-[1px] transition-colors ${activeSection === section.id ? 'text-emerald-400 border-emerald-500 font-medium' : 'text-slate-500 border-transparent hover:text-slate-300'}`}
+                                className={`block w-full text-left pl-4 py-1 text-xs border-l -ml-[1px] transition-colors ${activeSection === section.id ? 'text-brand border-brand font-medium' : 'text-slate-500 border-transparent hover:text-slate-300'}`}
                             >
                                 {section.title}
                             </button>
@@ -320,7 +320,7 @@ const Documentation = ({ onClose }) => {
                     <div className="mt-8 pt-8 border-t border-slate-800">
                         <h5 className="text-xs font-bold text-white mb-4">Other Resources</h5>
                         <ul className="space-y-3 text-xs text-slate-500">
-                            <li className="hover:text-emerald-400 cursor-pointer transition-colors">Risk Disclaimer</li>
+                            <li className="hover:text-brand cursor-pointer transition-colors">Risk Disclaimer</li>
                             <li>
                                 <a
                                     href="/diverai-quant-whitepaper.pdf"

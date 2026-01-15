@@ -62,7 +62,7 @@ const AnnouncementBanner = () => {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="relative bg-gradient-to-r from-emerald-600/90 via-emerald-500/90 to-blue-600/90 text-white overflow-hidden"
+            className="relative bg-gradient-to-r from-brand-dark/90 via-brand/90 to-brand-light/90 text-white overflow-hidden"
         >
             <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 mix-blend-overlay pointer-events-none"></div>
             <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-center gap-4 relative">
@@ -221,7 +221,7 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
     };
 
     return (
-        <div className="min-h-screen bg-[#050B14] text-white font-sans selection:bg-emerald-500/30">
+        <div className="min-h-screen bg-black text-white font-sans selection:bg-brand/30">
             <InstallationGuideModal isOpen={showGuide} onClose={() => setShowGuide(false)} platform={platform} />
 
             <main>
@@ -229,22 +229,22 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                 <AnnouncementBanner />
 
                 {/* Institutional Hero Section */}
-                <section className="relative pt-32 pb-40 overflow-hidden bg-[#020617]">
+                <section className="relative pt-20 pb-24 lg:pt-24 lg:pb-32 overflow-hidden bg-black">
                     {/* Architectural Grid Background */}
-                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:40px_40px] opacity-20 pointer-events-none"></div>
-                    <div className="absolute inset-0 bg-gradient-to-b from-[#020617] via-transparent to-[#020617] pointer-events-none"></div>
+                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#111_1px,transparent_1px),linear-gradient(to_bottom,#111_1px,transparent_1px)] bg-[size:40px_40px] opacity-20 pointer-events-none"></div>
+                    <div className="absolute inset-0 bg-black pointer-events-none"></div>
 
                     <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
                         <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
 
                             {/* Copy Column */}
-                            <div className="flex-1 text-center lg:text-left space-y-8">
+                            <div className="flex-1 text-center lg:text-left space-y-6">
                                 <motion.div
                                     initial={{ opacity: 0, x: -20 }}
                                     animate={{ opacity: 1, x: 0 }}
-                                    className="inline-flex items-center gap-3 px-4 py-1.5 bg-slate-900 border border-slate-800 rounded-full"
+                                    className="inline-flex items-center gap-3 px-4 py-1.5 bg-black border border-brand/20 rounded-full"
                                 >
-                                    <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_#10b981]"></div>
+                                    <div className="w-2 h-2 bg-brand rounded-full animate-pulse shadow-[0_0_10px_#f59e0b]"></div>
                                     <span className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">System Operational v5.0</span>
                                 </motion.div>
 
@@ -252,17 +252,17 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.1 }}
-                                    className="text-5xl lg:text-7xl font-bold tracking-tight text-white leading-[1.1]"
+                                    className="text-4xl lg:text-6xl font-bold tracking-tight text-white leading-[1.1]"
                                 >
                                     Institutional <br />
-                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-200 to-slate-500">Market Intelligence.</span>
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-brand-light to-brand">Market Intelligence.</span>
                                 </motion.h1>
 
                                 <motion.p
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.2 }}
-                                    className="text-lg text-slate-400 max-w-xl mx-auto lg:mx-0 leading-relaxed font-light"
+                                    className="text-base text-slate-400 max-w-xl mx-auto lg:mx-0 leading-relaxed font-light"
                                 >
                                     Diver AI provides hedge-fund grade optical analysis and probabilistic forecasting for the modern independent trader. Deploy systematic alpha strategies with precision.
                                 </motion.p>
@@ -273,7 +273,7 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                                     transition={{ delay: 0.3 }}
                                     className="flex flex-wrap items-center justify-center lg:justify-start gap-4"
                                 >
-                                    <button onClick={onStart} className="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg transition-all shadow-lg shadow-emerald-900/20 flex items-center gap-2 text-sm uppercase tracking-wider">
+                                    <button onClick={onStart} className="btn-flame">
                                         Launch Terminal <ArrowRight className="w-4 h-4" />
                                     </button>
                                     <button onClick={onOpenDocs} className="px-8 py-4 bg-transparent border border-slate-700 text-slate-300 font-semibold rounded-lg hover:bg-slate-900/50 transition-colors text-sm uppercase tracking-wider">
@@ -283,13 +283,13 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                                         href="/diverai-quant-whitepaper.pdf"
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="px-8 py-4 bg-slate-900 border border-slate-800 text-emerald-500 font-bold rounded-lg hover:border-emerald-500/50 transition-all text-sm uppercase tracking-widest flex items-center gap-2"
+                                        className="px-8 py-4 bg-slate-950 border border-brand/30 text-brand font-bold rounded-lg hover:border-brand/50 transition-all text-sm uppercase tracking-widest flex items-center gap-2"
                                     >
                                         <FileText className="w-4 h-4" /> White Paper
                                     </a>
                                 </motion.div>
 
-                                <div className="pt-8 flex items-center justify-center lg:justify-start gap-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+                                <div className="pt-4 flex items-center justify-center lg:justify-start gap-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
                                     <div className="text-xs font-mono text-slate-500 flex items-center gap-2"><Lock className="w-3 h-3" /> SOC2 Compliant Arch</div>
                                     <div className="text-xs font-mono text-slate-500 flex items-center gap-2"><ShieldCheck className="w-3 h-3" /> 256-bit Encryption</div>
                                 </div>
@@ -302,11 +302,11 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                                 transition={{ delay: 0.4 }}
                                 className="flex-1 w-full max-w-2xl"
                             >
-                                <div className="rounded-xl bg-[#0B1121] border border-slate-800 shadow-2xl overflow-hidden relative group">
-                                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+                                <div className="rounded-xl bg-black border border-slate-800 shadow-2xl overflow-hidden relative group">
+                                    <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-1000"></div>
 
                                     {/* Glass Header */}
-                                    <div className="h-9 bg-slate-900/80 backdrop-blur border-b border-slate-800 flex items-center justify-between px-4">
+                                    <div className="h-9 bg-black backdrop-blur border-b border-slate-800 flex items-center justify-between px-4">
                                         <div className="flex gap-1.5 opacity-50">
                                             <div className="w-2.5 h-2.5 rounded-full bg-slate-600"></div>
                                             <div className="w-2.5 h-2.5 rounded-full bg-slate-600"></div>
@@ -317,45 +317,45 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
 
                                     {/* Minimalist Data Grid */}
                                     <div className="p-1">
-                                        <div className="grid grid-cols-3 gap-px bg-slate-900/50 border border-slate-800 rounded-lg overflow-hidden">
+                                        <div className="grid grid-cols-3 gap-px bg-black border border-slate-800 rounded-lg overflow-hidden">
                                             {/* Live Ticker Block */}
-                                            <div className="col-span-3 p-6 bg-[#0B1121] border-b border-slate-800 flex justify-between items-end">
+                                            <div className="col-span-3 p-6 bg-black border-b border-slate-800 flex justify-between items-end">
                                                 <div>
                                                     <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Asset Class</div>
                                                     <div className="text-3xl font-bold text-white tracking-tight">BTC/USD</div>
                                                 </div>
                                                 <div className="text-right">
-                                                    <div className="text-2xl font-mono text-emerald-400">$64,241.50</div>
-                                                    <div className="text-xs font-bold text-emerald-600">+1.24% (24h)</div>
+                                                    <div className="text-2xl font-mono text-brand">$64,241.50</div>
+                                                    <div className="text-xs font-bold text-brand-dark">+1.24% (24h)</div>
                                                 </div>
                                             </div>
 
                                             {/* Metric Cells */}
-                                            <div className="p-4 bg-[#0B1121] hover:bg-slate-900/50 transition-colors">
+                                            <div className="p-4 bg-black hover:bg-black-ash transition-colors">
                                                 <div className="text-[9px] text-slate-500 uppercase tracking-wider mb-1">Neural Confidence</div>
-                                                <div className="text-lg font-bold text-emerald-400">94.2%</div>
+                                                <div className="text-lg font-bold text-brand">94.2%</div>
                                             </div>
-                                            <div className="p-4 bg-[#0B1121] hover:bg-slate-900/50 transition-colors">
+                                            <div className="p-4 bg-black hover:bg-black-ash transition-colors">
                                                 <div className="text-[9px] text-slate-500 uppercase tracking-wider mb-1">Volatility (ATR)</div>
                                                 <div className="text-lg font-bold text-white">1.45%</div>
                                             </div>
-                                            <div className="p-4 bg-[#0B1121] hover:bg-slate-900/50 transition-colors">
+                                            <div className="p-4 bg-black hover:bg-black-ash transition-colors">
                                                 <div className="text-[9px] text-slate-500 uppercase tracking-wider mb-1">Sharpe Ratio</div>
                                                 <div className="text-lg font-bold text-blue-400">2.81</div>
                                             </div>
                                         </div>
 
                                         {/* Abstract Chart */}
-                                        <div className="h-48 mt-1 bg-[#0B1121] border border-slate-800 rounded-lg relative overflow-hidden">
+                                        <div className="h-48 mt-1 bg-black border border-slate-800 rounded-lg relative overflow-hidden">
                                             <div className="absolute inset-0 flex items-center justify-center">
                                                 <div className="w-full h-px bg-slate-800/30"></div>
                                             </div>
                                             <svg className="w-full h-full" preserveAspectRatio="none">
-                                                <path d="M0 120 C 100 110, 200 60, 300 80 S 500 40, 600 50" stroke="#10b981" strokeWidth="1.5" fill="none" className="drop-shadow-[0_0_5px_rgba(16,185,129,0.5)]" />
+                                                <path d="M0 120 C 100 110, 200 60, 300 80 S 500 40, 600 50" stroke="#f59e0b" strokeWidth="1.5" fill="none" className="drop-shadow-[0_0_5px_rgba(245,158,11,0.5)]" />
                                                 <path d="M0 120 L 600 50 L 600 200 L 0 200 Z" fill="url(#grad)" opacity="0.1" />
                                                 <defs>
                                                     <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-                                                        <stop offset="0%" stopColor="#10b981" />
+                                                        <stop offset="0%" stopColor="#f59e0b" />
                                                         <stop offset="100%" stopColor="transparent" />
                                                     </linearGradient>
                                                 </defs>
@@ -369,10 +369,10 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                 </section>
 
                 {/* Universal Compatibility Section */}
-                <section className="py-20 border-y border-slate-900 bg-[#020617]">
+                <section className="py-20 border-y border-slate-900 bg-black">
                     <div className="max-w-7xl mx-auto px-6 text-center space-y-12">
                         <div className="space-y-4">
-                            <h2 className="text-sm font-bold text-emerald-500 uppercase tracking-[0.2em]">Universal Integration</h2>
+                            <h2 className="text-sm font-bold text-brand uppercase tracking-[0.2em]">Universal Integration</h2>
                             <p className="text-slate-400 font-medium text-lg max-w-2xl mx-auto">
                                 The Diver AI Neural Extension is available on the Chrome Web Store and is architected to overlay seamlessly on any institutional charting platform.
                             </p>
@@ -390,11 +390,11 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                             </div>
                             {/* CoinGecko */}
                             <div className="flex items-center justify-center gap-3 group">
-                                <span className="text-xl font-black text-slate-300 group-hover:text-emerald-400 transition-colors tracking-tight">CoinGecko</span>
+                                <span className="text-xl font-black text-slate-300 group-hover:text-brand transition-colors tracking-tight">CoinGecko</span>
                             </div>
                             {/* Robinhood */}
                             <div className="flex items-center justify-center gap-3 group">
-                                <span className="text-xl font-black text-slate-300 group-hover:text-emerald-500 transition-colors tracking-tight">Robinhood</span>
+                                <span className="text-xl font-black text-slate-300 group-hover:text-brand-dark transition-colors tracking-tight">Robinhood</span>
                             </div>
 
                         </div>
@@ -406,12 +406,12 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                 </section>
 
                 {/* Features Grid */}
-                <section className="py-32 bg-slate-950 border-t border-slate-900">
+                <section className="py-32 bg-black border-t border-slate-900">
                     <div className="max-w-7xl mx-auto px-6 lg:px-8">
                         <div className="grid md:grid-cols-3 gap-12">
                             <div className="space-y-4">
-                                <div className="w-12 h-12 bg-blue-500/10 rounded-xl border border-blue-500/20 flex items-center justify-center">
-                                    <Activity className="w-6 h-6 text-blue-400" />
+                                <div className="w-12 h-12 bg-brand/10 rounded-xl border border-brand/20 flex items-center justify-center">
+                                    <Activity className="w-6 h-6 text-brand-light" />
                                 </div>
                                 <h3 className="text-xl font-bold text-white">Pattern Recognition</h3>
                                 <p className="text-slate-400 text-sm leading-relaxed">
@@ -419,8 +419,8 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                                 </p>
                             </div>
                             <div className="space-y-4">
-                                <div className="w-12 h-12 bg-emerald-500/10 rounded-xl border border-emerald-500/20 flex items-center justify-center">
-                                    <Cpu className="w-6 h-6 text-emerald-400" />
+                                <div className="w-12 h-12 bg-brand/10 rounded-xl border border-brand/20 flex items-center justify-center">
+                                    <Cpu className="w-6 h-6 text-brand" />
                                 </div>
                                 <h3 className="text-xl font-bold text-white">Probabilistic Forecasting</h3>
                                 <p className="text-slate-400 text-sm leading-relaxed">
@@ -441,18 +441,18 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                 </section>
 
                 {/* Chrome Extension Promo */}
-                <section className="py-32 bg-[#020617] relative overflow-hidden">
+                <section className="py-32 bg-black relative overflow-hidden">
                     {/* Background Glow */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-500/10 blur-[120px] rounded-full pointer-events-none"></div>
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand/10 blur-[120px] rounded-full pointer-events-none"></div>
 
                     <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10 text-center space-y-12">
                         <div className="space-y-6 max-w-3xl mx-auto">
-                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full">
-                                <Chrome className="w-4 h-4 text-blue-400" />
-                                <span className="text-[10px] font-black uppercase tracking-widest text-blue-300">Browser Integration</span>
+                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-brand/10 border border-brand/20 rounded-full">
+                                <Chrome className="w-4 h-4 text-brand" />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-brand-light">Browser Integration</span>
                             </div>
                             <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter">
-                                Seamless <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">Workflow Overlay.</span>
+                                Seamless <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-light to-brand">Workflow Overlay.</span>
                             </h2>
                             <p className="text-slate-400 text-lg leading-relaxed">
                                 Don't switch tabs. The Diver AI Chrome Extension overlays institutional-grade analysis directly onto your existing charts. Compatible with TradingView, Yahoo Finance, CoinGecko, and more.
@@ -464,9 +464,9 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                                 href="https://chromewebstore.google.com/detail/gjmicgddmbghplbdolnmiecjkdfipand?utm_source=item-share-cb"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="group relative inline-flex items-center justify-center gap-3 px-10 py-5 bg-white text-slate-950 font-black rounded-xl hover:bg-slate-200 transition-all shadow-xl shadow-white/10 overflow-hidden"
+                                className="btn-flame group"
                             >
-                                <Chrome className="w-6 h-6 text-blue-600" />
+                                <Chrome className="w-6 h-6 text-white" />
                                 <span className="text-sm uppercase tracking-widest relative z-10">Add to Chrome</span>
                                 <ArrowRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
                             </a>
@@ -482,10 +482,10 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {testimonials.map((t, i) => (
                             <div key={i} className="p-10 bg-slate-900/30 border border-slate-800/50 rounded-2xl space-y-6">
-                                <div className="flex text-emerald-500 gap-1">{[...Array(5)].map((_, j) => <Star key={j} className="w-4 h-4 fill-current" />)}</div>
+                                <div className="flex text-brand gap-1">{[...Array(5)].map((_, j) => <Star key={j} className="w-4 h-4 fill-current" />)}</div>
                                 <p className="text-slate-300 font-medium text-sm leading-relaxed font-mono">"{t.text}"</p>
                                 <div className="flex items-center gap-4 pt-4 border-t border-slate-800/50">
-                                    <div className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center font-black text-emerald-400 text-xs">{t.name[0]}</div>
+                                    <div className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center font-black text-brand-light text-xs">{t.name[0]}</div>
                                     <div><h4 className="text-white font-bold text-sm uppercase tracking-tight">{t.name}</h4><p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{t.role}</p></div>
                                 </div>
                             </div>
@@ -506,7 +506,7 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                                     onClick={() => setActiveFaq(activeFaq === i ? null : i)}
                                     className="w-full px-8 py-6 flex items-center justify-between text-left hover:bg-slate-900 transition-colors group"
                                 >
-                                    <span className="font-bold uppercase tracking-tight text-xs md:text-sm group-hover:text-emerald-400 transition-colors text-slate-300">{faq.q}</span>
+                                    <span className="font-bold uppercase tracking-tight text-xs md:text-sm group-hover:text-brand transition-colors text-slate-300">{faq.q}</span>
                                     <div className={`p-2 rounded-lg bg-slate-950 border border-slate-800 transition-transform duration-300 ${activeFaq === i ? 'rotate-180' : ''}`}>
                                         <ChevronDown className="w-4 h-4 text-slate-500" />
                                     </div>
@@ -531,18 +531,18 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                 <ReviewSection />
 
                 {/* Mobile Command Center */}
-                <section className="py-24 bg-[#0B1121] border-t border-b border-slate-900 overflow-hidden relative">
-                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:40px_40px] opacity-10 pointer-events-none"></div>
+                <section className="py-24 bg-black border-t border-b border-slate-900 overflow-hidden relative">
+                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#111_1px,transparent_1px),linear-gradient(to_bottom,#111_1px,transparent_1px)] bg-[size:40px_40px] opacity-10 pointer-events-none"></div>
                     <div className="max-w-7xl mx-auto px-6 relative z-10">
                         <div className="flex flex-col lg:flex-row items-center justify-between gap-16">
                             <div className="flex-1 space-y-8 text-center lg:text-left">
-                                <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 border border-slate-800 rounded-full">
-                                    <Wifi className="w-4 h-4 text-emerald-500 animate-pulse" />
+                                <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 border border-brand/20 rounded-full">
+                                    <Wifi className="w-4 h-4 text-brand animate-pulse" />
                                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Mobile Uplink Active</span>
                                 </div>
                                 <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter">
                                     Command Center <br />
-                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-blue-500">In Your Pocket.</span>
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-brand-dark">In Your Pocket.</span>
                                 </h2>
                                 <p className="text-slate-400 text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed">
                                     Monitor your positions and receive real-time neural alerts directly on your device. The Diver AI PWA installs as a native application for zero-latency performance.
@@ -550,16 +550,16 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                                 <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
                                     <button
                                         onClick={() => { setPlatform('ios'); setShowGuide(true); }}
-                                        className="px-8 py-4 bg-slate-900 border border-slate-700 hover:border-emerald-500/50 text-white font-bold rounded-xl transition-all flex items-center gap-3 min-w-[200px] justify-center group"
+                                        className="px-8 py-4 bg-slate-900 border border-slate-700 hover:border-brand/50 text-white font-bold rounded-xl transition-all flex items-center gap-3 min-w-[200px] justify-center group"
                                     >
-                                        <Smartphone className="w-5 h-5 text-slate-400 group-hover:text-emerald-400 transition-colors" />
+                                        <Smartphone className="w-5 h-5 text-slate-400 group-hover:text-brand transition-colors" />
                                         <span>Install on iOS</span>
                                     </button>
                                     <button
                                         onClick={() => { setPlatform('android'); setShowGuide(true); }}
-                                        className="px-8 py-4 bg-slate-900 border border-slate-700 hover:border-emerald-500/50 text-white font-bold rounded-xl transition-all flex items-center gap-3 min-w-[200px] justify-center group"
+                                        className="px-8 py-4 bg-slate-900 border border-slate-700 hover:border-brand-dark/50 text-white font-bold rounded-xl transition-all flex items-center gap-3 min-w-[200px] justify-center group"
                                     >
-                                        <Monitor className="w-5 h-5 text-slate-400 group-hover:text-emerald-400 transition-colors" />
+                                        <Monitor className="w-5 h-5 text-slate-400 group-hover:text-brand-dark transition-colors" />
                                         <span>Install on Android</span>
                                     </button>
                                 </div>
@@ -604,11 +604,11 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                                                 </div>
                                                 <div className="h-16 w-full bg-slate-900 rounded-lg overflow-hidden relative">
                                                     <svg className="w-full h-full" preserveAspectRatio="none">
-                                                        <path d="M0 64 C 20 60, 40 30, 60 40 S 100 20, 120 25" stroke="#10b981" strokeWidth="2" fill="none" />
+                                                        <path d="M0 64 C 20 60, 40 30, 60 40 S 100 20, 120 25" stroke="#f59e0b" strokeWidth="2" fill="none" />
                                                         <path d="M0 64 L 120 25 L 120 64 Z" fill="url(#grad2)" opacity="0.2" />
                                                         <defs>
                                                             <linearGradient id="grad2" x1="0" y1="0" x2="0" y2="1">
-                                                                <stop offset="0%" stopColor="#10b981" />
+                                                                <stop offset="0%" stopColor="#f59e0b" />
                                                                 <stop offset="100%" stopColor="transparent" />
                                                             </linearGradient>
                                                         </defs>
@@ -637,7 +637,7 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                 </section>
 
                 {/* Industry Capabilities Section */}
-                <section className="py-24 bg-slate-950 border-t border-slate-900 overflow-hidden">
+                <section className="py-24 bg-black border-t border-slate-900 overflow-hidden">
                     <div className="max-w-7xl mx-auto px-6 lg:px-8">
                         <div className="flex flex-col lg:flex-row items-center gap-16">
                             <div className="flex-1 space-y-8">
@@ -647,22 +647,22 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                                 </div>
                                 <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter">
                                     The Intelligent <br />
-                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-blue-500">Industry Standard.</span>
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-brand-dark">Industry Standard.</span>
                                 </h2>
                                 <p className="text-slate-400 text-lg leading-relaxed">
                                     Diver AI provides a high-fidelity alternative to legacy charting software. By combining Optical Pattern Recognition with a proprietary Bayesian Neural Core, we offer institutional-grade insights that traditional technical analysis misses.
                                 </p>
                                 <ul className="space-y-4">
                                     <li className="flex items-center gap-3 text-slate-300 font-medium">
-                                        <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                                        <CheckCircle2 className="w-5 h-5 text-brand" />
                                         <span>Optical AI vs Standard Trendlines</span>
                                     </li>
                                     <li className="flex items-center gap-3 text-slate-300 font-medium">
-                                        <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                                        <CheckCircle2 className="w-5 h-5 text-brand" />
                                         <span>Probabilistic vs Lagging Indicators</span>
                                     </li>
                                     <li className="flex items-center gap-3 text-slate-300 font-medium">
-                                        <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                                        <CheckCircle2 className="w-5 h-5 text-brand" />
                                         <span>Transparent Alpha vs Black-box Signals</span>
                                     </li>
                                 </ul>
@@ -671,10 +671,10 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                                 <div className="absolute inset-0 bg-blue-500/10 blur-[100px] rounded-full"></div>
                                 <div className="relative rounded-2xl border border-slate-800 bg-slate-900/50 p-6 shadow-2xl overflow-hidden group">
                                     <div className="aspect-video bg-slate-950 rounded-lg flex items-center justify-center border border-slate-800 relative overflow-hidden">
-                                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.1)_0%,transparent_70%)]"></div>
-                                        <Activity className="w-16 h-16 text-emerald-500/20" />
+                                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.1)_0%,transparent_70%)]"></div>
+                                        <Activity className="w-16 h-16 text-brand/20" />
                                         <div className="absolute bottom-4 left-4 right-4 h-1 bg-slate-800 rounded-full overflow-hidden">
-                                            <div className="h-full bg-emerald-500 w-2/3 animate-pulse"></div>
+                                            <div className="h-full bg-brand w-2/3 animate-pulse"></div>
                                         </div>
                                     </div>
                                     <div className="mt-6 space-y-2">
@@ -689,7 +689,7 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
 
                 {/* Final CTA */}
                 <section className="py-24 max-w-7xl mx-auto px-6">
-                    <div className="p-12 md:p-24 bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl relative overflow-hidden text-center space-y-8 group">
+                    <div className="p-12 md:p-24 bg-black border border-slate-800 rounded-3xl relative overflow-hidden text-center space-y-8 group">
                         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 mix-blend-overlay"></div>
 
                         <motion.h2
@@ -705,7 +705,7 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center relative z-10 pt-4">
                             <button
                                 onClick={onStart}
-                                className="px-10 py-5 bg-emerald-500 text-slate-950 font-black rounded-xl hover:bg-emerald-400 transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] flex items-center gap-3 text-sm uppercase tracking-widest active:scale-95"
+                                className="btn-flame"
                             >
                                 Get Started <ArrowRight className="w-5 h-5" />
                             </button>
@@ -725,7 +725,7 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                 )}
             </AnimatePresence>
 
-            <footer className="py-24 border-t border-slate-900 bg-[#020617]">
+            <footer className="py-24 border-t border-slate-900 bg-black">
                 <div className="max-w-7xl mx-auto px-6 lg:px-8">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-12 lg:gap-24 mb-16">
 
@@ -754,12 +754,12 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                         <div className="space-y-6">
                             <h4 className="text-white font-bold text-sm uppercase tracking-widest">Product</h4>
                             <ul className="space-y-4">
-                                <li><button onClick={onStart} className="text-sm text-slate-400 hover:text-emerald-400 transition-colors font-medium">Terminal</button></li>
+                                <li><button onClick={onStart} className="text-sm text-slate-400 hover:text-brand transition-colors font-medium">Terminal</button></li>
                                 <li>
-                                    <a href="https://chromewebstore.google.com/detail/gjmicgddmbghplbdolnmiecjkdfipand?utm_source=item-share-cb" target="_blank" rel="noreferrer" className="text-sm text-slate-400 hover:text-emerald-400 transition-colors font-medium">Chrome Extension</a>
+                                    <a href="https://chromewebstore.google.com/detail/gjmicgddmbghplbdolnmiecjkdfipand?utm_source=item-share-cb" target="_blank" rel="noreferrer" className="text-sm text-slate-400 hover:text-brand transition-colors font-medium">Chrome Extension</a>
                                 </li>
-                                <li><button onClick={() => { setPlatform('ios'); setShowGuide(true); }} className="text-sm text-slate-400 hover:text-emerald-400 transition-colors font-medium">Mobile App</button></li>
-                                <li><button onClick={onOpenPricing} className="text-sm text-slate-400 hover:text-emerald-400 transition-colors font-medium">Pricing</button></li>
+                                <li><button onClick={() => { setPlatform('ios'); setShowGuide(true); }} className="text-sm text-slate-400 hover:text-brand transition-colors font-medium">Mobile App</button></li>
+                                <li><button onClick={onOpenPricing} className="text-sm text-slate-400 hover:text-brand transition-colors font-medium">Pricing</button></li>
                             </ul>
                         </div>
 
@@ -790,13 +790,13 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                         <div className="text-xs text-slate-600 font-mono flex flex-col md:flex-row items-center gap-1 md:gap-4">
                             <span>© 2026 Diver AI. All rights reserved.</span>
                             <span className="hidden md:block text-slate-800">|</span>
-                            <a href="https://flisoft.agency" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-500 transition-colors">
+                            <a href="https://flisoft.agency" target="_blank" rel="noopener noreferrer" className="hover:text-brand transition-colors">
                                 Built & Published by Fli SOFT
                             </a>
                         </div>
                         <div className="flex flex-col gap-4">
                             <div className="flex items-center gap-6">
-                                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                                <div className="w-2 h-2 rounded-full bg-brand animate-pulse"></div>
                                 <span className="text-xs text-slate-500 font-mono uppercase tracking-widest">System Nominal • v2.5</span>
                             </div>
                             <div className="flex flex-wrap gap-x-6 gap-y-2 text-[10px] text-slate-700 font-mono uppercase">

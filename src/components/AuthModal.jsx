@@ -169,9 +169,9 @@ const AuthModal = ({ onClose, onSuccess }) => {
 
     if (isEmailSent) {
         return (
-            <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-300">
-                <div className="bg-slate-900 border border-slate-800 rounded-[32px] w-full max-w-md p-8 relative shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 via-cyan-500 to-blue-500"></div>
+            <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
+                <div className="bg-black border border-slate-800 rounded-[32px] w-full max-w-md p-8 relative shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand via-brand-light to-brand-dark"></div>
 
                     <button onClick={onClose} className="absolute top-6 right-6 text-slate-500 hover:text-white transition-colors">
                         <X className="w-5 h-5" />
@@ -179,8 +179,8 @@ const AuthModal = ({ onClose, onSuccess }) => {
 
                     <div className="text-center space-y-6 pt-4">
                         <div className="relative mx-auto w-20 h-20">
-                            <div className="absolute inset-0 bg-emerald-500/20 rounded-full animate-ping"></div>
-                            <div className="relative bg-emerald-500 rounded-full w-20 h-20 flex items-center justify-center shadow-xl shadow-emerald-500/20">
+                            <div className="absolute inset-0 bg-brand/20 rounded-full animate-ping"></div>
+                            <div className="relative bg-brand rounded-full w-20 h-20 flex items-center justify-center shadow-xl shadow-brand/20">
                                 <Mail className="w-10 h-10 text-slate-950 animate-bounce" />
                             </div>
                         </div>
@@ -189,15 +189,15 @@ const AuthModal = ({ onClose, onSuccess }) => {
                             <h2 className="text-3xl font-black text-white tracking-tighter uppercase">Check Your Inbox</h2>
                             <p className="text-slate-400 text-sm font-medium leading-relaxed">
                                 We've sent a magic link to <br />
-                                <span className="text-emerald-400 font-bold">{email}</span>
+                                <span className="text-brand font-bold">{email}</span>
                             </p>
                         </div>
 
-                        <div className="p-4 bg-slate-950/50 rounded-2xl border border-slate-800/50 text-left">
+                        <div className="p-4 bg-black/50 rounded-2xl border border-slate-800/50 text-left">
                             <p className="text-[11px] text-slate-500 font-bold uppercase tracking-widest leading-relaxed">
-                                <span className="text-emerald-500 mr-2">●</span> Click the link in the email to verify your account.
+                                <span className="text-brand mr-2">●</span> Click the link in the email to verify your account.
                                 <br />
-                                <span className="text-emerald-500 mr-2">●</span> Your app will automatically update once verified.
+                                <span className="text-brand mr-2">●</span> Your app will automatically update once verified.
                             </p>
                         </div>
 
@@ -236,13 +236,13 @@ const AuthModal = ({ onClose, onSuccess }) => {
     }
 
     return (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-300">
-            <div className="bg-slate-900 border border-slate-800 rounded-[32px] w-full max-w-md p-8 relative shadow-2xl animate-in zoom-in-95 duration-300 overflow-hidden">
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
+            <div className="bg-black border border-slate-800 rounded-[32px] w-full max-w-md p-8 relative shadow-2xl animate-in zoom-in-95 duration-300 overflow-hidden">
                 <button onClick={onClose} className="absolute top-6 right-6 text-slate-500 hover:text-white transition-colors"><X className="w-5 h-5" /></button>
 
                 <div className="text-center mb-8 pt-4">
-                    <div className="bg-emerald-500/10 w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <Lock className="w-6 h-6 text-emerald-500" />
+                    <div className="bg-brand/10 w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <Lock className="w-6 h-6 text-brand" />
                     </div>
                     <h2 className="text-3xl font-black text-white mb-2 tracking-tighter uppercase">{isLogin ? 'Quant Access' : 'Secure Entry'}</h2>
                     <p className="text-slate-500 text-xs font-black uppercase tracking-widest leading-none">Terminal Authentication Sequence</p>
@@ -269,7 +269,7 @@ const AuthModal = ({ onClose, onSuccess }) => {
                             <span className="w-full border-t border-slate-800" />
                         </div>
                         <div className="relative flex justify-center text-[10px] uppercase">
-                            <span className="bg-slate-900 px-2 text-slate-500 font-black tracking-widest">Or use encryption key</span>
+                            <span className="bg-black px-2 text-slate-500 font-black tracking-widest">Or use encryption key</span>
                         </div>
                     </div>
                 </div>
@@ -284,7 +284,7 @@ const AuthModal = ({ onClose, onSuccess }) => {
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full bg-slate-950 border border-slate-800 rounded-2xl py-3.5 pl-11 pr-4 text-white focus:outline-none focus:border-emerald-500/50 transition-all font-mono text-sm"
+                                className="w-full bg-black border border-slate-800 rounded-2xl py-3.5 pl-11 pr-4 text-white focus:outline-none focus:border-brand/50 transition-all font-mono text-sm"
                                 placeholder="TRADER@QUANT.AI"
                                 autocomplete="username"
                             />
@@ -299,7 +299,7 @@ const AuthModal = ({ onClose, onSuccess }) => {
                                 required
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="w-full bg-slate-950 border border-slate-800 rounded-2xl py-3.5 pl-11 pr-4 text-white focus:outline-none focus:border-emerald-500/50 transition-all font-mono text-sm"
+                                className="w-full bg-black border border-slate-800 rounded-2xl py-3.5 pl-11 pr-4 text-white focus:outline-none focus:border-brand/50 transition-all font-mono text-sm"
                                 placeholder="••••••••"
                                 autocomplete={isLogin ? "current-password" : "new-password"}
                             />
@@ -308,15 +308,15 @@ const AuthModal = ({ onClose, onSuccess }) => {
 
                     <button
                         disabled={loading}
-                        className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-4 rounded-2xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 text-xs uppercase tracking-[0.2em] shadow-xl shadow-emerald-500/10 active:scale-[0.98]"
+                        className="btn-flame w-full !py-4"
                     >
-                        {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (isLogin ? 'Initialize Session' : 'Create Profile')}
+                        {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : (isLogin ? 'Initialize Session' : 'Create Profile')}
                     </button>
                 </form>
 
                 <div className="mt-8 text-center text-[10px] font-black uppercase tracking-widest text-slate-500">
                     {isLogin ? "Neural uplink missing? " : "Existing profile found? "}
-                    <button onClick={() => setIsLogin(!isLogin)} className="text-emerald-400 hover:text-emerald-300 transition-colors ml-1 underline decoration-2 underline-offset-4">
+                    <button onClick={() => setIsLogin(!isLogin)} className="text-brand hover:text-brand-light transition-colors ml-1 underline decoration-2 underline-offset-4">
                         {isLogin ? 'Register' : 'Login'}
                     </button>
                 </div>

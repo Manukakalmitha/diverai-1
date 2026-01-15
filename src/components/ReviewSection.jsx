@@ -47,17 +47,17 @@ export default function ReviewSection() {
             <div className="flex flex-col md:flex-row items-end justify-between mb-12 gap-6">
                 <div className="space-y-4 text-center md:text-left">
                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 border border-slate-800 rounded-full">
-                        <Star className="w-4 h-4 text-emerald-500 fill-emerald-500" />
+                        <Star className="w-4 h-4 text-brand fill-brand" />
                         <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Community Feedback</span>
                     </div>
                     <h2 className="text-4xl md:text-6xl font-black text-white leading-none tracking-tighter">
-                        Verified by <br /> <span className="bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent italic">Elite Traders.</span>
+                        Verified by <br /> <span className="bg-gradient-to-r from-brand to-brand-light bg-clip-text text-transparent italic">Elite Traders.</span>
                     </h2>
                 </div>
 
                 <button
                     onClick={() => setIsWriting(!isWriting)}
-                    className="px-8 py-4 bg-emerald-600 text-white font-black rounded-xl text-[10px] uppercase tracking-widest hover:bg-emerald-500 transition-all shadow-xl flex items-center gap-3"
+                    className="btn-flame px-8 !py-4"
                 >
                     {isWriting ? "Close Terminal" : <><MessageSquare className="w-4 h-4" /> Share My Experience</>}
                 </button>
@@ -73,7 +73,7 @@ export default function ReviewSection() {
                     >
                         <div className="p-8 md:p-12 bg-slate-900/50 border border-slate-800 rounded-xl shadow-2xl relative">
                             <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none -rotate-12">
-                                <Sparkles className="w-48 h-48 text-emerald-400" />
+                                <Sparkles className="w-48 h-48 text-brand/30" />
                             </div>
 
                             <div className="max-w-2xl mx-auto space-y-8 relative z-10">
@@ -89,7 +89,7 @@ export default function ReviewSection() {
                                             onClick={() => setNewReview({ ...newReview, rating: star })}
                                             className="transition-transform active:scale-90"
                                         >
-                                            <Star className={`w-10 h-10 ${star <= newReview.rating ? 'text-emerald-500 fill-emerald-500' : 'text-slate-800'}`} />
+                                            <Star className={`w-10 h-10 ${star <= newReview.rating ? 'text-brand fill-brand' : 'text-slate-800'}`} />
                                         </button>
                                     ))}
                                 </div>
@@ -99,7 +99,7 @@ export default function ReviewSection() {
                                         value={newReview.text}
                                         onChange={(e) => setNewReview({ ...newReview, text: e.target.value })}
                                         placeholder="Describe your terminal experience... (OCR accuracy, pattern matching, blueprint utility)"
-                                        className="w-full h-40 bg-slate-950 border border-slate-800 rounded-xl p-8 text-white placeholder:text-slate-700 focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/5 outline-none transition-all resize-none"
+                                        className="w-full h-40 bg-black border border-slate-800 rounded-xl p-8 text-white placeholder:text-slate-700 focus:border-brand/50 focus:ring-4 focus:ring-brand/5 outline-none transition-all resize-none"
                                     />
                                     {!user && (
                                         <div className="absolute top-4 right-8 bg-amber-500/10 text-amber-500 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border border-amber-500/20">
@@ -111,9 +111,9 @@ export default function ReviewSection() {
                                 <button
                                     onClick={handleSubmit}
                                     disabled={loading || !newReview.text.trim()}
-                                    className="w-full py-5 bg-emerald-500 text-slate-950 font-black rounded-xl uppercase tracking-[0.2em] text-xs hover:bg-emerald-400 transition-all flex items-center justify-center gap-3 disabled:opacity-50 shadow-xl shadow-emerald-500/20"
+                                    className="btn-flame w-full !py-5"
                                 >
-                                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Send className="w-5 h-5" /> Deploy Feedback</>}
+                                    {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : <><Send className="w-5 h-5" /> Deploy Feedback</>}
                                 </button>
                             </div>
                         </div>
@@ -131,14 +131,14 @@ export default function ReviewSection() {
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex -space-x-1">
                                 {[...Array(5)].map((_, i) => (
-                                    <Star key={i} className={`w-4 h-4 ${i < rev.rating ? 'text-emerald-500 fill-emerald-500' : 'text-slate-800'}`} />
+                                    <Star key={i} className={`w-4 h-4 ${i < rev.rating ? 'text-brand fill-brand' : 'text-slate-800'}`} />
                                 ))}
                             </div>
                             <span className="text-[10px] font-mono text-slate-600">{rev.date}</span>
                         </div>
 
                         <div className="relative mb-6">
-                            <Quote className="absolute -top-4 -left-4 w-8 h-8 text-white/5 group-hover:text-emerald-500/10 transition-colors" />
+                            <Quote className="absolute -top-4 -left-4 w-8 h-8 text-white/5 group-hover:text-brand/10 transition-colors" />
                             <p className="text-slate-300 font-bold leading-relaxed relative z-10 italic">
                                 "{rev.text}"
                             </p>
@@ -155,7 +155,7 @@ export default function ReviewSection() {
                                 </div>
                             </div>
                             {rev.verified && (
-                                <div className="flex items-center gap-1.5 text-[8px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+                                <div className="flex items-center gap-1.5 text-[8px] font-black text-brand uppercase tracking-widest bg-brand/10 px-2.5 py-1 rounded-full border border-brand/20">
                                     <CheckCircle className="w-3 h-3" /> Verified
                                 </div>
                             )}

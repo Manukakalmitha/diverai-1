@@ -12,7 +12,7 @@ const FAQItem = ({ question, answer }) => {
                 onClick={() => setIsOpen(!isOpen)}
                 className="w-full py-6 flex items-center justify-between text-left group"
             >
-                <span className="text-lg font-medium text-slate-200 group-hover:text-emerald-400 transition-colors">{question}</span>
+                <span className="text-lg font-medium text-slate-200 group-hover:text-brand transition-colors">{question}</span>
                 {isOpen ? <ChevronUp className="w-5 h-5 text-slate-500" /> : <ChevronDown className="w-5 h-5 text-slate-500" />}
             </button>
             <AnimatePresence>
@@ -99,11 +99,11 @@ const Pricing = ({ user, profile, onClose, onUpgrade }) => {
     ];
 
     return (
-        <div className="w-full min-h-screen bg-black text-white selection:bg-emerald-500/30">
+        <div className="w-full min-h-screen bg-black text-white selection:bg-brand/30">
             {/* Background elements */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/5 blur-[120px] rounded-full" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/5 blur-[120px] rounded-full" />
+                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand/5 blur-[120px] rounded-full" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-brand-dark/5 blur-[120px] rounded-full" />
             </div>
 
             <div className="relative z-10 max-w-7xl mx-auto px-6 py-20 lg:py-32">
@@ -112,7 +112,7 @@ const Pricing = ({ user, profile, onClose, onUpgrade }) => {
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-widest mb-6"
+                        className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand/10 border border-brand/20 text-brand text-xs font-bold uppercase tracking-widest mb-6"
                     >
                         <Star className="w-3 h-3 fill-current" />
                         Join the Elite
@@ -148,12 +148,12 @@ const Pricing = ({ user, profile, onClose, onUpgrade }) => {
                         >
                             <motion.div
                                 animate={{ x: billingCycle === 'monthly' ? 0 : 28 }}
-                                className="w-5 h-5 bg-emerald-500 rounded-full shadow-lg shadow-emerald-500/20"
+                                className="w-5 h-5 bg-brand rounded-full shadow-lg shadow-brand-dark/20"
                             />
                         </button>
                         <div className="flex items-center gap-2">
                             <span className={`text-sm font-bold tracking-wide transition-colors ${billingCycle === 'annual' ? 'text-white' : 'text-slate-500'}`}>Annual</span>
-                            <span className="bg-emerald-500/10 text-emerald-400 text-[10px] font-black px-2 py-0.5 rounded border border-emerald-500/20 uppercase tracking-wider">
+                            <span className="bg-brand/10 text-brand text-[10px] font-black px-2 py-0.5 rounded border border-brand/20 uppercase tracking-wider">
                                 2 Months Free
                             </span>
                         </div>
@@ -167,7 +167,7 @@ const Pricing = ({ user, profile, onClose, onUpgrade }) => {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.4 }}
-                        className="group relative bg-slate-900/50 border border-slate-800 rounded-[32px] p-10 flex flex-col hover:border-slate-700 transition-all duration-500"
+                        className="group relative bg-black border border-slate-800 rounded-[32px] p-10 flex flex-col hover:border-slate-700 transition-all duration-500"
                     >
                         <div className="mb-8">
                             <h3 className="text-xl font-bold text-slate-300 mb-2">Starter Core</h3>
@@ -180,11 +180,11 @@ const Pricing = ({ user, profile, onClose, onUpgrade }) => {
 
                         <ul className="space-y-4 mb-10 flex-1">
                             <li className="flex gap-4 text-slate-400 text-sm font-medium">
-                                <div className="bg-slate-800 rounded-full p-1"><Check className="w-3.5 h-3.5 text-emerald-500" /></div>
+                                <div className="bg-slate-800 rounded-full p-1"><Check className="w-3.5 h-3.5 text-brand" /></div>
                                 3 Neural scans per day
                             </li>
                             <li className="flex gap-4 text-slate-400 text-sm font-medium">
-                                <div className="bg-slate-800 rounded-full p-1"><Check className="w-3.5 h-3.5 text-emerald-500" /></div>
+                                <div className="bg-slate-800 rounded-full p-1"><Check className="w-3.5 h-3.5 text-brand" /></div>
                                 Standard Optical Engine
                             </li>
                             <li className="flex gap-4 text-slate-400 text-sm font-medium opacity-50">
@@ -205,18 +205,18 @@ const Pricing = ({ user, profile, onClose, onUpgrade }) => {
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.5 }}
-                        className="group relative bg-black-ash border border-emerald-500/30 rounded-[32px] p-10 flex flex-col shadow-2xl shadow-emerald-500/10 overflow-hidden"
+                        className="group relative bg-black-ash border border-brand/30 rounded-[32px] p-10 flex flex-col shadow-2xl shadow-brand-dark/10 overflow-hidden"
                     >
                         {/* Premium Gradient Overlay */}
-                        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent opacity-50" />
-                        <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/10 blur-[100px] rounded-full pointer-events-none" />
+                        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-brand to-transparent opacity-50" />
+                        <div className="absolute -top-40 -right-40 w-80 h-80 bg-brand/10 blur-[100px] rounded-full pointer-events-none" />
 
-                        <div className="absolute top-6 right-6 px-3 py-1 rounded-full bg-emerald-500 text-slate-950 text-[10px] font-black uppercase tracking-widest">
+                        <div className="absolute top-6 right-6 px-3 py-1 rounded-full bg-brand text-slate-950 text-[10px] font-black uppercase tracking-widest">
                             Most Advanced
                         </div>
 
                         <div className="mb-8 relative z-10">
-                            <h3 className="text-xl font-bold text-emerald-400 mb-2 flex items-center gap-2">
+                            <h3 className="text-xl font-bold text-brand mb-2 flex items-center gap-2">
                                 <Zap className="w-6 h-6 fill-current" /> Pro Quant
                             </h3>
                             <div className="flex items-baseline gap-1">
@@ -232,19 +232,19 @@ const Pricing = ({ user, profile, onClose, onUpgrade }) => {
 
                         <ul className="space-y-4 mb-10 flex-1 relative z-10">
                             <li className="flex gap-4 text-white text-sm font-bold">
-                                <div className="bg-emerald-500/20 rounded-full p-1"><Check className="w-3.5 h-3.5 text-emerald-400" /></div>
+                                <div className="bg-brand/20 rounded-full p-1"><Check className="w-3.5 h-3.5 text-brand" /></div>
                                 Unlimited Neural Analysis
                             </li>
                             <li className="flex gap-4 text-slate-200 text-sm font-medium">
-                                <div className="bg-emerald-500/20 rounded-full p-1"><Check className="w-3.5 h-3.5 text-emerald-400" /></div>
+                                <div className="bg-brand/20 rounded-full p-1"><Check className="w-3.5 h-3.5 text-brand" /></div>
                                 Institutional OCR Priority
                             </li>
                             <li className="flex gap-4 text-slate-200 text-sm font-medium">
-                                <div className="bg-emerald-500/20 rounded-full p-1"><Check className="w-3.5 h-3.5 text-emerald-400" /></div>
+                                <div className="bg-brand/20 rounded-full p-1"><Check className="w-3.5 h-3.5 text-brand" /></div>
                                 Pattern Recognition Alpha
                             </li>
                             <li className="flex gap-4 text-slate-200 text-sm font-medium">
-                                <div className="bg-emerald-500/20 rounded-full p-1"><Check className="w-3.5 h-3.5 text-emerald-400" /></div>
+                                <div className="bg-brand/20 rounded-full p-1"><Check className="w-3.5 h-3.5 text-brand" /></div>
                                 PDF Intelligence Reports
                             </li>
                         </ul>
@@ -258,17 +258,16 @@ const Pricing = ({ user, profile, onClose, onUpgrade }) => {
                             <button
                                 onClick={() => handleUpgrade('card')}
                                 disabled={loading || (profile?.subscription_tier === 'pro')}
-                                className="relative w-full py-5 rounded-2xl bg-emerald-500 text-slate-950 font-black hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group/btn active:scale-[0.98] shadow-xl shadow-emerald-500/20 overflow-hidden"
+                                className="btn-flame w-full !py-5"
                             >
-                                <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-700 pointer-events-none" />
                                 {loading && payMethod === 'card' ? (
-                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    <Loader2 className="w-5 h-5 animate-spin mx-auto" />
                                 ) : (
                                     <>
                                         <span className="text-xs uppercase tracking-[0.2em]">
                                             {profile?.subscription_tier === 'pro' ? 'Active Subscription' : 'Upgrade with Card'}
                                         </span>
-                                        <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                                        <ArrowRight className="w-4 h-4" />
                                     </>
                                 )}
                             </button>
@@ -284,15 +283,15 @@ const Pricing = ({ user, profile, onClose, onUpgrade }) => {
                 <div className="mb-32">
                     <div className="text-center mb-12">
                         <h2 className="text-2xl font-bold mb-4">Compare Features</h2>
-                        <div className="w-12 h-1 bg-emerald-500 mx-auto rounded-full" />
+                        <div className="w-12 h-1 bg-brand mx-auto rounded-full" />
                     </div>
-                    <div className="max-w-4xl mx-auto overflow-hidden border border-slate-800 rounded-3xl bg-slate-900/30 backdrop-blur-sm">
+                    <div className="max-w-4xl mx-auto overflow-hidden border border-slate-800 rounded-3xl bg-black backdrop-blur-sm">
                         <table className="w-full border-collapse">
                             <thead>
                                 <tr className="border-b border-slate-800">
                                     <th className="p-6 text-left text-sm font-bold text-slate-400 uppercase tracking-widest">Architecture</th>
                                     <th className="p-6 text-center text-sm font-bold text-slate-400 uppercase tracking-widest">Starter</th>
-                                    <th className="p-6 text-center text-sm font-bold text-emerald-400 uppercase tracking-widest">Pro</th>
+                                    <th className="p-6 text-center text-sm font-bold text-brand uppercase tracking-widest">Pro</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -308,9 +307,9 @@ const Pricing = ({ user, profile, onClose, onUpgrade }) => {
                                         </td>
                                         <td className="p-6 text-center">
                                             {typeof feature.pro === 'string' ? (
-                                                <span className="text-emerald-400 text-sm font-bold">{feature.pro}</span>
+                                                <span className="text-brand text-sm font-bold">{feature.pro}</span>
                                             ) : (
-                                                <Check className="w-5 h-5 text-emerald-500 mx-auto" />
+                                                <Check className="w-5 h-5 text-brand mx-auto" />
                                             )}
                                         </td>
                                     </tr>
@@ -322,23 +321,23 @@ const Pricing = ({ user, profile, onClose, onUpgrade }) => {
 
                 {/* Trust Section */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32">
-                    <div className="p-8 rounded-3xl bg-slate-900/50 border border-slate-800 flex flex-col items-center text-center group hover:bg-slate-800/50 transition-colors">
-                        <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center mb-6 border border-emerald-500/20 group-hover:scale-110 transition-transform">
-                            <Shield className="w-6 h-6 text-emerald-400" />
+                    <div className="p-8 rounded-3xl bg-black border border-slate-800 flex flex-col items-center text-center group hover:bg-slate-800/50 transition-colors">
+                        <div className="w-12 h-12 bg-brand/10 rounded-2xl flex items-center justify-center mb-6 border border-brand/20 group-hover:scale-110 transition-transform">
+                            <Shield className="w-6 h-6 text-brand" />
                         </div>
                         <h4 className="text-lg font-bold mb-2">Secure Infrastructure</h4>
                         <p className="text-sm text-slate-400 leading-relaxed">Enterprise-grade encryption protecting your data and payment information.</p>
                     </div>
-                    <div className="p-8 rounded-3xl bg-slate-900/50 border border-slate-800 flex flex-col items-center text-center group hover:bg-slate-800/50 transition-colors">
-                        <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center mb-6 border border-emerald-500/20 group-hover:scale-110 transition-transform">
-                            <CreditCard className="w-6 h-6 text-emerald-400" />
+                    <div className="p-8 rounded-3xl bg-black border border-slate-800 flex flex-col items-center text-center group hover:bg-slate-800/50 transition-colors">
+                        <div className="w-12 h-12 bg-brand/10 rounded-2xl flex items-center justify-center mb-6 border border-brand/20 group-hover:scale-110 transition-transform">
+                            <CreditCard className="w-6 h-6 text-brand" />
                         </div>
                         <h4 className="text-lg font-bold mb-2">Flexible Billing</h4>
                         <p className="text-sm text-slate-400 leading-relaxed">Upgrade or cancel anytime through our intuitive dashboard. No hidden fees.</p>
                     </div>
-                    <div className="p-8 rounded-3xl bg-slate-900/50 border border-slate-800 flex flex-col items-center text-center group hover:bg-slate-800/50 transition-colors">
-                        <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center mb-6 border border-emerald-500/20 group-hover:scale-110 transition-transform">
-                            <HelpCircle className="w-6 h-6 text-emerald-400" />
+                    <div className="p-8 rounded-3xl bg-black border border-slate-800 flex flex-col items-center text-center group hover:bg-slate-800/50 transition-colors">
+                        <div className="w-12 h-12 bg-brand/10 rounded-2xl flex items-center justify-center mb-6 border border-brand/20 group-hover:scale-110 transition-transform">
+                            <HelpCircle className="w-6 h-6 text-brand" />
                         </div>
                         <h4 className="text-lg font-bold mb-2">Expert Support</h4>
                         <p className="text-sm text-slate-400 leading-relaxed">Direct access to our engineering team for technical queries and integration help.</p>
@@ -359,7 +358,7 @@ const Pricing = ({ user, profile, onClose, onUpgrade }) => {
                 </div>
 
                 {/* Footer CTA */}
-                <div className="mt-32 p-12 rounded-[40px] bg-gradient-to-br from-emerald-500 to-blue-600 relative overflow-hidden text-center group">
+                <div className="mt-32 p-12 rounded-[40px] bg-gradient-to-br from-brand to-brand-dark relative overflow-hidden text-center group">
                     <div className="absolute inset-0 bg-black/10 backdrop-blur-[2px]" />
                     <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent pointer-events-none" />
 
@@ -368,7 +367,7 @@ const Pricing = ({ user, profile, onClose, onUpgrade }) => {
                         <p className="text-white/80 text-lg mb-10 max-w-xl mx-auto font-medium">Join over 1,000+ traders using DiverAI to hunt institutional alpha daily.</p>
                         <button
                             onClick={() => handleUpgrade('card')}
-                            className="bg-white text-slate-950 px-10 py-4 rounded-2xl font-black text-sm uppercase tracking-[0.2em] hover:bg-slate-100 transition-all hover:shadow-2xl hover:shadow-white/20 active:scale-95"
+                            className="btn-flame px-10 !py-4"
                         >
                             Get Started Now
                         </button>

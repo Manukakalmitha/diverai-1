@@ -76,7 +76,7 @@ const ReferralPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-950 text-white p-6 md:p-12 lg:p-24">
+        <div className="min-h-screen bg-black text-white p-6 md:p-12 lg:p-24">
             <Helmet>
                 <title>Referral Program | Diver AI - Give Pro, Get Pro</title>
                 <meta name="description" content="Join the Diver AI referral program. Invite your friends to the ultimate AI trading companion and earn 30 days of Pro for every successful signup." />
@@ -86,38 +86,38 @@ const ReferralPage = () => {
             <div className="max-w-6xl mx-auto space-y-12">
 
                 {/* Hero Section */}
-                <div className="relative overflow-hidden rounded-[40px] bg-gradient-to-br from-blue-600 to-indigo-700 p-8 md:p-16 border border-white/10 shadow-2xl">
+                <div className="relative overflow-hidden rounded-[40px] bg-gradient-to-br from-brand to-brand-dark p-8 md:p-16 border border-white/10 shadow-2xl">
                     <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
                     <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                         <div className="space-y-8">
                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-xs font-bold uppercase tracking-widest text-white backdrop-blur-md">
-                                <Trophy className="w-3 h-3 text-yellow-400" /> Referral Rewards Program
+                                <Trophy className="w-3 h-3 text-brand" /> Referral Rewards Program
                             </div>
                             <h1 className="text-4xl md:text-6xl font-black tracking-tighter leading-none">
                                 GROW THE NETWORK.<br />
-                                <span className="text-blue-100">CLAIM PRO STATUS.</span>
+                                <span className="text-white">CLAIM PRO STATUS.</span>
                             </h1>
-                            <p className="text-lg text-blue-100/80 font-medium max-w-md leading-relaxed">
+                            <p className="text-lg text-white/80 font-medium max-w-md leading-relaxed">
                                 Give your friends 30 days of Pro analysis. Get 30 days of Pro for every successful referral. No limits.
                             </p>
                         </div>
 
-                        <div className="bg-slate-950/40 backdrop-blur-2xl rounded-3xl p-8 border border-white/10 space-y-6">
+                        <div className="bg-black/40 backdrop-blur-2xl rounded-3xl p-8 border border-white/10 space-y-6">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-blue-200 uppercase tracking-widest">Your Referral Link</label>
+                                <label className="text-[10px] font-black text-brand uppercase tracking-widest">Your Referral Link</label>
                                 <div className="flex gap-3">
-                                    <div className="flex-1 bg-black-ash border border-white/10 rounded-xl px-4 py-3 font-mono text-sm text-blue-400 overflow-hidden truncate">
+                                    <div className="flex-1 bg-black-ash border border-white/10 rounded-xl px-4 py-3 font-mono text-sm text-brand overflow-hidden truncate">
                                         {profile?.referral_code ? referralLink : 'Initializing Code...'}
                                     </div>
                                     <button
                                         onClick={handleCopy}
-                                        className="bg-white text-slate-950 p-3 rounded-xl hover:bg-blue-200 transition-all shadow-xl shadow-white/5 active:scale-95"
+                                        className="bg-white text-slate-950 p-3 rounded-xl hover:bg-brand/20 transition-all shadow-xl shadow-white/5 active:scale-95"
                                     >
                                         {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
                                     </button>
                                 </div>
                             </div>
-                            <button className="w-full bg-blue-500 hover:bg-blue-400 text-white font-black py-4 rounded-xl transition-all shadow-xl shadow-blue-500/20 uppercase tracking-widest text-xs flex items-center justify-center gap-2">
+                            <button className="btn-flame w-full !py-4">
                                 <Share2 className="w-4 h-4" /> Share with Traders
                             </button>
                         </div>
@@ -127,15 +127,15 @@ const ReferralPage = () => {
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="bg-black-ash/50 border border-slate-800 rounded-3xl p-8 hover:bg-black-ash transition-all group">
-                        <div className="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center mb-6 border border-blue-500/20 group-hover:scale-110 transition-transform">
-                            <Users className="w-6 h-6 text-blue-400" />
+                        <div className="w-12 h-12 bg-brand/20 rounded-2xl flex items-center justify-center mb-6 border border-brand/20 group-hover:scale-110 transition-transform">
+                            <Users className="w-6 h-6 text-brand" />
                         </div>
                         <div className="text-4xl font-black text-white mb-2">{profile?.referral_count || 0}</div>
                         <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">Active Referrals</div>
                     </div>
                     <div className="bg-black-ash/50 border border-slate-800 rounded-3xl p-8 hover:bg-black-ash transition-all group">
-                        <div className="w-12 h-12 bg-emerald-500/20 rounded-2xl flex items-center justify-center mb-6 border border-emerald-500/20 group-hover:scale-110 transition-transform">
-                            <Zap className="w-6 h-6 text-emerald-400" />
+                        <div className="w-12 h-12 bg-brand/20 rounded-2xl flex items-center justify-center mb-6 border border-brand/20 group-hover:scale-110 transition-transform">
+                            <Zap className="w-6 h-6 text-brand" />
                         </div>
                         <div className="text-4xl font-black text-white mb-2">{(profile?.referral_count || 0) * 30}</div>
                         <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">Days of Pro Gained</div>
@@ -172,7 +172,7 @@ const ReferralPage = () => {
                                                 <div className="text-sm font-bold text-white">{ref.referred_user?.email || 'Anonymous'}</div>
                                             </td>
                                             <td className="px-8 py-4">
-                                                <div className="inline-flex items-center gap-2 px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+                                                <div className="inline-flex items-center gap-2 px-2 py-1 rounded-lg bg-brand/10 border border-brand/20 text-[10px] font-bold text-brand uppercase tracking-wider">
                                                     <Check className="w-3 h-3" /> Verified
                                                 </div>
                                             </td>
@@ -180,7 +180,7 @@ const ReferralPage = () => {
                                                 {new Date(ref.created_at).toLocaleDateString()}
                                             </td>
                                             <td className="px-8 py-4 text-right">
-                                                <div className="text-sm font-black text-blue-400">+30D PRO</div>
+                                                <div className="text-sm font-black text-brand">+30D PRO</div>
                                             </td>
                                         </tr>
                                     ))}
@@ -190,7 +190,7 @@ const ReferralPage = () => {
                             <div className="p-16 text-center space-y-4 opacity-50">
                                 <Users className="w-12 h-12 text-slate-600 mx-auto" />
                                 <p className="text-slate-500 font-bold max-w-xs mx-auto">No referrals detected yet. Start sharing your link to gain rewards.</p>
-                                <button onClick={handleCopy} className="text-blue-500 hover:text-blue-400 font-black uppercase text-xs tracking-widest">Copy link now <ArrowRight className="w-3 h-3 inline ml-1" /></button>
+                                <button onClick={handleCopy} className="text-brand hover:text-brand-light font-black uppercase text-xs tracking-widest">Copy link now <ArrowRight className="w-3 h-3 inline ml-1" /></button>
                             </div>
                         )}
                     </div>

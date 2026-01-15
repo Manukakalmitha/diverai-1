@@ -7,7 +7,7 @@ const WhatIsDiverAI = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen bg-black text-slate-200 font-sans selection:bg-blue-500/30 pt-20 pb-20">
+        <div className="min-h-screen bg-black text-slate-200 font-sans selection:bg-brand/30 pt-20 pb-20">
             <Helmet>
                 <title>What is Diver AI? | Understanding OPR & Neural Engine</title>
                 <meta name="description" content="Learn about Diver AI's Institutional-grade trading intelligence. Explore Optical Pattern Recognition and Bayesian Neural Networks." />
@@ -16,11 +16,11 @@ const WhatIsDiverAI = () => {
 
                 {/* Header */}
                 <header className="mb-16 text-center space-y-6">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full text-blue-400 text-xs font-semibold uppercase tracking-widest">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand/10 border border-brand/20 rounded-full text-brand text-xs font-semibold uppercase tracking-widest">
                         <Activity className="w-4 h-4" /> Official Definition
                     </div>
                     <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
-                        What Is <span className="text-blue-500">Diver AI</span>?
+                        What Is <span className="text-brand">Diver AI</span>?
                     </h1>
                     <p className="text-xl text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed">
                         AI Trading & Optical Pattern Recognition Explained
@@ -31,9 +31,9 @@ const WhatIsDiverAI = () => {
 
                     {/* What It Is */}
                     <section className="bg-black-ash border border-slate-800 rounded-2xl p-8 md:p-12 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-20 bg-blue-500/5 rounded-full blur-[80px]"></div>
+                        <div className="absolute top-0 right-0 p-20 bg-brand/5 rounded-full blur-[80px]"></div>
                         <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                            <Zap className="w-6 h-6 text-blue-500" />
+                            <Zap className="w-6 h-6 text-brand" />
                             What Diver AI Is
                         </h2>
                         <p className="text-lg text-slate-300 leading-relaxed mb-6">
@@ -64,15 +64,15 @@ const WhatIsDiverAI = () => {
 
                     {/* How It Works */}
                     <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="bg-black-ash border border-slate-800 rounded-2xl p-8 hover:border-blue-500/30 transition-colors">
-                            <Search className="w-8 h-8 text-blue-500 mb-6" />
+                        <div className="bg-black-ash border border-slate-800 rounded-2xl p-8 hover:border-brand/30 transition-colors">
+                            <Search className="w-8 h-8 text-brand mb-6" />
                             <h3 className="text-xl font-bold text-white mb-4">1. Optical Scan</h3>
                             <p className="text-slate-400 leading-relaxed">
                                 The engine takes a snapshot of your chart and uses Computer Vision to identify geometric structures (Head & Shoulders, Flags, Wedges) and key support/resistance zones.
                             </p>
                         </div>
-                        <div className="bg-black-ash border border-slate-800 rounded-2xl p-8 hover:border-blue-500/30 transition-colors">
-                            <Target className="w-8 h-8 text-blue-500 mb-6" />
+                        <div className="bg-black-ash border border-slate-800 rounded-2xl p-8 hover:border-brand/30 transition-colors">
+                            <Target className="w-8 h-8 text-brand mb-6" />
                             <h3 className="text-xl font-bold text-white mb-4">2. Probability Fusion</h3>
                             <p className="text-slate-400 leading-relaxed">
                                 It compares the current pattern against 10 years of historical data (1M+ scenarios) to output a <strong>probabilistic forecast</strong> (e.g., "78% chance of upward breakout").
@@ -84,15 +84,15 @@ const WhatIsDiverAI = () => {
                     <section className="bg-black-ash border border-slate-800 rounded-2xl p-8 md:p-12 text-center">
                         <h2 className="text-2xl font-bold text-white mb-6">Who Is Diver AI For?</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
-                            <div className="p-6 bg-slate-950 rounded-xl border border-slate-800">
+                            <div className="p-6 bg-black rounded-xl border border-slate-800">
                                 <h4 className="font-bold text-white mb-2">Day Traders</h4>
                                 <p className="text-sm text-slate-400">For rapid confirmation of scalping setups.</p>
                             </div>
-                            <div className="p-6 bg-slate-950 rounded-xl border border-slate-800">
+                            <div className="p-6 bg-black rounded-xl border border-slate-800">
                                 <h4 className="font-bold text-white mb-2">Swing Traders</h4>
                                 <p className="text-sm text-slate-400">To find high-timeframe structural biases.</p>
                             </div>
-                            <div className="p-6 bg-slate-950 rounded-xl border border-slate-800">
+                            <div className="p-6 bg-black rounded-xl border border-slate-800">
                                 <h4 className="font-bold text-white mb-2">Crypto Investors</h4>
                                 <p className="text-sm text-slate-400">To navigate volatile altcoin markets with data.</p>
                             </div>
@@ -122,7 +122,7 @@ const WhatIsDiverAI = () => {
                 <footer className="mt-24 text-center">
                     <button
                         onClick={() => navigate('/')}
-                        className="px-8 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-blue-500/20"
+                        className="btn-flame px-8 !py-3.5"
                     >
                         Explore The Platform
                     </button>

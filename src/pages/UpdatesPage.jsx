@@ -197,7 +197,7 @@ const updates = [
 const UpdatesPage = () => {
 
     return (
-        <div className="min-h-screen bg-[#050B14] text-white">
+        <div className="min-h-screen bg-black text-white">
             <Helmet>
                 <title>Product Updates & Changelog | Diver AI</title>
                 <meta name="description" content="Stay up to date with the latest Diver AI features, improvements, and fixes. See what's new in the AI trading platform." />
@@ -205,11 +205,11 @@ const UpdatesPage = () => {
                 <meta property="og:description" content="Latest features and improvements to the Diver AI trading analysis platform." />
             </Helmet>
             {/* Header */}
-            <div className="border-b border-slate-800 bg-[#020617]">
+            <div className="border-b border-slate-800 bg-black">
                 <div className="max-w-4xl mx-auto px-6 py-12">
                     <Link
                         to="/"
-                        className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-emerald-400 transition-colors mb-6"
+                        className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-brand transition-colors mb-6"
                     >
                         <ArrowLeft className="w-4 h-4" /> Back to Home
                     </Link>
@@ -218,9 +218,9 @@ const UpdatesPage = () => {
                         animate={{ opacity: 1, y: 0 }}
                         className="space-y-4"
                     >
-                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
-                            <Sparkles className="w-3 h-3 text-emerald-400" />
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-300">What's New</span>
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand/10 border border-brand/20 rounded-full">
+                            <Sparkles className="w-3 h-3 text-brand" />
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-brand">What's New</span>
                         </div>
                         <h1 className="text-4xl md:text-5xl font-black tracking-tight">
                             Product Updates
@@ -246,13 +246,13 @@ const UpdatesPage = () => {
                         <div className="flex flex-wrap items-center gap-4 mb-8">
                             <div className="flex items-center gap-3">
                                 <div className={`px-3 py-1.5 rounded-lg font-mono text-sm font-bold ${update.isLatest
-                                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                    ? 'bg-brand/20 text-brand border border-brand/30'
                                     : 'bg-slate-800 text-slate-300 border border-slate-700'
                                     }`}>
                                     {update.version}
                                 </div>
                                 {update.isLatest && (
-                                    <span className="px-2 py-0.5 bg-emerald-500 text-slate-950 text-[10px] font-black uppercase tracking-wider rounded-full">
+                                    <span className="px-2 py-0.5 bg-brand text-slate-950 text-[10px] font-black uppercase tracking-wider rounded-full">
                                         Latest
                                     </span>
                                 )}
@@ -274,19 +274,19 @@ const UpdatesPage = () => {
                                 >
                                     <div className="flex gap-4">
                                         <div className={`shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${change.type === 'feature'
-                                            ? 'bg-emerald-500/10 text-emerald-400'
-                                            : 'bg-blue-500/10 text-blue-400'
+                                            ? 'bg-brand/10 text-brand'
+                                            : 'bg-brand-dark/10 text-brand-dark'
                                             }`}>
                                             <change.icon className="w-5 h-5" />
                                         </div>
                                         <div className="space-y-1">
                                             <div className="flex items-center gap-2">
-                                                <h3 className="font-bold text-white group-hover:text-emerald-400 transition-colors">
+                                                <h3 className="font-bold text-white group-hover:text-brand transition-colors">
                                                     {change.title}
                                                 </h3>
                                                 <span className={`px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded ${change.type === 'feature'
-                                                    ? 'bg-emerald-500/10 text-emerald-400'
-                                                    : 'bg-blue-500/10 text-blue-400'
+                                                    ? 'bg-brand/10 text-brand'
+                                                    : 'bg-brand-dark/10 text-brand-dark'
                                                     }`}>
                                                     {change.type}
                                                 </span>
@@ -309,14 +309,14 @@ const UpdatesPage = () => {
             </div>
 
             {/* CTA Section */}
-            <div className="border-t border-slate-800 bg-[#020617]">
+            <div className="border-t border-slate-800 bg-black">
                 <div className="max-w-4xl mx-auto px-6 py-16 text-center space-y-6">
                     <h3 className="text-2xl font-bold text-white">Ready to try the latest features?</h3>
                     <p className="text-slate-400">Experience institutional-grade market analysis with the enhanced Optical Engine.</p>
                     <div className="flex flex-wrap justify-center gap-4">
                         <Link
                             to="/analysis"
-                            className="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg transition-all flex items-center gap-2"
+                            className="btn-flame px-8 !py-4"
                         >
                             Launch Terminal <Rocket className="w-4 h-4" />
                         </Link>

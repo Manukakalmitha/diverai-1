@@ -104,8 +104,6 @@
             "description": "View live market prices",
             "tag": "ticker",
             "template": "ticker",
-            "ms_ac_template": "widgets/ticker_template.json",
-            "data": "widgets/ticker_data.json",
             "type": "text/html",
             "start_url": "/widget_ticker.html",
             "icons": [

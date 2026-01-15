@@ -3,8 +3,8 @@
 # min_api: 21
 # common_typos_disable
 # {"id":"com.android.tools.r8.mapping","version":"2.2"}
-# pg_map_id: 49f4a16
-# pg_map_hash: SHA-256 49f4a16f772f1770fc256a715e3c6c11e5f5856ff9bdb5601d04dc8df6ebe64a
+# pg_map_id: e8ebee8
+# pg_map_hash: SHA-256 e8ebee8221a67c3e959d98ec5be5a3a3dcc2701cbc5a5507ddb9d1bb60aaf215
 agency.flisoft.diverai.twa.Application -> agency.flisoft.diverai.twa.Application:
 # {"id":"sourceFile","fileName":"Application.java"}
     1:4:void <init>():20:20 -> <init>
@@ -24,67 +24,71 @@ agency.flisoft.diverai.twa.LauncherActivity -> agency.flisoft.diverai.twa.Launch
 agency.flisoft.diverai.twa.MarketTickerWidget -> agency.flisoft.diverai.twa.MarketTickerWidget:
 # {"id":"sourceFile","fileName":"MarketTickerWidget.java"}
     1:4:void <init>():15:15 -> <init>
-    3:6:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):41:41 -> a
-    7:11:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):42:42 -> a
-    12:18:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):47:47 -> a
-    19:24:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):48:48 -> a
-    25:31:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):49:49 -> a
-    32:34:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):50:50 -> a
-    35:37:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):51:51 -> a
-    38:44:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):52:52 -> a
-    45:52:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):54:54 -> a
-    53:66:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):55:55 -> a
-    67:71:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):56:56 -> a
-    72:77:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):58:58 -> a
-    78:84:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):59:59 -> a
-    85:87:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):61:61 -> a
-    88:96:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):63:63 -> a
-    97:102:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):64:64 -> a
-    103:106:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):65:65 -> a
-    107:112:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):66:66 -> a
-    113:120:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):67:67 -> a
-    121:151:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):69:69 -> a
-    152:159:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):71:71 -> a
-    160:195:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):72:72 -> a
-    196:226:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):75:75 -> a
-    227:229:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):81:81 -> a
-    230:240:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):85:85 -> a
-    241:245:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):86:86 -> a
-    246:250:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):87:87 -> a
-    251:255:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):88:88 -> a
-    256:260:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):91:91 -> a
-    261:269:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):92:92 -> a
-    270:273:void lambda$updateAppWidget$0(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):94:94 -> a
-    1:11:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):25:25 -> b
-    12:21:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):28:28 -> b
-    22:25:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):29:29 -> b
-    26:30:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):30:30 -> b
-    31:37:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):33:33 -> b
-    38:42:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):34:34 -> b
-    43:51:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):35:35 -> b
-    52:55:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):36:36 -> b
-    56:60:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):37:37 -> b
-    61:73:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):40:40 -> b
-    74:76:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):96:96 -> b
-    77:83:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):99:99 -> b
-    84:90:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):100:100 -> b
-    91:94:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):101:101 -> b
-    1:6:void onUpdate(android.content.Context,android.appwidget.AppWidgetManager,int[]):19:19 -> onUpdate
-    7:13:void onUpdate(android.content.Context,android.appwidget.AppWidgetManager,int[]):20:20 -> onUpdate
+    1:6:void lambda$onUpdate$0(int[],android.content.Context,android.appwidget.AppWidgetManager,android.content.BroadcastReceiver$PendingResult):24:24 -> a
+    7:16:void lambda$onUpdate$0(int[],android.content.Context,android.appwidget.AppWidgetManager,android.content.BroadcastReceiver$PendingResult):25:25 -> a
+    17:20:void lambda$onUpdate$0(int[],android.content.Context,android.appwidget.AppWidgetManager,android.content.BroadcastReceiver$PendingResult):30:30 -> a
+    21:23:void lambda$onUpdate$0(int[],android.content.Context,android.appwidget.AppWidgetManager,android.content.BroadcastReceiver$PendingResult):28:28 -> a
+    24:30:void lambda$onUpdate$0(int[],android.content.Context,android.appwidget.AppWidgetManager,android.content.BroadcastReceiver$PendingResult):30:30 -> a
+    31:31:void lambda$onUpdate$0(int[],android.content.Context,android.appwidget.AppWidgetManager,android.content.BroadcastReceiver$PendingResult) -> a
+    8:20:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):36:36 -> b
+    21:30:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):39:39 -> b
+    31:34:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):40:40 -> b
+    35:39:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):41:41 -> b
+    40:46:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):44:44 -> b
+    47:51:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):45:45 -> b
+    52:60:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):46:46 -> b
+    61:64:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):47:47 -> b
+    65:69:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):48:48 -> b
+    70:76:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):51:51 -> b
+    77:83:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):52:52 -> b
+    84:89:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):53:53 -> b
+    90:96:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):62:62 -> b
+    97:102:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):63:63 -> b
+    103:109:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):64:64 -> b
+    110:112:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):65:65 -> b
+    113:115:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):66:66 -> b
+    116:122:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):67:67 -> b
+    123:130:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):69:69 -> b
+    131:144:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):70:70 -> b
+    145:149:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):71:71 -> b
+    150:155:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):73:73 -> b
+    156:162:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):74:74 -> b
+    163:165:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):76:76 -> b
+    166:174:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):78:78 -> b
+    175:180:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):79:79 -> b
+    181:184:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):80:80 -> b
+    185:190:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):81:81 -> b
+    191:198:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):82:82 -> b
+    199:229:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):84:84 -> b
+    230:237:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):86:86 -> b
+    238:273:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):87:87 -> b
+    274:304:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):90:90 -> b
+    305:307:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):79:79 -> b
+    308:310:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):95:95 -> b
+    311:313:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):98:98 -> b
+    314:315:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):99:99 -> b
+    316:326:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):103:103 -> b
+    327:331:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):104:104 -> b
+    332:336:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):105:105 -> b
+    337:341:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):106:106 -> b
+    342:346:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):109:109 -> b
+    347:351:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):110:110 -> b
+    352:355:void updateAppWidget(android.content.Context,android.appwidget.AppWidgetManager,int):112:112 -> b
+    1:4:void onUpdate(android.content.Context,android.appwidget.AppWidgetManager,int[]):20:20 -> onUpdate
+    5:14:void onUpdate(android.content.Context,android.appwidget.AppWidgetManager,int[]):22:22 -> onUpdate
+    15:18:void onUpdate(android.content.Context,android.appwidget.AppWidgetManager,int[]):32:32 -> onUpdate
 agency.flisoft.diverai.twa.MarketTickerWidget$$ExternalSyntheticLambda0 -> a.a:
 # {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
 # {"id":"com.android.tools.r8.synthesized"}
-    android.content.Context agency.flisoft.diverai.twa.MarketTickerWidget$$InternalSyntheticLambda$1$352ac47c92ca82bb7378dde9a9f2c91e3d0086ff4ac6ee6396fa601f9075cc96$0.f$0 -> a
+    int[] agency.flisoft.diverai.twa.MarketTickerWidget$$InternalSyntheticLambda$1$11316698d4f62c9fa0c91d521710d0fca26395b4ecbca7ccc2a650c176e86d4a$0.f$0 -> a
       # {"id":"com.android.tools.r8.synthesized"}
-    android.app.PendingIntent agency.flisoft.diverai.twa.MarketTickerWidget$$InternalSyntheticLambda$1$352ac47c92ca82bb7378dde9a9f2c91e3d0086ff4ac6ee6396fa601f9075cc96$0.f$1 -> b
+    android.content.Context agency.flisoft.diverai.twa.MarketTickerWidget$$InternalSyntheticLambda$1$11316698d4f62c9fa0c91d521710d0fca26395b4ecbca7ccc2a650c176e86d4a$0.f$1 -> b
       # {"id":"com.android.tools.r8.synthesized"}
-    android.app.PendingIntent agency.flisoft.diverai.twa.MarketTickerWidget$$InternalSyntheticLambda$1$352ac47c92ca82bb7378dde9a9f2c91e3d0086ff4ac6ee6396fa601f9075cc96$0.f$2 -> c
+    android.appwidget.AppWidgetManager agency.flisoft.diverai.twa.MarketTickerWidget$$InternalSyntheticLambda$1$11316698d4f62c9fa0c91d521710d0fca26395b4ecbca7ccc2a650c176e86d4a$0.f$2 -> c
       # {"id":"com.android.tools.r8.synthesized"}
-    android.appwidget.AppWidgetManager agency.flisoft.diverai.twa.MarketTickerWidget$$InternalSyntheticLambda$1$352ac47c92ca82bb7378dde9a9f2c91e3d0086ff4ac6ee6396fa601f9075cc96$0.f$3 -> d
+    android.content.BroadcastReceiver$PendingResult agency.flisoft.diverai.twa.MarketTickerWidget$$InternalSyntheticLambda$1$11316698d4f62c9fa0c91d521710d0fca26395b4ecbca7ccc2a650c176e86d4a$0.f$3 -> d
       # {"id":"com.android.tools.r8.synthesized"}
-    int agency.flisoft.diverai.twa.MarketTickerWidget$$InternalSyntheticLambda$1$352ac47c92ca82bb7378dde9a9f2c91e3d0086ff4ac6ee6396fa601f9075cc96$0.f$4 -> e
-      # {"id":"com.android.tools.r8.synthesized"}
-    1:1:void a.MarketTickerWidget$$ExternalSyntheticLambda0.<init>(android.content.Context,android.app.PendingIntent,android.app.PendingIntent,android.appwidget.AppWidgetManager,int):0:0 -> <init>
+    1:1:void a.MarketTickerWidget$$ExternalSyntheticLambda0.<init>(int[],android.content.Context,android.appwidget.AppWidgetManager,android.content.BroadcastReceiver$PendingResult):0:0 -> <init>
       # {"id":"com.android.tools.r8.synthesized"}
     1:1:void a.MarketTickerWidget$$ExternalSyntheticLambda0.run():0:0 -> run
       # {"id":"com.android.tools.r8.synthesized"}

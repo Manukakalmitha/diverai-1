@@ -18,7 +18,7 @@ const ArticlePage = () => {
     }
 
     return (
-        <div className="min-h-screen bg-black text-slate-200 font-sans selection:bg-blue-500/30 pt-24 pb-20">
+        <div className="min-h-screen bg-black text-slate-200 font-sans selection:bg-brand/30 pt-24 pb-20">
             <Helmet>
                 <title>{`${article.title} | Diver AI Insights`}</title>
                 <meta name="description" content={article.summary} />
@@ -30,7 +30,7 @@ const ArticlePage = () => {
 
                 <button
                     onClick={() => navigate('/articles')}
-                    className="flex items-center gap-2 text-blue-500 font-bold uppercase tracking-widest text-xs mb-8 hover:text-blue-400 transition-colors"
+                    className="flex items-center gap-2 text-brand font-bold uppercase tracking-widest text-xs mb-8 hover:text-brand-light transition-colors"
                 >
                     <ArrowLeft className="w-4 h-4" /> Back to Articles
                 </button>
@@ -56,7 +56,7 @@ const ArticlePage = () => {
                 </header>
 
                 <div
-                    className="prose prose-invert prose-lg max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-blue-400 hover:prose-a:text-blue-300 prose-img:rounded-xl"
+                    className="prose prose-invert prose-lg max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-brand hover:prose-a:text-brand-light prose-img:rounded-xl"
                     dangerouslySetInnerHTML={{ __html: article.content }}
                 />
 
@@ -68,7 +68,7 @@ const ArticlePage = () => {
                         </p>
                         <button
                             onClick={() => navigate('/analysis')}
-                            className="px-8 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-blue-500/20"
+                            className="btn-flame px-8 !py-3.5"
                         >
                             Launch Terminal
                         </button>

@@ -41,15 +41,76 @@ body,
 #root {
   height: 100%;
   margin: 0;
-  background-color: #000000;
-  /* Pure Black */
+  background-color: #000000 !important;
+  color: white;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
+
+  --brand: #f59e0b;
+  --brand-light: #fb923c;
+  --brand-dark: #ea580c;
+  --flame: #ef4444;
+  --flame-dark: #b91c1c;
+  --flame-deep: #7f1d1d;
+}
+
+@layer components {
+  .btn-flame {
+    @apply relative overflow-hidden bg-gradient-to-br from-flame-deep via-flame-dark to-flame text-white font-black transition-all duration-300 shadow-xl shadow-flame-deep/40 hover:shadow-flame-dark/60 hover:scale-[1.03] active:scale-95 px-6 py-4 rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest text-[11px];
+  }
+
+  .btn-flame::after {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-t from-orange-500/20 to-transparent opacity-0 transition-opacity duration-300 pointer-events-none;
+  }
+
+  .btn-flame:hover::after {
+    @apply opacity-100;
+  }
+}
+
+.bg-black-ash {
+  background-color: #000000 !important;
+}
+
+.bg-ash {
+  background-color: #050505 !important;
+}
+
+.text-brand {
+  color: var(--brand);
+}
+
+.bg-brand {
+  background-color: var(--brand);
+}
+
+.border-brand {
+  border-color: var(--brand);
+}
+
+::selection {
+  background-color: rgba(245, 158, 11, 0.3);
+  color: white;
+}
+
+.brand-gradient {
+  background: linear-gradient(135deg, #fb923c, #f59e0b, #ea580c);
+}
+
+.text-brand-gradient {
+  background: linear-gradient(135deg, #fb923c, #f59e0b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 /* Print-specific styles for PDF export */
 @media print {
-  html, body, #root {
+
+  html,
+  body,
+  #root {
     background-color: white !important;
     color: black !important;
     -webkit-print-color-adjust: exact;
@@ -57,8 +118,10 @@ body,
   }
 
   /* Hide non-essential UI elements */
-  nav, header, footer, 
-  .sidebar, 
+  nav,
+  header,
+  footer,
+  .sidebar,
   [class*="animate-"],
   button:not(.print-visible),
   .print\\:hidden {
@@ -66,7 +129,7 @@ body,
   }
 
   /* Force white background for dark elements */
-  [class*="bg-slate"], 
+  [class*="bg-slate"],
   [class*="bg-\\["] {
     background-color: white !important;
   }
@@ -93,7 +156,9 @@ body,
   }
 
   /* Avoid page breaks inside cards */
-  .grid, .rounded-lg, table {
+  .grid,
+  .rounded-lg,
+  table {
     page-break-inside: avoid;
   }
 

@@ -43,12 +43,12 @@ const Sparkline = ({ data, color = 'emerald' }) => {
         <svg className="w-12 h-4 overflow-visible" viewBox="0 0 48 16">
             <polyline
                 fill="none"
-                stroke={color === 'emerald' ? '#10b981' : '#f43f5e'}
+                stroke={color === 'brand' ? '#f59e0b' : (color === 'emerald' ? '#10b981' : '#f43f5e')}
                 strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 points={points}
-                className="drop-shadow-[0_0_3px_rgba(16,185,129,0.5)]"
+                className={`drop-shadow-[0_0_3px_${color === 'brand' ? 'rgba(245,158,11,0.5)' : (color === 'emerald' ? 'rgba(16,185,129,0.5)' : 'rgba(244,63,94,0.5)')}]`}
             />
         </svg>
     );
@@ -89,7 +89,7 @@ const SentimentGauge = ({ probability, direction }) => {
     const percentage = probability * 100;
     const isBull = direction.includes('Bullish');
     const isBear = direction.includes('Bearish');
-    const color = isBull ? 'emerald' : (isBear ? 'rose' : 'blue');
+    const color = isBull ? 'brand' : (isBear ? 'rose' : 'blue');
 
     const markers = [
         { label: 'Panic', pos: 10 },
@@ -153,32 +153,32 @@ const ScanningHUD = ({ status }) => {
     }, []);
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-[500px] relative overflow-hidden bg-ash rounded-[40px] border border-slate-900 shadow-2xl">
+        <div className="flex flex-col items-center justify-center min-h-[500px] relative overflow-hidden bg-black rounded-[40px] border border-slate-900 shadow-2xl">
             {/* Grid Overlay */}
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#262626_1px,transparent_1px),linear-gradient(to_bottom,#262626_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-20" />
 
             <div className="relative z-10 flex flex-col items-center">
                 <div className="relative w-32 h-32 mb-12">
-                    <div className="absolute inset-0 border-2 border-blue-500/20 rounded-full animate-[ping_3s_linear_infinite]" />
-                    <div className="absolute inset-0 border border-emerald-500/40 rounded-full rotate-45" />
-                    <div className="absolute inset-2 border border-t-emerald-400 border-l-transparent border-r-transparent border-b-transparent rounded-full animate-spin [animation-duration:1s]" />
+                    <div className="absolute inset-0 border-2 border-brand/20 rounded-full animate-[ping_3s_linear_infinite]" />
+                    <div className="absolute inset-0 border border-brand/40 rounded-full rotate-45" />
+                    <div className="absolute inset-2 border border-t-brand border-l-transparent border-r-transparent border-b-transparent rounded-full animate-spin [animation-duration:1s]" />
                     <div className="absolute inset-0 flex items-center justify-center">
-                        <Cpu className="w-12 h-12 text-emerald-400 animate-pulse" />
+                        <Cpu className="w-12 h-12 text-brand animate-pulse" />
                     </div>
                 </div>
 
                 <div className="text-center space-y-4">
                     <h3 className="text-2xl font-black text-white tracking-tighter uppercase">{status || "Initializing Neural Core"}</h3>
                     <div className="flex items-center justify-center gap-1.5">
-                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" />
+                        <div className="w-1.5 h-1.5 bg-brand rounded-full animate-bounce [animation-delay:-0.3s]" />
+                        <div className="w-1.5 h-1.5 bg-brand rounded-full animate-bounce [animation-delay:-0.15s]" />
+                        <div className="w-1.5 h-1.5 bg-brand rounded-full animate-bounce" />
                     </div>
                 </div>
 
                 <div className="mt-12 w-64 h-px bg-gradient-to-r from-transparent via-slate-800 to-transparent" />
 
-                <div className="mt-8 font-mono text-[8px] text-emerald-500/40 space-y-1">
+                <div className="mt-8 font-mono text-[8px] text-brand/40 space-y-1">
                     {hexLines.map((line, i) => (
                         <div key={i} className="animate-in fade-in slide-in-from-bottom-2 duration-300">{line}</div>
                     ))}
@@ -186,7 +186,7 @@ const ScanningHUD = ({ status }) => {
             </div>
 
             {/* Scanning Beam */}
-            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-50 animate-scan pointer-events-none" />
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-brand to-transparent opacity-50 animate-scan pointer-events-none" />
         </div>
     );
 };
@@ -194,7 +194,7 @@ const ScanningHUD = ({ status }) => {
 // Trade Blueprint Section (Previously Modal)
 const TradeBlueprint = ({ targets, direction }) => {
     const isBull = direction.includes('Bullish');
-    const themeColor = isBull ? 'emerald' : 'rose';
+    const themeColor = isBull ? 'brand' : 'rose';
 
     return (
         <div className="bg-black-ash/40 border border-ash rounded-3xl overflow-hidden shadow-sm group">
@@ -208,7 +208,7 @@ const TradeBlueprint = ({ targets, direction }) => {
                         Institutional {isBull ? 'Long' : 'Short'} Logic
                     </p>
                 </div>
-                <div className="px-3 py-1 bg-ash/50 rounded-full border border-ash text-[9px] font-mono text-emerald-400 font-bold">
+                <div className="px-3 py-1 bg-ash/50 rounded-full border border-ash text-[9px] font-mono text-brand font-bold">
                     R/R: 1 : {targets.rr}
                 </div>
             </div>
@@ -221,8 +221,8 @@ const TradeBlueprint = ({ targets, direction }) => {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     {[
-                        { label: 'Primary', val: targets.tp1, color: 'emerald', tag: 'TP1' },
-                        { label: 'Extended', val: targets.tp2, color: 'emerald', tag: 'TP2' },
+                        { label: 'Primary', val: targets.tp1, color: 'brand', tag: 'TP1' },
+                        { label: 'Extended', val: targets.tp2, color: 'brand', tag: 'TP2' },
                         { label: 'Stop Loss', val: targets.sl, color: 'rose', tag: 'SL' }
                     ].map((t) => (
                         <div key={t.tag} className={`flex flex-col p-4 rounded-xl bg-ash/40 border border-${t.color}-500/10 group-hover:border-${t.color}-500/30 transition-all`}>
@@ -253,12 +253,12 @@ const ManualTickerModal = ({ onSubmit, onClose }) => {
                     value={input}
                     onChange={(e) => setInput(e.target.value.toUpperCase())}
                     placeholder="e.g. BTC, ETH, SOL"
-                    className="w-full bg-ash border border-ash rounded-xl px-4 py-3 text-center text-white font-black tracking-widest uppercase mb-6 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                    className="w-full bg-ash border border-ash rounded-xl px-4 py-3 text-center text-white font-black tracking-widest uppercase mb-6 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
                     autoFocus
                 />
                 <div className="flex gap-3">
-                    <button onClick={onClose} className="flex-1 py-3 rounded-xl border border-ash text-slate-500 font-bold hover:bg-slate-800 transition-colors">Cancel</button>
-                    <button onClick={() => input && onSubmit(input)} disabled={!input} className="flex-1 py-3 rounded-xl bg-emerald-500 text-slate-950 font-black hover:bg-emerald-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Proceed</button>
+                    <button onClick={onClose} className="flex-1 py-3 rounded-xl border border-ash text-slate-500 font-bold hover:bg-black-ash transition-colors">Cancel</button>
+                    <button onClick={() => input && onSubmit(input)} disabled={!input} className="btn-flame flex-1 !py-3">Proceed</button>
                 </div>
             </div>
         </div>
@@ -332,10 +332,10 @@ const VerificationModal = ({ validationResult, ticker, onClose, onCalibrate }) =
                         {onCalibrate && (
                             <button
                                 onClick={() => onCalibrate(recommendedWeights)}
-                                className="w-full mt-6 py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl transition-all uppercase tracking-widest text-[10px] shadow-xl shadow-emerald-500/10 flex items-center justify-center gap-2"
+                                className="btn-flame w-full mt-6"
                             >
                                 <Cpu className="w-4 h-4" />
-                                Calibrate AI Weights to Current Market
+                                Calibrate AI Weights
                             </button>
                         )}
                     </div>
@@ -395,8 +395,8 @@ const ApiKeyModal = ({ ticker, onSubmit, onClose }) => {
                     autoFocus
                 />
                 <div className="flex gap-3">
-                    <button onClick={onClose} className="flex-1 py-3 rounded-xl border border-ash text-slate-500 font-bold hover:bg-slate-800 transition-colors">Cancel</button>
-                    <button onClick={() => input && onSubmit(input)} disabled={!input} className="flex-1 py-3 rounded-xl bg-emerald-500 text-slate-950 font-black hover:bg-emerald-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Save & Scan</button>
+                    <button onClick={onClose} className="flex-1 py-3 rounded-xl border border-ash text-slate-500 font-bold hover:bg-black-ash transition-colors">Cancel</button>
+                    <button onClick={() => input && onSubmit(input)} disabled={!input} className="btn-flame flex-1 !py-3">Save & Scan</button>
                 </div>
                 <a href="https://finnhub.io/register" target="_blank" rel="noreferrer" className="block mt-4 text-xs text-blue-500 hover:underline">Get a free API Key →</a>
             </div>
@@ -413,9 +413,9 @@ const LimitModal = ({ message, type, onClose, onLogin }) => {
                 <p className="text-slate-500 text-sm font-bold mb-8 leading-relaxed">{message}</p>
                 <div className="flex flex-col gap-3">
                     {type === 'free' ? (
-                        <button onClick={() => window.open('/pricing', '_blank')} className="w-full py-4 rounded-xl bg-emerald-500 text-slate-950 font-black hover:bg-emerald-400 transition-all shadow-xl shadow-emerald-500/20 uppercase tracking-widest text-xs flex items-center justify-center gap-2">Upgrade to Pro <ArrowRight className="w-4 h-4" /></button>
+                        <button onClick={() => window.open('/pricing', '_blank')} className="btn-flame w-full !py-4">Upgrade to Pro <ArrowRight className="w-4 h-4" /></button>
                     ) : type === 'guest' ? (
-                        <button onClick={onLogin} className="w-full py-4 rounded-xl bg-emerald-500 text-slate-950 font-black hover:bg-emerald-400 transition-all shadow-xl shadow-emerald-500/20 uppercase tracking-widest text-xs flex items-center justify-center gap-2">Initialize Authentication <ArrowRight className="w-4 h-4" /></button>
+                        <button onClick={onLogin} className="btn-flame w-full !py-4">Initialize Authentication <ArrowRight className="w-4 h-4" /></button>
                     ) : (
                         <button onClick={onClose} className="w-full py-4 rounded-xl bg-slate-800 text-white font-black hover:bg-slate-700 transition-all uppercase tracking-widest text-xs">Check Inbox</button>
                     )}
@@ -432,17 +432,17 @@ const FileUpload = ({ onFileSelect, isAnalyzing, statusMessage }) => {
     return (
         <div
             onDragOver={handleDrag} onDragLeave={handleDrag} onDrop={(e) => { e.preventDefault(); setIsDragging(false); if (e.dataTransfer.files[0]) onFileSelect(e.dataTransfer.files[0]); }}
-            className={`relative group h-96 rounded-[40px] border-4 border-dashed transition-all duration-500 flex flex-col items-center justify-center cursor-pointer overflow-hidden ${isDragging ? 'border-emerald-500 bg-emerald-500/5 scale-[0.99] shadow-inner' : 'border-ash bg-black-ash/50 hover:border-slate-700 hover:bg-black-ash shadow-2xl'}`}
+            className={`relative group h-96 rounded-[40px] border-4 border-dashed transition-all duration-500 flex flex-col items-center justify-center cursor-pointer overflow-hidden ${isDragging ? 'border-brand bg-brand/5 scale-[0.99] shadow-inner' : 'border-ash bg-black-ash/50 hover:border-slate-700 hover:bg-black-ash shadow-2xl'}`}
         >
             <input type="file" className="absolute inset-0 opacity-0 cursor-pointer z-10" onChange={e => onFileSelect(e.target.files[0])} accept="image/*" />
             {isAnalyzing && !analysisResult ? (
                 <ScanningHUD status={statusMessage} />
             ) : (
                 <>
-                    <div className="w-24 h-24 bg-emerald-500 rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-2xl shadow-emerald-500/20"><ShieldCheck className="w-12 h-12 text-slate-950" /></div>
+                    <div className="w-24 h-24 bg-brand rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-2xl shadow-brand/20"><ShieldCheck className="w-12 h-12 text-slate-950" /></div>
                     <h3 className="text-3xl font-black text-white mb-3 tracking-tighter uppercase">Ready for Analysis</h3>
                     <p className="text-slate-500 max-w-sm text-center mb-10 leading-relaxed font-bold text-sm">Drag & drop your chart, paste from clipboard, or click to browse local files.</p>
-                    <div className="px-8 py-4 bg-emerald-500 text-slate-950 font-black rounded-2xl shadow-xl shadow-emerald-500/10 group-hover:bg-emerald-400 group-hover:scale-105 transition-all uppercase tracking-widest text-xs">Execute Neural Analysis</div>
+                    <div className="btn-flame px-8 !py-4">Execute Neural Analysis</div>
                 </>
             )}
         </div>
@@ -480,7 +480,7 @@ const MacroFluctuationChart = ({ macroTrend, isPro, source }) => {
     const maxVal = Math.max(...bars.map(b => Math.abs(b.change)), 10); // Scale
 
     return (
-        <div className="bg-[#020617] border border-ash rounded-lg p-4 print:border-gray-300 print:bg-white">
+        <div className="bg-black border border-ash rounded-lg p-4 print:border-gray-300 print:bg-white">
             <div className="flex justify-between items-center mb-4">
                 <div className="flex items-center gap-2">
                     <Activity className="w-4 h-4 text-slate-500" />
@@ -619,21 +619,21 @@ const AnalysisResult = ({ result, imagePreview, onVerify, isVerifying, isPro, on
 
             {/* Key Metrics Grid (Dense) */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-slate-800 border border-ash rounded-lg overflow-hidden print:border-gray-300 print:bg-gray-300">
-                <div className="bg-[#020617] p-4 flex flex-col justify-between hover:bg-black-ash transition-colors print:bg-white">
+                <div className="bg-black p-4 flex flex-col justify-between hover:bg-black-ash transition-colors print:bg-white">
                     <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Confidence</span>
                     <span className={`text-2xl font-mono font-bold ${colors.text} print:text-black`}>{result.confidence}%</span>
                 </div>
-                <div className="bg-[#020617] p-4 flex flex-col justify-between hover:bg-black-ash transition-colors print:bg-white">
+                <div className="bg-black p-4 flex flex-col justify-between hover:bg-black-ash transition-colors print:bg-white">
                     <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Volatility (ATR)</span>
                     <span className="text-2xl font-mono font-bold text-white print:text-black">{result.riskMetrics?.volatility || "0.00"}%</span>
                 </div>
-                <div className="bg-[#020617] p-4 flex flex-col justify-between hover:bg-black-ash transition-colors print:bg-white">
+                <div className="bg-black p-4 flex flex-col justify-between hover:bg-black-ash transition-colors print:bg-white">
                     <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Sharpe (Est.)</span>
-                    <span className="text-2xl font-mono font-bold text-blue-400 print:text-black">{result.riskMetrics?.sharpeRatio || "0.00"}</span>
+                    <span className="text-2xl font-mono font-bold text-brand print:text-black">{result.riskMetrics?.sharpeRatio || "0.00"}</span>
                 </div>
-                <div className="bg-[#020617] p-4 flex flex-col justify-between hover:bg-black-ash transition-colors print:bg-white">
+                <div className="bg-black p-4 flex flex-col justify-between hover:bg-black-ash transition-colors print:bg-white">
                     <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Reward/Risk</span>
-                    <span className="text-2xl font-mono font-bold text-emerald-400 print:text-black">{result.targets.rr}x</span>
+                    <span className="text-2xl font-mono font-bold text-brand print:text-black">{result.targets.rr}x</span>
                 </div>
             </div>
 
@@ -677,7 +677,7 @@ const AnalysisResult = ({ result, imagePreview, onVerify, isVerifying, isPro, on
                             <Cpu className="w-32 h-32" />
                         </div>
                         <div className="flex items-center gap-2 mb-6">
-                            <Activity className="w-4 h-4 text-emerald-500" />
+                            <Activity className="w-4 h-4 text-brand" />
                             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Neural Strategic Analysis</h3>
                         </div>
                         <p className="text-slate-300 text-sm md:text-base leading-relaxed font-mono print:text-black relative z-10" dangerouslySetInnerHTML={{ __html: result.overview || result.summary.replace(/\*\*(.*?)\*\*/g, '<span class="text-white font-bold">$1</span>') }} />
@@ -686,7 +686,7 @@ const AnalysisResult = ({ result, imagePreview, onVerify, isVerifying, isPro, on
                     {/* Chart Preview */}
                     <div className="border border-ash rounded-3xl overflow-hidden relative group h-80 print:h-96 print:border-gray-300 shadow-2xl">
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 to-transparent opacity-60 z-10" />
-                        <div className="absolute top-4 left-4 z-20 bg-emerald-500 text-slate-950 px-3 py-1 rounded-full text-[9px] font-black tracking-widest uppercase shadow-lg">DATA SOURCE: VISUAL SCAN</div>
+                        <div className="absolute top-4 left-4 z-20 bg-brand text-slate-950 px-3 py-1 rounded-full text-[9px] font-black tracking-widest uppercase shadow-lg">DATA SOURCE: VISUAL SCAN</div>
                         <img src={imagePreview} alt="Analyzed Chart" className="w-full h-full object-cover opacity-60 grayscale group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700 scale-105 group-hover:scale-100 print:opacity-100 print:grayscale-0" />
                     </div>
                 </div>
@@ -696,11 +696,11 @@ const AnalysisResult = ({ result, imagePreview, onVerify, isVerifying, isPro, on
                     <div className="bg-black-ash/20 border border-ash rounded-3xl overflow-hidden print:border-gray-200">
                         <div className="bg-black-ash/50 px-6 py-4 border-b border-ash flex justify-between items-center print:bg-gray-100">
                             <div className="flex items-center gap-2">
-                                <ShieldCheck className="w-4 h-4 text-blue-400" />
+                                <ShieldCheck className="w-4 h-4 text-brand" />
                                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Alpha Factors</span>
                             </div>
                             {onVerify && (
-                                <button onClick={onVerify} disabled={isVerifying} className="text-[9px] text-blue-500 hover:text-blue-400 uppercase font-black print:hidden transition-colors">
+                                <button onClick={onVerify} disabled={isVerifying} className="text-[9px] text-brand hover:text-brand-light uppercase font-black print:hidden transition-colors">
                                     {isVerifying ? 'CALIBRATING...' : 'VERIFY CORE'}
                                 </button>
                             )}
@@ -734,11 +734,11 @@ const AnalysisResult = ({ result, imagePreview, onVerify, isVerifying, isPro, on
 
 const HistorySidebar = ({ history, onSelect, onDelete, onFeedback }) => {
     return (
-        <div className="h-full flex flex-col bg-[#020617] border-l border-slate-900 shadow-2xl overflow-hidden">
+        <div className="h-full flex flex-col bg-black border-l border-slate-900 shadow-2xl overflow-hidden">
             <div className="p-6 border-b border-slate-900 bg-ash/50 backdrop-blur-xl">
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                        <div className="w-2 h-2 bg-brand rounded-full animate-pulse" />
                         <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Terminal Log</h3>
                     </div>
                     <span className="text-[8px] font-mono text-slate-600 bg-black-ash px-2 py-0.5 rounded border border-ash">CORE v5.0</span>
@@ -787,7 +787,7 @@ const HistorySidebar = ({ history, onSelect, onDelete, onFeedback }) => {
                                 <div className="flex gap-2">
                                     <button
                                         onClick={(e) => { e.stopPropagation(); onFeedback(item.db_id, true); }}
-                                        className={`p-1.5 rounded-lg border border-ash/50 transition-all ${item.feedback === 'win' ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' : 'text-slate-600 hover:text-emerald-400 hover:bg-emerald-500/10'}`}
+                                        className={`p-1.5 rounded-lg border border-ash/50 transition-all ${item.feedback === 'win' ? 'bg-brand/20 border-brand/30 text-brand' : 'text-slate-600 hover:text-brand hover:bg-brand/10'}`}
                                     >
                                         <ThumbsUp className="w-3 h-3" />
                                     </button>
@@ -819,8 +819,8 @@ const HistorySidebar = ({ history, onSelect, onDelete, onFeedback }) => {
 
             <div className="p-4 border-t border-slate-900 bg-slate-950/30">
                 <div className="flex items-center gap-3 p-3 bg-slate-900/50 rounded-xl border border-slate-800/40">
-                    <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
-                        <Cpu className="w-4 h-4 text-blue-400" />
+                    <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center border border-brand/20">
+                        <Cpu className="w-4 h-4 text-brand" />
                     </div>
                     <div>
                         <div className="text-[9px] font-black text-white uppercase leading-none">Global Model</div>
@@ -1726,13 +1726,13 @@ export default function Terminal() {
             {/* Clinical System HUD */}
             <div className="bg-slate-900/50 border-b border-slate-800/50 px-4 py-1.5 flex items-center justify-between text-[8px] font-bold font-mono tracking-widest text-slate-500">
                 <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" /> ENGINE_STATUS: OPERATIONAL</div>
+                    <div className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 bg-brand rounded-full animate-pulse" /> ENGINE_STATUS: OPERATIONAL</div>
                     <div className="flex items-center gap-1.5"><Activity className="w-3 h-3" /> LATENCY: 42MS</div>
                     <div className="flex items-center gap-1.5"><Cpu className="w-3 h-3" /> WEBGL_ACCELERATION: ACTIVE</div>
                 </div>
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-1.5">DATA_STREAM: [YAHOO:PASS, CG:PASS, FINN:PASS]</div>
-                    <div className="flex items-center gap-1.5 text-emerald-400">INSTITUTIONAL_CORE: v3.2.1-STABLE</div>
+                    <div className="flex items-center gap-1.5 text-brand">INSTITUTIONAL_CORE: v3.2.1-STABLE</div>
                 </div>
             </div>
 
@@ -1759,7 +1759,7 @@ export default function Terminal() {
                                                 {isPro && (
                                                     <button
                                                         onClick={() => setIsIncognito(!isIncognito)}
-                                                        className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all text-[10px] font-black uppercase tracking-widest ${isIncognito ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'}`}
+                                                        className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all text-[10px] font-black uppercase tracking-widest ${isIncognito ? 'bg-brand/10 border-brand/20 text-brand' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'}`}
                                                     >
                                                         {isIncognito ? <ShieldCheck className="w-4 h-4" /> : <History className="w-4 h-4" />}
                                                         {isIncognito ? 'Stealth Active' : 'Incognito Off'}
@@ -1774,9 +1774,9 @@ export default function Terminal() {
                                     <div className="flex flex-col items-center justify-center min-h-[400px]">
                                         {isQuickShareMode && (
                                             <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-3xl z-[2000] flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
-                                                <div className="w-20 h-20 bg-emerald-500/10 rounded-3xl border border-emerald-500/20 flex items-center justify-center mb-8 relative">
-                                                    <div className="absolute inset-0 border-2 border-emerald-500 rounded-3xl border-t-transparent animate-spin" />
-                                                    <Share2 className="w-8 h-8 text-emerald-400" />
+                                                <div className="w-20 h-20 bg-brand/10 rounded-3xl border border-brand/20 flex items-center justify-center mb-8 relative">
+                                                    <div className="absolute inset-0 border-2 border-brand rounded-3xl border-t-transparent animate-spin" />
+                                                    <Share2 className="w-8 h-8 text-brand" />
                                                 </div>
                                                 <h2 className="text-3xl font-black text-white uppercase tracking-tighter mb-4">Signal Received</h2>
                                                 <p className="text-slate-400 font-mono text-xs uppercase tracking-widest animate-pulse">{statusMessage}</p>
@@ -1786,7 +1786,7 @@ export default function Terminal() {
                                                         initial={{ width: 0 }}
                                                         animate={{ width: '100%' }}
                                                         transition={{ duration: 15, ease: "linear" }}
-                                                        className="h-full bg-emerald-500"
+                                                        className="h-full bg-brand"
                                                     />
                                                 </div>
                                                 <button
@@ -1798,9 +1798,9 @@ export default function Terminal() {
                                             </div>
                                         )}
                                         <div className="relative w-24 h-24 mb-6">
-                                            <div className="absolute inset-0 border-4 border-emerald-500/10 rounded-full"></div>
-                                            <div className="absolute inset-0 border-4 border-t-emerald-400 rounded-full animate-spin"></div>
-                                            <Camera className="absolute inset-0 m-auto text-emerald-400 w-10 h-10 animate-pulse" />
+                                            <div className="absolute inset-0 border-4 border-brand/10 rounded-full"></div>
+                                            <div className="absolute inset-0 border-4 border-t-brand rounded-full animate-spin"></div>
+                                            <Camera className="absolute inset-0 m-auto text-brand w-10 h-10 animate-pulse" />
                                         </div>
                                         <h3 className="text-2xl font-bold text-white mb-2 leading-none">{statusMessage}</h3>
                                     </div>
@@ -1833,8 +1833,8 @@ export default function Terminal() {
                 </aside>
 
                 <div className="md:hidden fixed bottom-20 left-4 right-4 z-40 bg-slate-900/90 border border-slate-800 backdrop-blur-xl px-4 py-3 flex items-center justify-around rounded-[24px] shadow-2xl ring-1 ring-white/5">
-                    <button onClick={() => setActiveTab('analyze')} className={`flex flex-col items-center gap-1.5 transition-all ${activeTab === 'analyze' ? 'text-emerald-400' : 'text-slate-500'}`}><Activity className="w-5 h-5" /><span className="text-[8px] font-black uppercase">Analyze</span></button>
-                    <button onClick={() => setActiveTab('history')} className={`flex flex-col items-center gap-1.5 transition-all ${activeTab === 'history' ? 'text-emerald-400' : 'text-slate-500'}`}><History className="w-5 h-5" /><span className="text-[8px] font-black uppercase">Terminal</span></button>
+                    <button onClick={() => setActiveTab('analyze')} className={`flex flex-col items-center gap-1.5 transition-all ${activeTab === 'analyze' ? 'text-brand' : 'text-slate-500'}`}><Activity className="w-5 h-5" /><span className="text-[8px] font-black uppercase">Analyze</span></button>
+                    <button onClick={() => setActiveTab('history')} className={`flex flex-col items-center gap-1.5 transition-all ${activeTab === 'history' ? 'text-brand' : 'text-slate-500'}`}><History className="w-5 h-5" /><span className="text-[8px] font-black uppercase">Terminal</span></button>
                 </div>
             </div>
             <FloatingWidget onPaste={triggerPaste} onCompanion={handleLaunchCompanion} />

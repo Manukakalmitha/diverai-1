@@ -156,7 +156,7 @@ export default function ProfilePage() {
                 <p className="text-slate-500 max-w-sm mb-8 font-bold">Please log in to view your terminal profile and billing architecture.</p>
                 <button
                     onClick={() => navigate('/')}
-                    className="px-8 py-3 bg-emerald-500 text-slate-950 font-black rounded-xl uppercase tracking-widest text-xs hover:bg-emerald-400 transition-all shadow-xl shadow-emerald-500/20"
+                    className="btn-flame px-8 !py-3"
                 >
                     Return to Base
                 </button>
@@ -168,7 +168,7 @@ export default function ProfilePage() {
     const usagePercent = profile?.subscription_tier === 'pro' ? 100 : Math.min(100, (profile?.upload_count || 0) / 3 * 100);
 
     return (
-        <div className="min-h-screen py-10 md:py-20 px-6 animate-in fade-in duration-700">
+        <div className="min-h-screen bg-black py-10 md:py-20 px-6 animate-in fade-in duration-700">
             <Helmet>
                 <title>User Profile | Diver AI - Trading Architecture</title>
                 <meta name="description" content="Manage your Diver AI profile, billing, and neural engine settings. View your trade accuracy and history." />
@@ -178,11 +178,11 @@ export default function ProfilePage() {
                 {/* Profile Header */}
                 <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 bg-black-ash/40 border border-slate-800 rounded-[32px] md:rounded-[40px] p-6 md:p-12 relative overflow-hidden shadow-2xl">
                     <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none hidden md:block">
-                        <User className="w-64 h-64 text-emerald-500" />
+                        <User className="w-64 h-64 text-brand" />
                     </div>
 
                     <div className="relative group">
-                        <div className="w-32 h-32 md:w-40 md:h-40 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-[48px] p-1 shadow-2xl overflow-hidden relative">
+                        <div className="w-32 h-32 md:w-40 md:h-40 bg-gradient-to-br from-brand to-brand-dark rounded-[48px] p-1 shadow-2xl overflow-hidden relative">
                             <div className="w-full h-full bg-black-ash rounded-[44px] flex items-center justify-center overflow-hidden">
                                 {profile?.avatar_url ? (
                                     <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
@@ -198,7 +198,7 @@ export default function ProfilePage() {
                                 </label>
                             )}
                         </div>
-                        <div className="absolute -bottom-2 -right-2 bg-emerald-500 text-slate-950 p-3 rounded-2xl shadow-xl">
+                        <div className="absolute -bottom-2 -right-2 bg-brand text-slate-950 p-3 rounded-2xl shadow-xl">
                             <Shield className="w-6 h-6" />
                         </div>
                     </div>
@@ -221,7 +221,7 @@ export default function ProfilePage() {
                     <div className="flex flex-col gap-3 w-full md:w-auto">
                         <button
                             onClick={() => navigate('/pricing')}
-                            className="px-6 py-3 bg-white text-slate-950 font-black rounded-2xl text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all flex items-center justify-center gap-2"
+                            className="btn-flame px-6 !py-3"
                         >
                             <Crown className="w-4 h-4" /> View Pricing
                         </button>
@@ -236,9 +236,9 @@ export default function ProfilePage() {
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-black-ash border border-slate-800 rounded-[32px] p-8 shadow-2xl hover:border-emerald-500/30 transition-colors group">
+                    <div className="bg-black-ash border border-slate-800 rounded-[32px] p-8 shadow-2xl hover:border-brand/30 transition-colors group">
                         <div className="flex items-center justify-between mb-6">
-                            <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-400 group-hover:scale-110 transition-transform"><Activity className="w-6 h-6" /></div>
+                            <div className="p-3 bg-brand/10 rounded-2xl text-brand group-hover:scale-110 transition-transform"><Activity className="w-6 h-6" /></div>
                             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Neural Load</span>
                         </div>
                         <div className="space-y-4">
@@ -248,16 +248,16 @@ export default function ProfilePage() {
                             </div>
                             <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
                                 <div
-                                    className="h-full bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)] transition-all duration-1000"
+                                    className="h-full bg-brand shadow-[0_0_15px_rgba(245,158,11,0.5)] transition-all duration-1000"
                                     style={{ width: `${usagePercent}%` }}
                                 />
                             </div>
                         </div>
                     </div>
 
-                    <div className="bg-black-ash border border-slate-800 rounded-[32px] p-8 shadow-2xl hover:border-blue-500/30 transition-colors group">
+                    <div className="bg-black-ash border border-slate-800 rounded-[32px] p-8 shadow-2xl hover:border-brand/30 transition-colors group">
                         <div className="flex items-center justify-between mb-6">
-                            <div className="p-3 bg-blue-500/10 rounded-2xl text-blue-400 group-hover:scale-110 transition-transform"><Target className="w-6 h-6" /></div>
+                            <div className="p-3 bg-brand/10 rounded-2xl text-brand group-hover:scale-110 transition-transform"><Target className="w-6 h-6" /></div>
                             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Model Trust</span>
                         </div>
                         <div className="space-y-4">
@@ -266,7 +266,7 @@ export default function ProfilePage() {
                                 <div className="text-[10px] font-bold text-slate-500 mb-1">Avg. Confidence</div>
                             </div>
                             <div className="flex items-center justify-between pt-2">
-                                <div className="text-[10px] font-black text-emerald-400 uppercase tracking-widest flex items-center gap-1.5"><TrendingUp className="w-3 h-3" /> {stats.wins} Wins</div>
+                                <div className="text-[10px] font-black text-brand uppercase tracking-widest flex items-center gap-1.5"><TrendingUp className="w-3 h-3" /> {stats.wins} Wins</div>
                                 <div className="text-[10px] font-black text-rose-400 uppercase tracking-widest flex items-center gap-1.5">{stats.losses} Losses <LogOut className="w-3 h-3 rotate-180" /></div>
                             </div>
                         </div>
@@ -298,7 +298,7 @@ export default function ProfilePage() {
                     <div className="bg-black-ash/40 border border-slate-800 rounded-[32px] md:rounded-[40px] p-6 md:p-12 shadow-2xl relative overflow-hidden">
                         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 md:mb-10 gap-4">
                             <div className="flex items-center gap-4">
-                                <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-400">
+                                <div className="p-3 bg-brand/10 rounded-2xl text-brand">
                                     <User className="w-6 h-6" />
                                 </div>
                                 <div>
@@ -308,7 +308,7 @@ export default function ProfilePage() {
                             </div>
                             <button
                                 onClick={() => setIsEditing(!isEditing)}
-                                className={`w-full md:w-auto px-6 py-3 md:py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${isEditing ? 'bg-rose-500/10 text-rose-500' : 'bg-emerald-500 text-slate-950 hover:bg-emerald-400'}`}
+                                className={`w-full md:w-auto px-6 py-3 md:py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${isEditing ? 'bg-rose-500/10 text-rose-500' : 'bg-brand text-slate-950 hover:bg-brand-light'}`}
                             >
                                 {isEditing ? 'Cancel Edit' : 'Edit Profile'}
                             </button>
@@ -326,7 +326,7 @@ export default function ProfilePage() {
                                                 value={editData.full_name}
                                                 onChange={(e) => setEditData({ ...editData, full_name: e.target.value })}
                                                 placeholder="John Doe"
-                                                className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-sm font-bold text-white focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 outline-none transition-all"
+                                                className="w-full bg-black border border-slate-800 rounded-2xl p-4 text-sm font-bold text-white focus:border-brand/50 focus:ring-1 focus:ring-brand/50 outline-none transition-all"
                                             />
                                         </div>
                                         <div className="space-y-2">
@@ -336,7 +336,7 @@ export default function ProfilePage() {
                                                 value={editData.phone}
                                                 onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
                                                 placeholder="+1 (555) 000-0000"
-                                                className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-sm font-bold text-white focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 outline-none transition-all"
+                                                className="w-full bg-black border border-slate-800 rounded-2xl p-4 text-sm font-bold text-white focus:border-brand/50 focus:ring-1 focus:ring-brand/50 outline-none transition-all"
                                             />
                                         </div>
                                     </div>
@@ -351,7 +351,7 @@ export default function ProfilePage() {
                                                 value={editData.billing_info.address}
                                                 onChange={(e) => setEditData({ ...editData, billing_info: { ...editData.billing_info, address: e.target.value } })}
                                                 placeholder="123 Innovation Dr"
-                                                className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-sm font-bold text-white focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 outline-none transition-all"
+                                                className="w-full bg-black border border-slate-800 rounded-2xl p-4 text-sm font-bold text-white focus:border-brand/50 focus:ring-1 focus:ring-brand/50 outline-none transition-all"
                                             />
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
@@ -362,7 +362,7 @@ export default function ProfilePage() {
                                                     value={editData.billing_info.city}
                                                     onChange={(e) => setEditData({ ...editData, billing_info: { ...editData.billing_info, city: e.target.value } })}
                                                     placeholder="Neo Tokyo"
-                                                    className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-sm font-bold text-white focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 outline-none transition-all"
+                                                    className="w-full bg-black border border-slate-800 rounded-2xl p-4 text-sm font-bold text-white focus:border-brand/50 focus:ring-1 focus:ring-brand/50 outline-none transition-all"
                                                 />
                                             </div>
                                             <div className="space-y-2">
@@ -372,7 +372,7 @@ export default function ProfilePage() {
                                                     value={editData.billing_info.zip}
                                                     onChange={(e) => setEditData({ ...editData, billing_info: { ...editData.billing_info, zip: e.target.value } })}
                                                     placeholder="10001"
-                                                    className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-sm font-bold text-white focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 outline-none transition-all"
+                                                    className="w-full bg-black border border-slate-800 rounded-2xl p-4 text-sm font-bold text-white focus:border-brand/50 focus:ring-1 focus:ring-brand/50 outline-none transition-all"
                                                 />
                                             </div>
                                         </div>
@@ -381,7 +381,7 @@ export default function ProfilePage() {
                                 <div className="md:col-span-2 pt-6">
                                     <button
                                         onClick={handleSaveProfile}
-                                        className="w-full py-4 bg-emerald-500 text-slate-950 font-black rounded-2xl shadow-xl shadow-emerald-500/20 hover:bg-emerald-400 transition-all active:scale-95 uppercase tracking-widest text-xs"
+                                        className="btn-flame w-full !py-4"
                                     >
                                         Deploy Configuration Changes
                                     </button>
@@ -391,14 +391,14 @@ export default function ProfilePage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="space-y-4">
                                     <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Public Identity</p>
-                                    <div className="bg-slate-950/30 p-4 rounded-2xl border border-slate-800/50">
+                                    <div className="bg-black/30 p-4 rounded-2xl border border-slate-800/50">
                                         <div className="text-white font-black">{profile.full_name || 'Not Configured'}</div>
                                         <div className="text-[10px] text-slate-500 font-bold">{editData.phone || 'No phone recorded'}</div>
                                     </div>
                                 </div>
                                 <div className="space-y-4">
                                     <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Billing Node</p>
-                                    <div className="bg-slate-950/30 p-4 rounded-2xl border border-slate-800/50">
+                                    <div className="bg-black/30 p-4 rounded-2xl border border-slate-800/50">
                                         <div className="text-white font-black">{editData.billing_info.address || 'Address Hidden'}</div>
                                         <div className="text-[10px] text-slate-500 font-bold">{editData.billing_info.city} {editData.billing_info.zip}</div>
                                     </div>
@@ -412,7 +412,7 @@ export default function ProfilePage() {
                 <div className="bg-black-ash/40 border border-slate-800 rounded-[32px] overflow-hidden">
                     <div className="px-8 py-6 border-b border-slate-800 flex items-center justify-between bg-black-ash/60">
                         <h3 className="text-lg font-black text-white uppercase tracking-widest flex items-center gap-3">
-                            <Activity className="w-5 h-5 text-emerald-400" /> Recent Neural Logs
+                            <Activity className="w-5 h-5 text-brand" /> Recent Neural Logs
                         </h3>
                         <button
                             onClick={() => navigate('/analysis')}
@@ -439,7 +439,7 @@ export default function ProfilePage() {
                                                     <img src={item.imageUrl} alt={item.ticker} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" referrerPolicy="no-referrer" />
                                                 </div>
                                             ) : (
-                                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${item.direction.includes('Bullish') ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${item.direction.includes('Bullish') ? 'bg-brand/10 text-brand' : 'bg-rose-500/10 text-rose-400'}`}>
                                                     {item.ticker.slice(0, 3)}
                                                 </div>
                                             )}
@@ -453,7 +453,7 @@ export default function ProfilePage() {
                                             </div>
                                         </div>
                                         <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto border-t border-slate-800/50 pt-3 sm:pt-0 sm:border-0">
-                                            <span className={`text-[9px] font-black px-3 py-1 rounded-md uppercase tracking-tighter ${item.feedback === 'win' ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20' : (item.feedback === 'loss' ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' : 'bg-slate-800 text-slate-500')}`}>
+                                            <span className={`text-[9px] font-black px-3 py-1 rounded-md uppercase tracking-tighter ${item.feedback === 'win' ? 'bg-brand text-slate-950 shadow-lg shadow-brand-dark/20' : (item.feedback === 'loss' ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' : 'bg-slate-800 text-slate-500')}`}>
                                                 {item.feedback || 'Pending'}
                                             </span>
                                             <ArrowUpRight className="w-4 h-4 md:w-5 md:h-5 text-slate-700 group-hover:text-white transition-colors" />

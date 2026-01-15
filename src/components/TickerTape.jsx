@@ -59,7 +59,7 @@ const TickerTape = () => {
     // Show loading state or empty state
     if (loading || tickers.length === 0) {
         return (
-            <div className="w-full bg-slate-950 border-b border-slate-800 h-10 flex items-center overflow-hidden whitespace-nowrap relative z-40">
+            <div className="w-full bg-black border-b border-slate-800 h-10 flex items-center overflow-hidden whitespace-nowrap relative z-40">
                 <div className="animate-marquee inline-flex items-center gap-8 px-4">
                     {TICKER_SYMBOLS.map((symbol, i) => (
                         <div key={i} className="flex items-center gap-2 text-xs font-medium">
@@ -79,7 +79,7 @@ const TickerTape = () => {
                     <div key={i} className="flex items-center gap-2 text-xs font-medium">
                         <span className="text-slate-200 font-bold">{t.symbol}</span>
                         <span className="text-slate-400">{t.price}</span>
-                        <span className={t.change.startsWith('+') ? 'text-emerald-500' : t.change.startsWith('-') ? 'text-rose-500' : 'text-slate-500'}>
+                        <span className={t.change.startsWith('+') ? 'text-brand' : t.change.startsWith('-') ? 'text-rose-500' : 'text-slate-500'}>
                             {t.change}
                         </span>
                     </div>

@@ -15,7 +15,7 @@ const FloatingWidget = ({ onPaste, onCapture, onCompanion }) => {
                 onPaste?.();
                 setIsOpen(false);
             },
-            color: 'text-emerald-400'
+            color: 'text-brand'
         },
         {
             icon: <Monitor className="w-4 h-4" />,
@@ -54,7 +54,7 @@ const FloatingWidget = ({ onPaste, onCapture, onCompanion }) => {
                         initial={{ opacity: 0, y: 20, scale: 0.9 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.9 }}
-                        className="bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-3xl p-3 shadow-2xl pointer-events-auto min-w-[180px]"
+                        className="bg-black/90 backdrop-blur-xl border border-slate-800 rounded-3xl p-3 shadow-2xl pointer-events-auto min-w-[180px]"
                     >
                         <div className="flex flex-col gap-1">
                             {menuItems.map((item, i) => (
@@ -63,7 +63,7 @@ const FloatingWidget = ({ onPaste, onCapture, onCompanion }) => {
                                     onClick={item.action}
                                     className="flex items-center gap-3 w-full p-3 hover:bg-white/5 rounded-2xl transition-all group"
                                 >
-                                    <div className={`p-2 rounded-xl bg-slate-950/50 ${item.color} border border-white/5 ring-1 ring-white/5 group-hover:ring-emerald-500/50 transition-all`}>
+                                    <div className={`p-2 rounded-xl bg-black ${item.color} border border-white/5 ring-1 ring-white/5 group-hover:ring-brand/50 transition-all`}>
                                         {item.icon}
                                     </div>
                                     <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest group-hover:text-white transition-colors">
@@ -85,7 +85,7 @@ const FloatingWidget = ({ onPaste, onCapture, onCompanion }) => {
                 whileTap={{ scale: 0.95 }}
             >
                 {/* Background Pulse Effect */}
-                <div className="absolute inset-0 bg-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity animate-pulse" />
+                <div className="absolute inset-0 bg-brand/10 opacity-0 group-hover:opacity-100 transition-opacity animate-pulse" />
 
                 <div className="relative z-10">
                     {isOpen ? (
@@ -101,7 +101,7 @@ const FloatingWidget = ({ onPaste, onCapture, onCompanion }) => {
 
                 {/* Status Indicator */}
                 {!isOpen && (
-                    <div className="absolute top-3 right-3 w-2 h-2 bg-emerald-500 rounded-full border border-slate-900 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                    <div className="absolute top-3 right-3 w-2 h-2 bg-brand rounded-full border border-slate-900 shadow-[0_0_8px_rgba(255,191,0,0.5)]" />
                 )}
             </motion.button>
 

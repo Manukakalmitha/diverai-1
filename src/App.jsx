@@ -21,12 +21,12 @@ const UpdatesPage = lazy(() => import('./pages/UpdatesPage'));
 const ReferralPage = lazy(() => import('./pages/ReferralPage'));
 
 const LoadingFallback = () => (
-  <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+  <div className="min-h-screen bg-black flex items-center justify-center">
     <div className="text-center space-y-4">
       <div className="relative mx-auto w-12 h-12">
-        <div className="absolute inset-0 bg-emerald-500/20 rounded-full animate-ping"></div>
-        <div className="relative bg-emerald-500/10 rounded-full w-12 h-12 flex items-center justify-center border border-emerald-500/20">
-          <Loader2 className="w-6 h-6 text-emerald-500 animate-spin" />
+        <div className="absolute inset-0 bg-brand/20 rounded-full animate-ping"></div>
+        <div className="relative bg-brand/10 rounded-full w-12 h-12 flex items-center justify-center border border-brand/20">
+          <Loader2 className="w-6 h-6 text-brand animate-spin" />
         </div>
       </div>
       <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold animate-pulse">Initializing Neural Core...</p>

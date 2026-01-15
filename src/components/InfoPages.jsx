@@ -7,7 +7,7 @@ const InfoPages = ({ type, onClose }) => {
             title: "Privacy Policy",
             subtitle: "Trust & Safety",
             icon: Shield,
-            color: "text-blue-500",
+            color: "text-brand",
             sections: [
                 {
                     h: "Data Collection",
@@ -27,7 +27,7 @@ const InfoPages = ({ type, onClose }) => {
             title: "Terms of Service",
             subtitle: "Usage Framework",
             icon: Scale,
-            color: "text-blue-500",
+            color: "text-brand",
             sections: [
                 {
                     h: "Intellectual Property",
@@ -47,7 +47,7 @@ const InfoPages = ({ type, onClose }) => {
             title: "API Documentation",
             subtitle: "Institutional Access",
             icon: Globe,
-            color: "text-purple-500",
+            color: "text-brand",
             sections: [
                 {
                     h: "Status: Restricted",
@@ -67,7 +67,7 @@ const InfoPages = ({ type, onClose }) => {
             title: "System Status",
             subtitle: "Real-time Monitoring",
             icon: Activity,
-            color: "text-blue-500",
+            color: "text-brand",
             sections: [
                 {
                     h: "Operational Services",
@@ -79,7 +79,7 @@ const InfoPages = ({ type, onClose }) => {
             title: "About Us",
             subtitle: "Team & Mission",
             icon: Users,
-            color: "text-blue-500",
+            color: "text-brand",
             sections: [
                 {
                     h: "Our Mission",
@@ -99,7 +99,7 @@ const InfoPages = ({ type, onClose }) => {
             title: "Research",
             subtitle: "Methodology",
             icon: BookOpen,
-            color: "text-indigo-500",
+            color: "text-brand",
             sections: [
                 {
                     h: "Abstract",
@@ -143,7 +143,7 @@ const InfoPages = ({ type, onClose }) => {
             title: "Cookie Policy",
             subtitle: "Data Persistence",
             icon: CheckCircle2,
-            color: "text-blue-500",
+            color: "text-brand",
             sections: [
                 {
                     h: "Essential Cookies",
@@ -198,10 +198,10 @@ const InfoPages = ({ type, onClose }) => {
                     {type === 'status' && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-8">
                             {[
-                                { n: "Analysis Engine", s: "Operational", c: "text-blue-500" },
-                                { n: "Pattern Recognition", s: "Operational", c: "text-blue-500" },
-                                { n: "Market Data Feeds", s: "Operational", c: "text-blue-500" },
-                                { n: "Historical Database", s: "Operational", c: "text-blue-500" }
+                                { n: "Analysis Engine", s: "Operational", c: "text-brand" },
+                                { n: "Pattern Recognition", s: "Operational", c: "text-brand" },
+                                { n: "Market Data Feeds", s: "Operational", c: "text-brand" },
+                                { n: "Historical Database", s: "Operational", c: "text-brand" }
                             ].map((svc, i) => (
                                 <div key={i} className="p-6 bg-slate-900 rounded-xl border border-slate-800 flex items-center justify-between">
                                     <span className="text-sm font-semibold text-slate-300">{svc.n}</span>
@@ -217,7 +217,7 @@ const InfoPages = ({ type, onClose }) => {
 
                 <footer className="mt-20 pt-12 border-t border-slate-800 text-center">
                     <p className="text-slate-500 text-sm font-medium">
-                        © 2026 Diver AI by <a href="https://flisoft.agency" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-500 transition-colors">Fli SOFT</a>. All rights reserved.
+                        © 2026 Diver AI by <a href="https://flisoft.agency" target="_blank" rel="noopener noreferrer" className="hover:text-brand transition-colors">Fli SOFT</a>. All rights reserved.
                     </p>
                 </footer>
             </div>
