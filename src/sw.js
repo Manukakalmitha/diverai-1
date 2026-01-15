@@ -12,9 +12,11 @@ self.addEventListener('fetch', (event) => {
             (async () => {
                 try {
                     const formData = await event.request.formData();
-                    const file = formData.get('media') || formData.get('files'); // Support both standard and custom field names
+                    // Some apps use 'files', others 'media', or 'image'
+                    const file = formData.get('files') || formData.get('media') || formData.get('image');
 
                     if (file) {
+                        console.log('Shared file received:', file.name, file.type);
                         const cache = await caches.open('shared-media');
                         await cache.put('shared-image', new Response(file));
                     }

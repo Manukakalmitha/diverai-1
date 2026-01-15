@@ -953,7 +953,6 @@ export default function Terminal() {
                     factors: [{ name: 'Neural', p: 0.9, type: 'Deep Learning' }, { name: 'Pattern', p: 0.8, type: 'Geometric' }],
                     riskMetrics: { volatility: '4.2', sharpeRatio: '2.1', maxDrawdown: '12.5' },
                     macroTrend: {
-                        // Mock 10 years of data (one point per year is enough for the grouper to work)
                         prices: [15000, 18000, 4000, 12000, 7000, 28000, 69000, 16000, 42000, 95000],
                         dates: [
                             new Date('2015-01-01').getTime() / 1000,
@@ -978,12 +977,20 @@ export default function Terminal() {
 
                 try {
                     const cache = await caches.open('shared-media');
-                    const response = await cache.match('shared-image');
+                    let response = null;
+
+                    // Retry logic: Service worker might still be writing to cache
+                    for (let i = 0; i < 5; i++) {
+                        response = await cache.match('shared-image');
+                        if (response) break;
+                        await new Promise(r => setTimeout(r, 200)); // Wait 200ms
+                    }
+
                     if (response) {
+                        setStatusMessage("Processing Neural Input...");
                         const blob = await response.blob();
                         const file = new File([blob], "shared-image.png", { type: blob.type });
 
-                        // Process immediately
                         const reader = new FileReader();
                         reader.onloadend = () => {
                             const img = new Image();
@@ -999,11 +1006,16 @@ export default function Terminal() {
                         // Clean up cache
                         await cache.delete('shared-image');
                         navigate(location.pathname, { replace: true });
+                    } else {
+                        throw new Error("Shared image not found in cache after retries");
                     }
                 } catch (err) {
                     console.error("Shared image processing failed:", err);
-                    setIsQuickShareMode(false);
-                    setIsAnalyzing(false);
+                    setStatusMessage("Neural Link Failed - Please Reshare");
+                    setTimeout(() => {
+                        setIsQuickShareMode(false);
+                        setIsAnalyzing(false);
+                    }, 3000);
                 }
             }
         };

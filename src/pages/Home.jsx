@@ -8,9 +8,13 @@ const Home = () => {
     const navigate = useNavigate();
     const { user, loading } = useAppContext();
 
-    // Redirect logged-in users directly to the analysis page
+    // Redirect standalone/TWA users or logged-in users directly to the analysis page
     useEffect(() => {
-        if (!loading && user) {
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+            window.navigator.standalone ||
+            document.referrer.includes('android-app://');
+
+        if (!loading && (user || isStandalone)) {
             navigate('/analysis', { replace: true });
         }
     }, [user, loading, navigate]);
