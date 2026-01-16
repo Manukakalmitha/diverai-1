@@ -970,7 +970,8 @@ export default function Terminal() {
                 });
                 return;
             }
-            if (params.get('shared-image') === 'true') {
+
+            if (params.get('shared-image') === 'true' || params.get('shared-url') === 'true') {
                 setIsQuickShareMode(true);
                 setIsAnalyzing(true);
                 setStatusMessage("Receiving Shared Intelligence...");
@@ -978,18 +979,33 @@ export default function Terminal() {
                 try {
                     const cache = await caches.open('shared-media');
                     let response = null;
+                    const isUrl = params.get('shared-url') === 'true';
+                    const cacheKey = isUrl ? 'shared-url' : 'shared-image';
 
                     // Retry logic: Service worker might still be writing to cache
-                    for (let i = 0; i < 5; i++) {
-                        response = await cache.match('shared-image');
+                    for (let i = 0; i < 10; i++) {
+                        response = await cache.match(cacheKey);
                         if (response) break;
                         await new Promise(r => setTimeout(r, 200)); // Wait 200ms
                     }
 
                     if (response) {
+                        if (isUrl) {
+                            setStatusMessage("Fetching Shared Link Data...");
+                            const sharedUrl = await response.text();
+                            // For now, we just log it and show an alert if we can't handle it
+                            // In the future, we could try to scrape/fetch the image from TradingView URL
+                            alert(`Shared Link Received: ${sharedUrl}\n\nNote: For instant analysis, please use 'Share Image' from TradingView instead of 'Share Link'.`);
+                            throw new Error("Link sharing not fully supported yet - Use Image Share");
+                        }
+
                         setStatusMessage("Processing Neural Input...");
                         const blob = await response.blob();
-                        const file = new File([blob], "shared-image.png", { type: blob.type });
+
+                        // Basic validation that we got an image
+                        if (blob.size < 100) throw new Error("Captured image data too small/corrupt");
+
+                        const file = new File([blob], "shared-image.png", { type: blob.type || "image/png" });
 
                         const reader = new FileReader();
                         reader.onloadend = () => {
@@ -999,23 +1015,28 @@ export default function Terminal() {
                                 setImagePreview(reader.result);
                                 runAnalysisWorkflow(reader.result, visualSrc, ocrSrc);
                             };
+                            img.onerror = () => {
+                                setStatusMessage("Image format unsupported or corrupt.");
+                                setIsAnalyzing(false);
+                                setIsQuickShareMode(false);
+                            };
                             img.src = reader.result;
                         };
                         reader.readAsDataURL(file);
 
                         // Clean up cache
-                        await cache.delete('shared-image');
+                        await cache.delete(cacheKey);
                         navigate(location.pathname, { replace: true });
                     } else {
-                        throw new Error("Shared image not found in cache after retries");
+                        throw new Error("Shared data not found in cache after retries");
                     }
                 } catch (err) {
-                    console.error("Shared image processing failed:", err);
-                    setStatusMessage("Neural Link Failed - Please Reshare");
+                    console.error("Shared processing failed:", err);
+                    setStatusMessage(err.message || "Neural Link Failed");
                     setTimeout(() => {
                         setIsQuickShareMode(false);
                         setIsAnalyzing(false);
-                    }, 3000);
+                    }, 5000);
                 }
             }
         };
@@ -1234,7 +1255,7 @@ export default function Terminal() {
         // Helper to send notification safely in TWA/PWA
         const sendNotification = async (title, options) => {
             try {
-                if (Notification.permission === 'granted') {
+                if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
                     if ('serviceWorker' in navigator) {
                         const registration = await navigator.serviceWorker.ready;
                         if (registration && registration.showNotification) {
@@ -1242,11 +1263,13 @@ export default function Terminal() {
                             return;
                         }
                     }
-                    // Fallback to standard Notification if SW not ready/supported
-                    new Notification(title, options);
+                    // In TWA (Android), new Notification() is strictly forbidden and throws Illegal Constructor.
+                    // We only use it if we are sure we are not on a mobile device that doesn't support it.
+                    // For safety, if SW isn't ready, we just skip it or log it.
+                    console.info("Notification skipped: Service Worker not ready or showNotification missing.");
                 }
             } catch (err) {
-                console.warn("Notification failed:", err);
+                console.warn("Notification system error:", err);
             }
         };
 

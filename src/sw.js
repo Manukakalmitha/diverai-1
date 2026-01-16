@@ -12,21 +12,42 @@ self.addEventListener('fetch', (event) => {
             (async () => {
                 try {
                     const formData = await event.request.formData();
-                    // Some apps use 'files', others 'media', or 'image'
-                    const file = formData.get('files') || formData.get('media') || formData.get('image');
+                    console.log('Share Target Received. Keys:', [...formData.keys()]);
+
+                    // Some apps use 'files', others 'media', 'image', or 'file'
+                    const file = formData.get('files') || formData.get('media') || formData.get('image') || formData.get('file');
+                    const text = formData.get('text') || formData.get('body');
+                    const title = formData.get('title');
+                    const url = formData.get('url');
+
+                    console.log('Detected Share Data:', {
+                        hasFile: !!file,
+                        fileName: file?.name,
+                        fileType: file?.type,
+                        text,
+                        title,
+                        url
+                    });
 
                     if (file) {
-                        console.log('Shared file received:', file.name, file.type);
                         const cache = await caches.open('shared-media');
                         await cache.put('shared-image', new Response(file));
+                    } else if (url || text) {
+                        // If no file but there's a URL/text (common with TradingView links)
+                        const sharedUrl = url || text;
+                        if (sharedUrl.startsWith('http')) {
+                            const cache = await caches.open('shared-media');
+                            await cache.put('shared-url', new Response(sharedUrl));
+                            return Response.redirect('/analysis?shared-url=true', 303);
+                        }
                     }
 
                     // Success redirect
                     return Response.redirect('/analysis?shared-image=true', 303);
                 } catch (err) {
-                    console.error('Share Target Error:', err);
+                    console.error('Share Target Error Detail:', err);
                     // Fallback redirect on error to prevent broken page
-                    return Response.redirect('/analysis?error=share_failed', 303);
+                    return Response.redirect(`/analysis?error=share_failed&msg=${encodeURIComponent(err.message)}`, 303);
                 }
             })()
         );
