@@ -53,6 +53,21 @@ export const AppProvider = ({ children }) => {
 
                 if (!insertError) data = newProfile;
             }
+            if (data) {
+                // Automatic Downgrade Check
+                if (data.subscription_tier === 'pro' && data.pro_expires_at) {
+                    const expiryDate = new Date(data.pro_expires_at);
+                    if (expiryDate < new Date()) {
+                        console.log("Pro status expired. Downgrading to free tier...");
+                        await supabase
+                            .from('profiles')
+                            .update({ subscription_tier: 'free' })
+                            .eq('id', userId);
+
+                        data.subscription_tier = 'free'; // Update local object
+                    }
+                }
+            }
             setProfile(data);
         } catch (err) {
             console.error("Profile fetch error:", err);

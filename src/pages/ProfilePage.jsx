@@ -208,9 +208,19 @@ export default function ProfilePage() {
                             <h1 className="text-2xl md:text-5xl font-black text-white tracking-tighter truncate" title={user.id}>
                                 {profile?.full_name || user.email?.split('@')[0]}
                             </h1>
-                            <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em] self-center md:self-auto border shrink-0 ${profile?.subscription_tier === 'pro' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
-                                {profile?.subscription_tier === 'pro' ? 'PRO QUANT' : 'FREE ARCH'}
-                            </span>
+                            <div className="flex flex-col gap-1">
+                                <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em] self-center md:self-auto border shrink-0 ${profile?.subscription_tier === 'pro' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
+                                    {profile?.subscription_tier === 'pro' ? 'PRO QUANT' : 'FREE ARCH'}
+                                </span>
+                                {profile?.subscription_tier === 'pro' && profile?.pro_expires_at && (
+                                    <div className="text-[8px] font-black text-amber-500/60 uppercase tracking-widest text-center md:text-left flex items-center justify-center md:justify-start gap-1">
+                                        <Clock className="w-2.5 h-2.5" />
+                                        <span>
+                                            {Math.max(0, Math.ceil((new Date(profile.pro_expires_at) - new Date()) / (1000 * 60 * 60 * 24)))} Days Left
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                         <div className="flex flex-wrap justify-center md:justify-start gap-3 md:gap-4 text-[10px] md:text-xs font-mono text-slate-500">
                             <div className="flex items-center gap-1.5"><Clock className="w-3 h-3 md:w-4 md:h-4" /> Since {new Date(user.created_at).toLocaleDateString()}</div>
@@ -281,6 +291,12 @@ export default function ProfilePage() {
                             <div className="text-xl font-black text-white uppercase tracking-tight">
                                 {profile?.subscription_tier === 'pro' ? 'Unlimited Pro Access' : 'Trial Architecture'}
                             </div>
+                            {profile?.subscription_tier === 'pro' && profile?.pro_expires_at && (
+                                <div className="flex items-center gap-2 text-[10px] font-mono text-amber-500/80 bg-amber-500/5 px-3 py-1.5 rounded-lg border border-amber-500/10 w-fit">
+                                    <Clock className="w-3 h-3" />
+                                    <span>EXPIRES: {new Date(profile.pro_expires_at).toLocaleDateString()} ({Math.max(0, Math.ceil((new Date(profile.pro_expires_at) - new Date()) / (1000 * 60 * 60 * 24)))} days remaining)</span>
+                                </div>
+                            )}
                             <p className="text-xs text-slate-500 leading-relaxed font-bold italic">
                                 {profile?.subscription_tier === 'pro'
                                     ? "Your neural engine priority is set to Institutional tier with unlimited bandwidth."

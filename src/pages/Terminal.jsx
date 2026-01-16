@@ -1231,8 +1231,27 @@ export default function Terminal() {
         }
         if (!manualTicker && !manualApiKey) setStatusMessage("Initializing Optical Core...");
 
+        // Helper to send notification safely in TWA/PWA
+        const sendNotification = async (title, options) => {
+            try {
+                if (Notification.permission === 'granted') {
+                    if ('serviceWorker' in navigator) {
+                        const registration = await navigator.serviceWorker.ready;
+                        if (registration && registration.showNotification) {
+                            await registration.showNotification(title, options);
+                            return;
+                        }
+                    }
+                    // Fallback to standard Notification if SW not ready/supported
+                    new Notification(title, options);
+                }
+            } catch (err) {
+                console.warn("Notification failed:", err);
+            }
+        };
+
         // Request Notification Permission
-        if (Notification.permission === 'default') {
+        if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
             Notification.requestPermission();
         }
 
@@ -1549,17 +1568,35 @@ export default function Terminal() {
 
             const result = await runRealAnalysis(ticker, marketStats, historicalPrices, user, weights, setStatusMessage, syncReliability);
 
-            // --- SNAPSHOT UPLOAD ---
+            // --- SNAPSHOT UPLOAD (Asynchronous Parallel) ---
             if (user) {
-                setStatusMessage("Archiving Neural Snapshot...");
-                try {
-                    const snapshotUrl = await uploadSnapshot(originalFileSrc, user.id);
-                    if (snapshotUrl) {
-                        result.imageUrl = snapshotUrl;
+                // We don't await this to keep the UI snappy
+                (async () => {
+                    try {
+                        console.info("Archiving Neural Snapshot in background...");
+                        const snapshotUrl = await uploadSnapshot(originalFileSrc, user.id);
+                        if (snapshotUrl) {
+                            // Update the result object and current state if it's still for this analysis
+                            result.imageUrl = snapshotUrl;
+                            setAnalysisResult(prev => {
+                                if (prev && prev.id === result.id) {
+                                    return { ...prev, imageUrl: snapshotUrl };
+                                }
+                                return prev;
+                            });
+                            // Store in history with the URL
+                            saveHistory(result);
+                        } else {
+                            saveHistory(result);
+                        }
+                    } catch (uploadErr) {
+                        console.warn("Snapshot upload background task failed:", uploadErr);
+                        saveHistory(result);
                     }
-                } catch (uploadErr) {
-                    console.warn("Snapshot upload failed:", uploadErr);
-                }
+                })();
+            } else {
+                // For guests, save history immediately
+                saveHistory(result);
             }
 
             // Update Usage (only on success)
@@ -1572,24 +1609,20 @@ export default function Terminal() {
                 updateGuestUsage();
             }
 
-            // Save History
-            saveHistory(result);
-            setAnalysisResult(result);
-
             // Trigger Notification
-            if (Notification.permission === 'granted') {
-                new Notification(`Analysis Complete: ${result.ticker}`, {
-                    body: `${result.direction} (${result.confidence}%) - Click to view details`,
-                    icon: '/pwa-192x192.png' // Utilizing PWA icon if available
-                });
-            }
+            sendNotification(`Analysis Complete: ${result.ticker}`, {
+                body: `${result.direction} (${result.confidence}%) - Click to view details`,
+                icon: '/pwa-192x192.png',
+                tag: 'analysis-complete', // Prevent duplicates
+                renotify: true
+            });
 
         } catch (err) {
             // Auto-reset API Key if it seems invalid
             if (err.message && (err.message.includes("API Key") || err.message.includes("Forbidden") || err.message.includes("403"))) {
                 localStorage.removeItem('finnhub_key');
             }
-            alert(err.message || "Analysis failed.");
+            setStatusMessage(`ERROR: ${err.message || "Analysis failed."}`);
             console.error(err);
         }
         finally {
