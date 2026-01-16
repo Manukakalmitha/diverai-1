@@ -21,7 +21,8 @@ export const calculateHybridProbability = (neuralProb, patternSentiment, indicat
 
     // Dynamic Macro Weighting based on context
     const W_MACRO = 0.15 + (volatilityRatio > 0.04 ? 0.05 : 0); // Increase macro weight in high volatility
-    const totalW = weights.omega + weights.alpha + weights.gamma + W_MACRO;
+    const W_OB = 0.10; // Order Book Bias Weight
+    const totalW = weights.omega + weights.alpha + weights.gamma + W_MACRO + W_OB;
 
     const getDeviation = (p) => (p - 0.5) * 2;
 
@@ -57,7 +58,8 @@ export const calculateHybridProbability = (neuralProb, patternSentiment, indicat
         { w: w2, p: P2, c: 0.9, f: 1.0 },
         { w: w3, p: P3, c: 1.0, f: f3 },
         { w: w4, p: P4, c: 1.0, f: 1.0 },
-        { w: w5, p: P5, c: 1.0, f: 1.0 }
+        { w: w5, p: P5, c: 1.0, f: 1.0 },
+        { w: W_OB / totalW, p: getDeviation(weights.obBias || 0.5), c: 1.0, f: 1.0 }
     ];
 
     const product = layers.reduce((acc, layer) => {
@@ -199,8 +201,25 @@ export const runRealAnalysis = async (ticker, marketStats, historicalData, user,
     const macroData = await fetchMacroHistory(ticker);
     const macroSentiment = calculateMacroSentiment(macroData?.prices);
 
+    // D. Order Book Sentiment (Institutional Walls)
+    let obBias = 0.5;
+    try {
+        if (ticker.includes('BTC') || ticker.includes('ETH')) {
+            const obRes = await fetch(`https://api.binance.com/api/v3/depth?symbol=${ticker.replace('/', '').toUpperCase()}&limit=20`);
+            if (obRes.ok) {
+                const obData = await obRes.json();
+                const bidVol = obData.bids.reduce((acc, [p, q]) => acc + Number(q), 0);
+                const askVol = obData.asks.reduce((acc, [p, q]) => acc + Number(q), 0);
+                obBias = bidVol / (bidVol + askVol);
+                console.log(`[Analysis] Order Book Bias: ${obBias.toFixed(2)}`);
+            }
+        }
+    } catch (obErr) {
+        console.warn("Order Book sync failed:", obErr);
+    }
+
     // C. The Engine Fusion (V5 Consensus)
-    let finalProb = calculateHybridProbability(neuralProb, patternSenti, { rsi, macd: macdHist }, weights, syncReliability, macroSentiment, volatilityRatio, mtfBias);
+    let finalProb = calculateHybridProbability(neuralProb, patternSenti, { rsi, macd: macdHist }, { ...weights, obBias }, syncReliability, macroSentiment, volatilityRatio, mtfBias);
 
     // NON-LINEAR CONSENSUS BOOST (V5)
     const techBull = rsi[rsi.length - 1] < 45 && patternSenti === 'Bullish';

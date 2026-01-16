@@ -2,7 +2,6 @@
 -keep class agency.flisoft.diverai.twa.Application { <init>(); }
 -keep class agency.flisoft.diverai.twa.DelegationService { <init>(); }
 -keep class agency.flisoft.diverai.twa.LauncherActivity { <init>(); }
--keep class agency.flisoft.diverai.twa.MarketTickerWidget { <init>(); }
 -keep class androidx.core.app.CoreComponentFactory { <init>(); }
 -keep class androidx.core.content.FileProvider { <init>(); }
 -keep class androidx.profileinstaller.ProfileInstallReceiver { <init>(); }

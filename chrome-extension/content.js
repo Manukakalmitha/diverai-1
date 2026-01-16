@@ -110,6 +110,56 @@ function addDiverButton() {
   }
 }
 
+// --- Smart RR Overlay Logic ---
+function injectRROverlay(targets, ticker) {
+  // Remove existing overlay
+  const oldOverlay = document.getElementById('diver-ai-rr-overlay');
+  if (oldOverlay) oldOverlay.remove();
+
+  // Find the TradingView chart container (usually 'chart-container' or similar)
+  const chartContainer = document.querySelector('.chart-container-border') || document.body;
+  const overlay = document.createElement('div');
+  overlay.id = 'diver-ai-rr-overlay';
+  overlay.style.position = 'absolute';
+  overlay.style.inset = '0';
+  overlay.style.pointerEvents = 'none';
+  overlay.style.zIndex = '100';
+
+  // Try to find the price axis to calibrate coordinates
+  // On TradingView, the price axis is usually a canvas or div on the right.
+  const priceAxis = document.querySelector('[class*="price-axis"]');
+  const rect = chartContainer.getBoundingClientRect();
+
+  // Draw simple horizontal lines for TP/SL/Entry
+  // In a real implementation, we'd need to sync pixel values with price.
+  // For now, we'll draw a themed 'Protocol HUD' overlay with the target values.
+  overlay.innerHTML = `
+    <div style="position: absolute; top: 20px; left: 20px; background: rgba(15, 23, 42, 0.9); border: 1px solid #3b82f6; border-radius: 12px; padding: 15px; font-family: monospace; color: white; backdrop-filter: blur(8px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+      <div style="font-size: 10px; color: #64748b; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px;">Protocol Overlay: ${ticker}</div>
+      <div style="display: grid; gap: 8px;">
+        <div style="color: #3b82f6;">ENTRY: ${targets.entry}</div>
+        <div style="color: #10b981;">TP1: ${targets.tp1}</div>
+        <div style="color: #10b981;">TP2: ${targets.tp2}</div>
+        <div style="color: #f43f5e;">SL: ${targets.sl}</div>
+        <div style="margin-top: 5px; font-weight: bold;">R/R: ${targets.rr}</div>
+      </div>
+    </div>
+  `;
+
+  chartContainer.appendChild(overlay);
+
+  // Auto-remove after 30 seconds or on next scan
+  setTimeout(() => overlay.remove(), 30000);
+}
+
+// Listen for messages from sidebar
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'DRAW_RR_OVERLAY') {
+    injectRROverlay(request.targets, request.ticker);
+    sendResponse({ success: true });
+  }
+});
+
 // Observe DOM changes to re-inject if lost (SPA navigation)
 const observer = new MutationObserver((mutations) => {
   addDiverButton();

@@ -42,7 +42,7 @@
     <!-- Value from default config. -->
     <string name="providerAuthority" translatable="false">agency.flisoft.diverai.twa.fileprovider</string>
     <!-- Value from default config. -->
-    <string name="shareTarget" translatable="false">{\"action\":\"https://diverai.flisoft.agency/share-target\",\"method\":\"POST\",\"enctype\":\"multipart/form-data\",\"params\":{\"files\":[{\"name\":\"files\",\"accept\":[\"image/*\"]}]}}</string>
+    <string name="shareTarget" translatable="false">{\"action\":\"https://diverai.flisoft.agency/share-target\",\"method\":\"POST\",\"enctype\":\"multipart/form-data\",\"params\":{\"title\":\"title\",\"text\":\"text\",\"url\":\"url\",\"files\":[{\"name\":\"files\",\"accept\":[\"image/*\"]}]}}</string>
     <!-- Value from default config. -->
     <string name="shortcut_name_0" translatable="false">Analysis Terminal</string>
     <!-- Value from default config. -->

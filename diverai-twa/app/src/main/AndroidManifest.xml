@@ -24,7 +24,6 @@
 
     
         <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-        <uses-permission android:name="android.permission.INTERNET"/>
     
 
     
@@ -151,6 +150,8 @@
                     
                     <category android:name="android.intent.category.DEFAULT" />
                     
+                        <data android:mimeType="text/plain" />
+                    
                         <data android:mimeType="image/*" />
                     
                 </intent-filter>
@@ -175,17 +176,6 @@
 
             
         </activity>
-
-        <receiver android:name=".MarketTickerWidget"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_market_ticker_info" />
-        </receiver>
 
         <activity android:name="com.google.androidbrowserhelper.trusted.FocusActivity" />
 

@@ -23,15 +23,14 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="agency.flisoft.diverai.twa"
-    android:versionCode="1"
-    android:versionName="1" >
+    android:versionCode="3"
+    android:versionName="3" >
 
     <uses-sdk
         android:minSdkVersion="21"
         android:targetSdkVersion="35" />
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.INTERNET" />
 
     <queries>
         <intent>
@@ -141,6 +140,7 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
 
+                <data android:mimeType="text/plain" />
                 <data android:mimeType="image/*" />
             </intent-filter>
             <intent-filter>
@@ -159,19 +159,6 @@
                     android:scheme="https" />
             </intent-filter>
         </activity>
-
-        <receiver
-            android:name="agency.flisoft.diverai.twa.MarketTickerWidget"
-            android:exported="true" >
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_market_ticker_info" />
-        </receiver>
-
         <activity android:name="com.google.androidbrowserhelper.trusted.FocusActivity" />
         <activity
             android:name="com.google.androidbrowserhelper.trusted.WebViewFallbackActivity"

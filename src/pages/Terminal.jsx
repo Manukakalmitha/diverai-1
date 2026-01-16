@@ -13,6 +13,7 @@ import AuthModal from '../components/AuthModal';
 import { calculateRSI as calcRSI, calculateMACD, calculateBollingerBands, detectPatterns } from '../lib/technicalAnalysis';
 import { prepareData, calculateStats, createModel, trainModel, predictNextPrice, disposeModel, assessModelAccuracy, saveGlobalModel, loadGlobalModel, runBackgroundTraining, runBackgroundAssessment, saveGlobalModelArtifacts } from '../lib/brain';
 import { extractChartData, anchorPriceToVisual } from '../lib/vision';
+import { enhanceMobileChart } from '../lib/visionMobile';
 import { runRealAnalysis } from '../lib/analysis';
 import { Helmet } from 'react-helmet-async';
 import FloatingWidget from '../components/FloatingWidget';
@@ -972,6 +973,10 @@ export default function Terminal() {
             }
 
             if (params.get('shared-image') === 'true' || params.get('shared-url') === 'true') {
+                if (!checkLimits()) {
+                    navigate('/', { replace: true });
+                    return;
+                }
                 setIsQuickShareMode(true);
                 setIsAnalyzing(true);
                 setStatusMessage("Receiving Shared Intelligence...");
@@ -1116,27 +1121,14 @@ export default function Terminal() {
     };
 
     const checkLimits = () => {
-        const today = new Date().toISOString().split('T')[0];
-
         if (!user) {
-            // Guest / IP-based Limit
-            const guestLogs = JSON.parse(localStorage.getItem('diver_ai_guest_ip_logs') || '{}');
-            const currentIpLog = guestLogs[userIp || 'unknown'] || { count: 0, date: today };
-
-            // Reset if new day
-            if (currentIpLog.date !== today) {
-                currentIpLog.count = 0;
-                currentIpLog.date = today;
-            }
-
-            if (currentIpLog.count >= 3) {
-                setLimitMessage("IP Limit Reached: 3 guest analysis/day. Please log in for expanded access.");
-                setLimitType('guest');
-                setShowLimitModal(true);
-                return false;
-            }
-            return true;
+            setLimitMessage("Authentication Required: Please log in to access the neural analysis terminal.");
+            setLimitType('guest');
+            setShowLimitModal(true);
+            return false;
         }
+
+        const today = new Date().toISOString().split('T')[0];
 
         // Email Verification Check
         if (!user.email_confirmed_at) {
@@ -1164,24 +1156,22 @@ export default function Terminal() {
     };
 
     const updateGuestUsage = () => {
-        if (user) return;
-        const today = new Date().toISOString().split('T')[0];
-        const guestLogs = JSON.parse(localStorage.getItem('diver_ai_guest_ip_logs') || '{}');
-        const currentIp = userIp || 'unknown';
-        const log = guestLogs[currentIp] || { count: 0, date: today };
-
-        if (log.date !== today) {
-            log.count = 1;
-            log.date = today;
-        } else {
-            log.count += 1;
-        }
-
-        guestLogs[currentIp] = log;
-        localStorage.setItem('diver_ai_guest_ip_logs', JSON.stringify(guestLogs));
+        // Guest usage tracking disabled as login is mandatory
+        return;
     };
 
     const preprocessImage = (imageElement) => {
+        // Check for Mobile/TWA context to apply ROI cropping
+        const isMobile = window.innerWidth < 768 || navigator.userAgent.toLowerCase().includes('android');
+
+        if (isMobile) {
+            console.log("[MobileVision] Activating ROI enhancement...");
+            const enhancedSrc = enhanceMobileChart(imageElement);
+            // Re-draw with enhanced source for further processing if needed
+            // For now, we return this as the base for OCR and Visual
+            return { visualSrc: enhancedSrc, ocrSrc: enhancedSrc };
+        }
+
         const width = imageElement.width;
         const height = imageElement.height;
         const scale = Math.max(1, 1000 / width); // Slightly higher res for OCR
@@ -1426,18 +1416,18 @@ export default function Terminal() {
             // Wait for both "eyes" to see
             const [ocrRawResult, visualData] = await Promise.all([ocrPromise, visualPromise]);
 
-            // Handle Hybrid Detection (Ticker OR Price)
+            // --- PROMPT FOR CONFIRMATION IF UNCERTAIN (V5 ACCURACY BOOST) ---
             let detectedTicker = null;
             let anchorPrice = null;
 
             if (typeof ocrRawResult === 'object' && ocrRawResult !== null) {
-                // Cloud OCR path (or updated promise) with raw text
                 const fullText = ocrRawResult.text || "";
-                console.log("[Terminal] OCR text:", fullText.substring(0, 100));
                 detectedTicker = detectTicker(fullText);
                 anchorPrice = detectPrice(fullText);
-                console.log("[Terminal] Detected:", { ticker: detectedTicker, price: anchorPrice });
             }
+
+            // If we have multiple potential tickers or low confidence, we can add a step here.
+            // But for now, let's just use the detected one or manual.
 
             ticker = detectedTicker || manualTicker;
             const hasVisual = visualData && visualData.points.length > 20;
@@ -1666,14 +1656,6 @@ export default function Terminal() {
                 const newItem = { ...result, db_id: data[0].id, created_at: data[0].created_at };
                 setHistory(prev => [{ ...newItem }, ...prev]);
             }
-        } else {
-            const now = new Date().toISOString();
-            const item = { ...result, db_id: 'local-' + Date.now(), created_at: now };
-            setHistory(prev => {
-                const nh = [item, ...prev].slice(0, 5);
-                localStorage.setItem('diver_ai_guest_history', JSON.stringify(nh));
-                return nh;
-            });
         }
     };
 
@@ -1815,7 +1797,30 @@ export default function Terminal() {
                     <div className="max-w-6xl mx-auto space-y-6 md:space-y-12">
                         {!analysisResult && !isAnalyzing && !showManualInput && !showApiKeyInput ? (
                             <div className="animate-in fade-in duration-1000 py-12 md:py-24">
-                                <FileUpload onFileSelect={handleFileSelect} isAnalyzing={isAnalyzing} statusMessage={statusMessage} />
+                                {!user ? (
+                                    <div className="max-w-md mx-auto text-center space-y-8 p-12 bg-black-ash/40 border border-ash rounded-[40px] shadow-2xl">
+                                        <div className="w-20 h-20 bg-brand/10 border border-brand/20 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                                            <Lock className="w-10 h-10 text-brand" />
+                                        </div>
+                                        <div className="space-y-4">
+                                            <h3 className="text-3xl font-black text-white uppercase tracking-tighter">Terminal Locked</h3>
+                                            <p className="text-slate-500 font-bold leading-relaxed">
+                                                Advanced neural analysis requires an active operative session. Please initialize authentication to access the terminal.
+                                            </p>
+                                        </div>
+                                        <button
+                                            onClick={() => setShowAuth(true)}
+                                            className="btn-flame w-full !py-4 text-xs font-black uppercase tracking-[0.2em]"
+                                        >
+                                            Initialize Authentication <ChevronRight className="w-4 h-4 ml-2" />
+                                        </button>
+                                        <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">
+                                            Secure end-to-end encrypted protocol
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <FileUpload onFileSelect={handleFileSelect} isAnalyzing={isAnalyzing} statusMessage={statusMessage} />
+                                )}
                             </div>
                         ) : (
                             <div className="space-y-6">

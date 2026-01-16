@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, Zap, Search, AlertTriangle, CheckCircle2, Lock, User, LogOut, ChevronLeft, Cpu, TrendingUp, TrendingDown, Minus, Clock, ShieldCheck, Key, History, Trash2, BarChart3, Fingerprint, Share2, Trophy, Copy } from 'lucide-react';
+import { Activity, Zap, Search, AlertTriangle, CheckCircle2, Lock, User, LogOut, ChevronLeft, Cpu, TrendingUp, TrendingDown, Minus, Clock, ShieldCheck, Key, History, Trash2, BarChart3, Fingerprint, Share2, Trophy, Copy, Layers, Pencil } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAppContext } from '../src/context/AppContext';
 import { runRealAnalysis } from '../src/lib/analysis';
@@ -32,6 +32,59 @@ const SentimentGauge = ({ probability, direction }) => {
                     transition={{ duration: 1, ease: "circOut" }}
                     className={`h-full ${isBull ? 'bg-emerald-500' : 'bg-rose-500'}`}
                 />
+            </div>
+        </div>
+    );
+};
+
+const OrderBookDepth = ({ ticker }) => {
+    const [depth, setDepth] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (!ticker) return;
+        fetchDepth();
+    }, [ticker]);
+
+    const fetchDepth = async () => {
+        setLoading(true);
+        try {
+            // Simplified order book fetch (Binance for Crypto, fallback for others)
+            const symbol = ticker.replace('/', '').toUpperCase();
+            const res = await fetch(`https://api.binance.com/api/v3/depth?symbol=${symbol}&limit=5`);
+            if (res.ok) {
+                const data = await res.json();
+                setDepth(data);
+            }
+        } catch (err) {
+            console.warn("Order book fetch skipped for non-compatible ticker.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) return <div className="h-20 bg-slate-900 animate-pulse rounded-xl" />;
+    if (!depth) return null;
+
+    return (
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-3 space-y-2">
+            <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase">
+                <Layers className="w-3 h-3" /> Order Book Depth
+            </div>
+            <div className="space-y-1">
+                {depth.asks.slice(0, 3).reverse().map(([price, qty], i) => (
+                    <div key={`ask-${i}`} className="flex justify-between text-[10px] font-mono">
+                        <span className="text-rose-500">{Number(price).toFixed(2)}</span>
+                        <span className="text-slate-600">{Number(qty).toFixed(4)}</span>
+                    </div>
+                ))}
+                <div className="h-px bg-slate-800 my-1" />
+                {depth.bids.slice(0, 3).map(([price, qty], i) => (
+                    <div key={`bid-${i}`} className="flex justify-between text-[10px] font-mono">
+                        <span className="text-emerald-500">{Number(price).toFixed(2)}</span>
+                        <span className="text-slate-600">{Number(qty).toFixed(4)}</span>
+                    </div>
+                ))}
             </div>
         </div>
     );
@@ -108,42 +161,23 @@ const Sidebar = () => {
                 const newItem = { ...result, db_id: data[0].id, created_at: data[0].created_at };
                 setHistory(prev => [newItem, ...prev].slice(0, 10));
             }
-        } else {
-            const now = new Date().toISOString();
-            const item = { ...result, db_id: 'local-' + Date.now(), created_at: now };
-            setHistory(prev => {
-                const nh = [item, ...prev].slice(0, 5);
-                localStorage.setItem('diver_ai_guest_history', JSON.stringify(nh));
-                return nh;
-            });
         }
     };
 
     const updateGuestUsage = () => {
-        if (user) return;
-        const today = new Date().toISOString().split('T')[0];
-        const guestLogs = JSON.parse(localStorage.getItem('diver_ai_guest_ip_logs') || '{}');
-        const currentIp = userIp || 'unknown';
-        const log = guestLogs[currentIp] || { count: 0, date: today };
-        if (log.date !== today) { log.count = 1; log.date = today; } else { log.count += 1; }
-        guestLogs[currentIp] = log;
-        localStorage.setItem('diver_ai_guest_ip_logs', JSON.stringify(guestLogs));
+        // Guest usage tracking disabled as login is mandatory
+        return;
     };
 
     const checkLimits = () => {
-        const today = new Date().toISOString().split('T')[0];
         if (!user) {
-            const guestLogs = JSON.parse(localStorage.getItem('diver_ai_guest_ip_logs') || '{}');
-            const currentIpLog = guestLogs[userIp || 'unknown'] || { count: 0, date: today };
-            if (currentIpLog.date !== today) { currentIpLog.count = 0; currentIpLog.date = today; }
-            if (currentIpLog.count >= 3) {
-                setLimitMessage("IP Limit Reached: 3 guest analysis/day. Please log in for expanded access.");
-                setLimitType('guest');
-                setShowLimitModal(true);
-                return false;
-            }
-            return true;
+            setLimitMessage("Authentication Required: Please log in to access the neural analysis terminal.");
+            setLimitType('guest');
+            setShowLimitModal(true);
+            return false;
         }
+
+        const today = new Date().toISOString().split('T')[0];
         if (!user.email_confirmed_at) {
             setLimitMessage("Security Protocol: Email verification required. Check your inbox to unlock terminal scanning.");
             setLimitType('verify');
@@ -269,6 +303,19 @@ const Sidebar = () => {
             setErrorMessage(err.message);
             setStatus('error');
         }
+    };
+
+    const handleDrawOverlay = () => {
+        if (!analysisResult) return;
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (tabs[0]?.id) {
+                chrome.tabs.sendMessage(tabs[0].id, {
+                    action: 'DRAW_RR_OVERLAY',
+                    targets: analysisResult.targets,
+                    ticker: analysisResult.ticker
+                });
+            }
+        });
     };
 
     const TabButton = ({ id, label, icon: Icon }) => (
@@ -444,15 +491,37 @@ const Sidebar = () => {
                             exit={{ opacity: 0, scale: 0.98 }}
                             className="flex flex-col items-center justify-center h-full text-center space-y-6 pt-12"
                         >
-                            <div className="w-20 h-20 bg-slate-900 rounded-full flex items-center justify-center border border-slate-800 shadow-xl">
-                                <Search className="w-8 h-8 text-blue-500" />
-                            </div>
-                            <div className="space-y-2 max-w-[200px]">
-                                <h3 className="text-lg font-bold text-white">Ready to Analyze</h3>
-                                <p className="text-xs text-slate-500 leading-relaxed">
-                                    Navigate to any chart (TradingView, Yahoo, etc.) and click scan below.
-                                </p>
-                            </div>
+                            {!user ? (
+                                <>
+                                    <div className="w-20 h-20 bg-slate-900 rounded-full flex items-center justify-center border border-slate-800 shadow-xl">
+                                        <Lock className="w-8 h-8 text-rose-500" />
+                                    </div>
+                                    <div className="space-y-2 max-w-[200px]">
+                                        <h3 className="text-lg font-bold text-white">Terminal Locked</h3>
+                                        <p className="text-xs text-slate-500 leading-relaxed">
+                                            Neural analysis requires an active operative session. Please login to continue.
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => window.open(`${PROD_URL}/login?source=extension&extId=${chrome.runtime.id}`, '_blank')}
+                                        className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg transition-all uppercase tracking-widest text-[10px]"
+                                    >
+                                        Initialize Login
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="w-20 h-20 bg-slate-900 rounded-full flex items-center justify-center border border-slate-800 shadow-xl">
+                                        <Search className="w-8 h-8 text-blue-500" />
+                                    </div>
+                                    <div className="space-y-2 max-w-[200px]">
+                                        <h3 className="text-lg font-bold text-white">Ready to Analyze</h3>
+                                        <p className="text-xs text-slate-500 leading-relaxed">
+                                            Navigate to any chart (TradingView, Yahoo, etc.) and click scan below.
+                                        </p>
+                                    </div>
+                                </>
+                            )}
                         </motion.div>
                     )}
 
@@ -531,6 +600,17 @@ const Sidebar = () => {
                                 </h4>
                                 <p className="text-xs text-slate-300 leading-relaxed font-medium" dangerouslySetInnerHTML={{ __html: analysisResult.overview.replace(/\*\*(.*?)\*\*/g, '<span class="text-white font-bold">$1</span>') }} />
                             </div>
+
+                            {/* Order Book Depth */}
+                            <OrderBookDepth ticker={analysisResult.ticker} />
+
+                            {/* Overlay Controls */}
+                            <button
+                                onClick={handleDrawOverlay}
+                                className="w-full py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all"
+                            >
+                                <Pencil className="w-3.5 h-3.5 text-blue-400" /> Draw R/R on Chart
+                            </button>
 
                             {/* Footer Note */}
                             <div className="pt-2 border-t border-slate-800/50 mt-4 text-center">

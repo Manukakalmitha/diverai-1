@@ -17,11 +17,7 @@ drawable shortcut_2
 drawable shortcut_3
 drawable shortcut_legacy_background
 drawable splash
-id widget_ticker_change
-id widget_ticker_price
-id widget_ticker_symbol
 integer splashScreenFadeOutDuration
-layout widget_market_ticker
 mipmap ic_launcher
 mipmap ic_maskable
 raw web_app_manifest
@@ -47,4 +43,3 @@ string shortcut_short_name_3
 string webManifestUrl
 xml filepaths
 xml shortcuts
-xml widget_market_ticker_info
