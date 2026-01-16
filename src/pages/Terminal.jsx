@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
     Activity, TrendingUp, TrendingDown, Minus, Camera,
-    History, ShieldCheck, Cpu, X, ChevronRight, Zap, ThumbsUp, ThumbsDown, Trash2, Keyboard, Key, Share2
+    History, ShieldCheck, Cpu, X, ChevronRight, Zap, ThumbsUp, ThumbsDown, Trash2, Keyboard, Key, Share2, Lock as LockIcon, AlertTriangle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
@@ -1800,7 +1800,7 @@ export default function Terminal() {
                                 {!user ? (
                                     <div className="max-w-md mx-auto text-center space-y-8 p-12 bg-black-ash/40 border border-ash rounded-[40px] shadow-2xl">
                                         <div className="w-20 h-20 bg-brand/10 border border-brand/20 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                                            <Lock className="w-10 h-10 text-brand" />
+                                            <LockIcon className="w-10 h-10 text-brand" />
                                         </div>
                                         <div className="space-y-4">
                                             <h3 className="text-3xl font-black text-white uppercase tracking-tighter">Terminal Locked</h3>

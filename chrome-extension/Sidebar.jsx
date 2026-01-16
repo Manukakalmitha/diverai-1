@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, Zap, Search, AlertTriangle, CheckCircle2, Lock, User, LogOut, ChevronLeft, Cpu, TrendingUp, TrendingDown, Minus, Clock, ShieldCheck, Key, History, Trash2, BarChart3, Fingerprint, Share2, Trophy, Copy, Layers, Pencil } from 'lucide-react';
+import { Activity, Zap, Search, AlertTriangle, CheckCircle2, Lock as LockIcon, User, LogOut, ChevronLeft, Cpu, TrendingUp, TrendingDown, Minus, Clock, ShieldCheck, Key, History, Trash2, BarChart3, Fingerprint, Share2, Trophy, Copy, Layers, Pencil } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAppContext } from '../src/context/AppContext';
 import { runRealAnalysis } from '../src/lib/analysis';
@@ -340,7 +340,7 @@ const Sidebar = () => {
             {showLimitModal && (
                 <div className="fixed inset-0 z-[100] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-6 text-center animate-in fade-in">
                     <div className="space-y-6 max-w-xs">
-                        <div className="w-16 h-16 bg-rose-500/10 rounded-2xl flex items-center justify-center mx-auto border border-rose-500/20"><Lock className="text-rose-500" /></div>
+                        <div className="w-16 h-16 bg-rose-500/10 rounded-2xl flex items-center justify-center mx-auto border border-rose-500/20"><LockIcon className="text-rose-500" /></div>
                         <h3 className="text-xl font-black uppercase tracking-tight">Access Restricted</h3>
                         <p className="text-slate-500 text-xs font-bold leading-relaxed">{limitMessage}</p>
                         <div className="space-y-3">
@@ -494,7 +494,7 @@ const Sidebar = () => {
                             {!user ? (
                                 <>
                                     <div className="w-20 h-20 bg-slate-900 rounded-full flex items-center justify-center border border-slate-800 shadow-xl">
-                                        <Lock className="w-8 h-8 text-rose-500" />
+                                        <LockIcon className="w-8 h-8 text-rose-500" />
                                     </div>
                                     <div className="space-y-2 max-w-[200px]">
                                         <h3 className="text-lg font-bold text-white">Terminal Locked</h3>
