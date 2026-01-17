@@ -345,8 +345,8 @@ export const predictNextPrice = (model, lastWindowSeries, stats) => {
             zScoreNormalize(lastWindowSeries.rsi[i], stats[1].mean, stats[1].std),
             zScoreNormalize(lastWindowSeries.macd[i], stats[2].mean, stats[2].std),
             zScoreNormalize(lastWindowSeries.atr[i], stats[3].mean, stats[3].std),
-            zScoreNormalize(lastWindowSeries.roc[i], stats[4].mean, stats[4].std),
-            zScoreNormalize(lastWindowSeries.vol[i], stats[5].mean, stats[5].std)
+            robustNormalize(lastWindowSeries.roc[i], stats[4].median, stats[4].iqr),
+            robustNormalize(lastWindowSeries.vol[i], stats[5].median, stats[5].iqr)
         ]);
     }
 

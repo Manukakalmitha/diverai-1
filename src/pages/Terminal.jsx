@@ -142,7 +142,7 @@ const SentimentGauge = ({ probability, direction }) => {
     );
 };
 
-const ScanningHUD = ({ status }) => {
+const ScanningHUD = ({ status, isUnstable, onConfirm, onReject }) => {
     const [hexLines, setHexLines] = useState([]);
 
     useEffect(() => {
@@ -154,11 +154,11 @@ const ScanningHUD = ({ status }) => {
     }, []);
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-[500px] relative overflow-hidden bg-black rounded-[40px] border border-slate-900 shadow-2xl">
+        <div className="flex flex-col items-center justify-center min-h-[500px] w-full relative overflow-hidden bg-black rounded-[40px] border border-slate-900 shadow-2xl">
             {/* Grid Overlay */}
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#262626_1px,transparent_1px),linear-gradient(to_bottom,#262626_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-20" />
 
-            <div className="relative z-10 flex flex-col items-center">
+            <div className="relative z-10 flex flex-col items-center w-full px-6">
                 <div className="relative w-32 h-32 mb-12">
                     <div className="absolute inset-0 border-2 border-brand/20 rounded-full animate-[ping_3s_linear_infinite]" />
                     <div className="absolute inset-0 border border-brand/40 rounded-full rotate-45" />
@@ -168,22 +168,46 @@ const ScanningHUD = ({ status }) => {
                     </div>
                 </div>
 
-                <div className="text-center space-y-4">
-                    <h3 className="text-2xl font-black text-white tracking-tighter uppercase">{status || "Initializing Neural Core"}</h3>
-                    <div className="flex items-center justify-center gap-1.5">
-                        <div className="w-1.5 h-1.5 bg-brand rounded-full animate-bounce [animation-delay:-0.3s]" />
-                        <div className="w-1.5 h-1.5 bg-brand rounded-full animate-bounce [animation-delay:-0.15s]" />
-                        <div className="w-1.5 h-1.5 bg-brand rounded-full animate-bounce" />
-                    </div>
+                <div className="text-center space-y-4 max-w-sm">
+                    <h3 className="text-2xl font-black text-white tracking-tighter uppercase leading-tight">{status || "Initializing Neural Core"}</h3>
+
+                    {!isUnstable ? (
+                        <div className="flex items-center justify-center gap-1.5">
+                            <div className="w-1.5 h-1.5 bg-brand rounded-full animate-bounce [animation-delay:-0.3s]" />
+                            <div className="w-1.5 h-1.5 bg-brand rounded-full animate-bounce [animation-delay:-0.15s]" />
+                            <div className="w-1.5 h-1.5 bg-brand rounded-full animate-bounce" />
+                        </div>
+                    ) : (
+                        <div className="flex flex-col gap-4 mt-8 animate-in zoom-in duration-300">
+                            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest bg-ash/50 px-3 py-1 rounded-full border border-ash">Ambiguous Ticker Detection triggered</p>
+                            <div className="flex gap-3 justify-center">
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); onConfirm(); }}
+                                    className="flex items-center gap-2 bg-brand text-slate-950 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-tighter hover:scale-105 transition-transform"
+                                >
+                                    <ThumbsUp className="w-4 h-4" /> Confirm
+                                </button>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); onReject(); }}
+                                    className="flex items-center gap-2 bg-ash/80 text-white border border-ash px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-tighter hover:bg-slate-800 transition-colors"
+                                >
+                                    <ThumbsDown className="w-4 h-4" /> Manual
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
-                <div className="mt-12 w-64 h-px bg-gradient-to-r from-transparent via-slate-800 to-transparent" />
-
-                <div className="mt-8 font-mono text-[8px] text-brand/40 space-y-1">
-                    {hexLines.map((line, i) => (
-                        <div key={i} className="animate-in fade-in slide-in-from-bottom-2 duration-300">{line}</div>
-                    ))}
-                </div>
+                {!isUnstable && (
+                    <>
+                        <div className="mt-12 w-64 h-px bg-gradient-to-r from-transparent via-slate-800 to-transparent" />
+                        <div className="mt-8 font-mono text-[8px] text-brand/40 space-y-1">
+                            {hexLines.map((line, i) => (
+                                <div key={i} className="animate-in fade-in slide-in-from-bottom-2 duration-300">{line}</div>
+                            ))}
+                        </div>
+                    </>
+                )}
             </div>
 
             {/* Scanning Beam */}
@@ -427,7 +451,7 @@ const LimitModal = ({ message, type, onClose, onLogin }) => {
     );
 };
 
-const FileUpload = ({ onFileSelect, isAnalyzing, statusMessage }) => {
+const FileUpload = ({ onFileSelect, isAnalyzing, statusMessage, isUnstableDetection, handleConfirmTicker }) => {
     const [isDragging, setIsDragging] = useState(false);
     const handleDrag = (e) => { e.preventDefault(); setIsDragging(e.type === 'dragover'); };
     return (
@@ -436,8 +460,13 @@ const FileUpload = ({ onFileSelect, isAnalyzing, statusMessage }) => {
             className={`relative group h-96 rounded-[40px] border-4 border-dashed transition-all duration-500 flex flex-col items-center justify-center cursor-pointer overflow-hidden ${isDragging ? 'border-brand bg-brand/5 scale-[0.99] shadow-inner' : 'border-ash bg-black-ash/50 hover:border-slate-700 hover:bg-black-ash shadow-2xl'}`}
         >
             <input type="file" className="absolute inset-0 opacity-0 cursor-pointer z-10" onChange={e => onFileSelect(e.target.files[0])} accept="image/*" />
-            {isAnalyzing && !analysisResult ? (
-                <ScanningHUD status={statusMessage} />
+            {(isAnalyzing || isUnstableDetection) && !analysisResult ? (
+                <ScanningHUD
+                    status={statusMessage}
+                    isUnstable={isUnstableDetection}
+                    onConfirm={() => handleConfirmTicker(true)}
+                    onReject={() => handleConfirmTicker(false)}
+                />
             ) : (
                 <>
                     <div className="w-24 h-24 bg-brand rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-2xl shadow-brand/20"><ShieldCheck className="w-12 h-12 text-slate-950" /></div>
@@ -907,6 +936,8 @@ export default function Terminal() {
     const [userIp, setUserIp] = useState(null);
     const [tickerItems, setTickerItems] = useState([]);
     const [isIncognito, setIsIncognito] = useState(false); // Pro Feature
+    const [isUnstableDetection, setIsUnstableDetection] = useState(false); // New: Confirmation Guard
+    const [pendingAnalysisData, setPendingAnalysisData] = useState(null); // New: Confirmation Guard
     const tempFileRef = useRef(null);
     const ocrWorkerRef = useRef(null);
 
@@ -1291,6 +1322,21 @@ export default function Terminal() {
         reader.readAsDataURL(file);
     };
 
+    const handleConfirmTicker = (confirmed) => {
+        if (confirmed && pendingAnalysisData) {
+            const { originalFileSrc, visualSrc, ocrSrc, ticker } = pendingAnalysisData;
+            setIsUnstableDetection(false);
+            setPendingAnalysisData(null);
+            // Run again with the now-confirmed ticker
+            runAnalysisWorkflow(originalFileSrc, visualSrc, ocrSrc, ticker);
+        } else {
+            setIsUnstableDetection(false);
+            setPendingAnalysisData(null);
+            setStatusMessage("Detection Discarded. Please use manual entry.");
+            setShowManualInput(true);
+        }
+    };
+
     const runAnalysisWorkflow = async (originalFileSrc, visualSrc, ocrSrc = null, manualTicker = null, manualApiKey = null) => {
         const ocrImage = ocrSrc || visualSrc; // Fallback
 
@@ -1379,7 +1425,7 @@ export default function Terminal() {
                             const isSkew = localStorage.getItem('supabase.auth.token')?.includes('"future"'); // Heuristic check
                             if (isSkew) {
                                 console.warn("CRITICAL: Clock Skew detected. Cloud OCR will fail until device time is corrected.");
-                                setStatusMessage("Clock Skew Detected: Correct device time to enable Cloud OCR.");
+                                setStatusMessage("CLOCK SKEW DETECTED: Your device clock is out of sync. Please check system time or use local OCR.");
                             }
                             console.info("Cloud OCR still unavailable. Switching to local engine.");
                         } else {
@@ -1528,8 +1574,22 @@ export default function Terminal() {
                 }
             }
 
-            // If we have multiple potential tickers or low confidence, we can add a step here.
-            // But for now, let's just use the detected one or manual.
+            // V5.7: Confirmation Guard for ambiguous detections
+            const isHeuristicBased = !manualTicker && (!ocrRawResult?.ticker || !isValidTicker(ocrRawResult.ticker)) && detectedTicker;
+
+            if (isHeuristicBased && !manualTicker) {
+                console.info("[Neural Core] Ambiguous detection. Awaiting user confirmation...");
+                setIsUnstableDetection(true);
+                setPendingAnalysisData({
+                    originalFileSrc, visualSrc, ocrSrc,
+                    ticker: detectedTicker,
+                    anchorPrice,
+                    visualData
+                });
+                setIsAnalyzing(false);
+                setStatusMessage(`Ambiguous Detection: Confirm ${detectedTicker}?`);
+                return;
+            }
 
             ticker = detectedTicker || manualTicker;
 
@@ -1927,7 +1987,13 @@ export default function Terminal() {
                                         </p>
                                     </div>
                                 ) : (
-                                    <FileUpload onFileSelect={handleFileSelect} isAnalyzing={isAnalyzing} statusMessage={statusMessage} />
+                                    <FileUpload
+                                        onFileSelect={handleFileSelect}
+                                        isAnalyzing={isAnalyzing}
+                                        statusMessage={statusMessage}
+                                        isUnstableDetection={isUnstableDetection}
+                                        handleConfirmTicker={handleConfirmTicker}
+                                    />
                                 )}
                             </div>
                         ) : (

@@ -197,7 +197,9 @@ export const runRealAnalysis = async (ticker, marketStats, historicalData, user,
                             prices: closes.slice(-WINDOW_SIZE),
                             rsi: rsi.slice(-WINDOW_SIZE),
                             macd: macdHist.slice(-WINDOW_SIZE),
-                            atr: atr.slice(-WINDOW_SIZE)
+                            atr: atr.slice(-WINDOW_SIZE),
+                            roc: roc.slice(-WINDOW_SIZE),
+                            vol: vol.slice(-WINDOW_SIZE)
                         };
                         const predictedPrice = predictNextPrice(model, lastWindow, statsFactors);
 

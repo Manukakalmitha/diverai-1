@@ -181,6 +181,8 @@ export const detectPrice = (text) => {
  * isValidTicker (V5.5)
  * Filters out garbage OCR strings like tNAML71W
  */
+// isValidTicker (V5.5)
+// Filters out garbage OCR strings like tNAML71W
 export const isValidTicker = (t) => {
     if (!t || typeof t !== 'string') return false;
     const upper = t.toUpperCase();
@@ -215,43 +217,79 @@ export const isValidTicker = (t) => {
     return true;
 };
 
+// Fuzzy similarity helper (Levenshtein based)
+export const fuzzyMatch = (s1, s2) => {
+    if (!s1 || !s2) return 0;
+    const longer = s1.length > s2.length ? s1 : s2;
+    const shorter = s1.length > s2.length ? s2 : s1;
+    if (longer.length === 0) return 1.0;
+
+    const editDistance = (a, b) => {
+        const matrix = [];
+        for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+        for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+        for (let i = 1; i <= b.length; i++) {
+            for (let j = 1; j <= a.length; j++) {
+                if (b.charAt(i - 1) === a.charAt(j - 1)) matrix[i][j] = matrix[i - 1][j - 1];
+                else matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1));
+            }
+        }
+        return matrix[b.length][a.length];
+    };
+
+    return (longer.length - editDistance(longer, shorter)) / parseFloat(longer.length);
+};
+
 export const detectTicker = (text) => {
     if (!text) return null;
     const upper = text.toUpperCase();
-    const blacklist = ['VOL', 'USD', 'USDT', 'UTC', 'CRYPTO', 'CRYPTOCURRENCY', 'PRICE', 'MARKET', 'CHANGE', 'TIME', 'TOTAL', 'LOW', 'HIGH', 'OPEN', 'CLOSE', 'DAILY', 'WEEKLY'];
 
-    // Matches TradingView symbol URLs: tradingview.com/symbols/BTCUSD/ or /chart/XYZ/?symbol=...
+    // 1. URL Strategy (Highest Confidence)
     const urlMatch = text.match(/tradingview\.com\/(?:symbols|chart)\/([A-Z0-9:]+)/i) ||
         text.match(/[?&]symbol=([A-Z0-9:]+)/i);
     if (urlMatch) {
-        let t = urlMatch[1].split(':').pop(); // Handle BINANCE:BTCUSDT -> BTCUSDT
-        const cleanTicker = t.replace(/(USD[TC]?|BUSD|EUR|GBP)$/, ''); // Strip quote currency
-
-        // V5.6 Fix: If it's a clear symbol from a URL, be more lenient than raw OCR
+        let t = urlMatch[1].split(':').pop();
+        const cleanTicker = t.replace(/(USD[TC]?|BUSD|EUR|GBP)$/, '');
         if (cleanTicker && cleanTicker.length >= 2) return cleanTicker;
     }
 
-    // 1. Explicit Ticker Dictionary Strategy
+    // 2. Exact or Fuzzy Dictionary Strategy
     const words = upper.split(/[^A-Z0-9]/).filter(w => w.length >= 2);
-    for (const ticker of Object.keys(COIN_MAP)) {
-        if (words.includes(ticker)) return ticker;
+    const allSymbols = [...Object.keys(COIN_MAP), ...Object.keys(STOCK_MAP)];
+
+    // Try exact first
+    for (const w of words) {
+        if (allSymbols.includes(w)) return w;
     }
 
-    // 2. Pair Strategy (e.g., BTCUSDT, BTC/USD, ETH-PERP, 1000SHIBUSDT)
+    // Try fuzzy if it looks like a ticker (2-5 chars alpha)
+    for (const w of words) {
+        if (/^[A-Z]{3,5}$/.test(w)) {
+            for (const sym of allSymbols) {
+                if (fuzzyMatch(w, sym) >= 0.8) return sym;
+            }
+        }
+    }
+
+    // 3. Pair Strategy
     const pairMatch = upper.match(/\b([A-Z0-9]{2,10})[\/\-\\]?(?:USDT|USD|BUSD|USDC|PERP|FRAX|DAI)\b/);
     if (pairMatch) {
         const t = pairMatch[1];
         if (isValidTicker(t)) return t;
     }
 
-    // 3. Contextual Pattern: CRYPTO O H L (Common TV/IBKR header) followed by Price
-    if ((upper.includes('CRYPTO') || upper.includes('O H L')) && !upper.includes('BITCOIN')) {
+    // 4. Contextual Price-Range Strategy (Tiered Backup)
+    // Only triggers if very strong structural markers are present
+    const hasStrongContext = upper.includes('O H L') || upper.includes('INDEX') || upper.includes('EXCHANGE') || upper.includes('MARKET CAP');
+    if (hasStrongContext && !upper.includes('BITCOIN')) {
         const price = detectPrice(text);
         if (price > 40000 && price < 150000) return 'BTC';
         if (price > 1500 && price < 10000) return 'ETH';
+        if (price > 150 && price < 1000) return 'SOL';
+        if (price > 0.4 && price < 2.5) return 'XRP';
     }
 
-    // 4. Full Name Variant Strategy (V5.1: Bitcoin, Ethereum, etc.)
+    // 5. Full Name Strategy
     const nameMap = {
         'BITCOIN': 'BTC',
         'ETHEREUM': 'ETH',
@@ -265,7 +303,7 @@ export const detectTicker = (text) => {
         if (upper.includes(name)) return ticker;
     }
 
-    // 5. Page Title Strategy
+    // 6. Page Title Strategy
     const titleMatch = upper.match(/\(([A-Z0-9]{2,6})\)[ -]|^([A-Z0-9]{2,6})\s+\d/);
     if (titleMatch) {
         const t = titleMatch[1] || titleMatch[2];

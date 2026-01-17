@@ -113,6 +113,11 @@ const prepareData = (dataSeries, windowSize) => {
 
         xData.push(pattern);
         yData.push((p[i + windowSize] - windowBasePrice) / (windowBasePrice || 1));
+
+        // AUGMENTATION (On-the-fly)
+        const augmented = augmentPattern(pattern);
+        xData.push(augmented);
+        yData.push((p[i + windowSize] - windowBasePrice) / (windowBasePrice || 1) * (0.999 + Math.random() * 0.002));
     }
 
     const xs = tf.tensor3d(xData, [xData.length, windowSize, FEATURES]);
