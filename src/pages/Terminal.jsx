@@ -1282,15 +1282,11 @@ export default function Terminal() {
                     try {
                         setStatusMessage("Deep Scan (Cloud OCR)...");
 
-                        // Explicitly get session to ensure freshness and prevent 401
-                        const { data: { session } } = await supabase.auth.getSession();
-                        const token = session?.access_token;
-
-                        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+                        // Ensure session is fresh before invoking
+                        await supabase.auth.refreshSession();
 
                         const { data, error } = await supabase.functions.invoke('detect_ticker', {
-                            body: { image: originalFileSrc },
-                            headers: headers
+                            body: { image: originalFileSrc }
                         });
 
                         if (error) throw error;
@@ -1298,7 +1294,8 @@ export default function Terminal() {
                             return { text: data.text, ticker: detectTicker(data.text) };
                         }
                     } catch (cloudErr) {
-                        if (cloudErr.message?.includes("401")) {
+                        const status = cloudErr.status || (cloudErr.message?.includes("401") ? 401 : null);
+                        if (status === 401) {
                             console.info("Cloud OCR unavailable (Guest/Session Stale). Switching to local engine.");
                         } else {
                             console.warn("Cloud OCR Failed, reverting to local:", cloudErr);

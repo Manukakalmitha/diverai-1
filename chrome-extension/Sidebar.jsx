@@ -219,65 +219,29 @@ const Sidebar = () => {
             setScreenshot(imgUrl);
 
             setStatus('analyzing');
-            setStatusMessage("Deep Scan (Cloud OCR)...");
+            await supabase.auth.refreshSession();
 
-            const { data: { session } } = await supabase.auth.getSession();
-            let currentToken = session?.access_token || import.meta.env.VITE_SUPABASE_ANON_KEY;
-            let retryCount = 0;
-            let response;
-            let success = false;
+            try {
+                setStatusMessage("Deep Scan (Cloud OCR)...");
+                const { data: ocrData, error: cloudErr } = await supabase.functions.invoke('detect_ticker', {
+                    body: { image: imgUrl }
+                });
 
-            while (!success && retryCount < 3) {
-                try {
-                    const activeToken = retryCount === 2 ? import.meta.env.VITE_SUPABASE_ANON_KEY : currentToken;
-                    response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/detect_ticker`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-                            'Authorization': `Bearer ${activeToken}`
-                        },
-                        body: JSON.stringify({ image: imgUrl })
-                    });
+                if (cloudErr) throw cloudErr;
 
-                    if (response.ok) {
-                        success = true;
-                    } else if (response.status === 401 && retryCount === 0 && session) {
-                        console.info("[Sidebar] Auth 401. Attempting session refresh...");
-                        try {
-                            const { data: { session: newSession }, error: refreshError } = await supabase.auth.refreshSession();
-                            if (refreshError || !newSession) {
-                                console.warn("[Sidebar] Refresh failed, switching to Anon-Key fallback.");
-                                retryCount = 2; // Jump to anon
-                            } else {
-                                currentToken = newSession.access_token;
-                                retryCount++;
-                            }
-                        } catch (err) {
-                            retryCount = 2;
-                        }
-                    } else if (response.status === 401 && retryCount < 2) {
-                        console.info("[Sidebar] Auth 401 (No Session/Expired). Using Anon-Key fallback.");
-                        retryCount = 2;
-                        // Small delay to prevent tight loop
-                        await new Promise(r => setTimeout(r, 500));
-                    } else {
-                        throw new Error(`Service Error (${response.status})`);
-                    }
-                } catch (err) {
-                    if (retryCount >= 2) throw err;
-                    retryCount++;
-                }
+                const fullText = ocrData?.text || '';
+                const ticker = detectTicker(fullText);
+                const anchorPrice = detectPrice(fullText);
+                console.log("[Sidebar] OCR Detected:", { ticker, anchorPrice });
+
+                if (!ticker && !anchorPrice) throw new Error("Neural Core Rejected: No valid asset or price identified.");
+
+                setStatusMessage(`Target Locked: ${ticker}. Syncing Data...`);
+                // ... rest of the flow
+            } catch (cloudErr) {
+                console.warn("[Sidebar] Cloud OCR Failed, using local fallback if possible or failing.");
+                throw cloudErr;
             }
-
-            if (!response || !response.ok) throw new Error("Visualization Service Unavailable");
-            const ocrData = await response.json();
-            const fullText = ocrData?.text || '';
-            const ticker = detectTicker(fullText);
-            const anchorPrice = detectPrice(fullText);
-            console.log("[Sidebar] OCR Detected:", { ticker, anchorPrice });
-
-            if (!ticker && !anchorPrice) throw new Error("Neural Core Rejected: No valid asset or price identified.");
 
             setStatusMessage(`Target Locked: ${ticker}. Syncing Data...`);
             let marketStats, historicalPrices;

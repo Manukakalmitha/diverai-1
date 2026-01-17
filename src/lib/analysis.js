@@ -250,6 +250,8 @@ export const runRealAnalysis = async (ticker, marketStats, historicalData, user,
     }
 
     // D. Generate Report Data
+    const confidence = ((finalProb > 0.5 ? finalProb : 1 - finalProb) * 100).toFixed(1);
+
     const factors = [
         { name: `Neural Net (V5 LSTM)`, type: 'Deep Intelligence', w: weights.omega, p: neuralProb, value: fastMode ? 'Heuristic' : 'RMSE-Optimized' },
         { name: `Primary Pattern: ${patterns[0].name}`, type: 'Geometric', w: weights.alpha, p: patternSenti === 'Bullish' ? 0.8 : (patternSenti === 'Bearish' ? 0.2 : 0.5), value: patterns[0].name },
@@ -336,7 +338,7 @@ export const runRealAnalysis = async (ticker, marketStats, historicalData, user,
         rr: rr.toFixed(1)
     };
 
-    const confidence = ((finalProb > 0.5 ? finalProb : 1 - finalProb) * 100).toFixed(1);
+
 
     const generateStrategicOutlook = () => {
         const rsiVal = rsi[rsi.length - 1];
