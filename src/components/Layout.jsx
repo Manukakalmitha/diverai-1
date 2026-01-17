@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { Activity, Book, Crown, LogOut, User, Menu, X, ChevronRight } from 'lucide-react';
+import { Activity, Book, Crown, LogOut, User, Menu, X, ChevronRight, AlertTriangle } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAppContext } from '../context/AppContext';
@@ -13,6 +12,12 @@ const Layout = ({ children, showNav = true, showTicker = true, navStyle }) => {
 
     return (
         <div className="min-h-screen bg-black text-slate-200 font-sans selection:bg-blue-500/30 overflow-x-hidden">
+            {/* Maintenance Banner */}
+            <div className="bg-amber-500 text-slate-950 font-black py-2.5 px-6 flex items-center justify-center gap-3 text-[10px] uppercase tracking-[0.2em] relative z-[100] shadow-2xl">
+                <AlertTriangle className="w-4 h-4" />
+                <span>System Undergoing Maintenance - Neural Core Synchronization in Progress</span>
+                <AlertTriangle className="w-4 h-4" />
+            </div>
 
             {/* Professional Header */}
             {showNav && (
