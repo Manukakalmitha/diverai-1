@@ -433,6 +433,83 @@ export const fetchStockHistory = async (ticker, apiKey) => {
     }
 };
 
+// V5.8: Direct Exchange Access (Binance Public API) - Reliable & Fast
+export const fetchBinancePrice = async (ticker) => {
+    try {
+        // Standardize: Remove USD/USDT suffixes if present, then add 'USDT'
+        const base = ticker.replace(/(USD[TC]?|BUSD|EUR|GBP)$/, '');
+        const symbol = `${base}USDT`;
+
+        const response = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`);
+        if (!response.ok) throw new Error("Symbol not found");
+
+        const data = await response.json();
+        return {
+            price: parseFloat(data.price),
+            source: 'Binance (Direct)'
+        };
+    } catch (err) {
+        // Silent fail - it's just one source
+        return null;
+    }
+};
+
+// V5.8: CryptoCompare API (Backup)
+export const fetchCryptoComparePrice = async (ticker) => {
+    try {
+        const base = ticker.replace(/(USD[TC]?|BUSD|EUR|GBP)$/, '');
+        const response = await fetch(`https://min-api.cryptocompare.com/data/price?fsym=${base}&tsyms=USD`);
+        const data = await response.json();
+        if (data.USD) {
+            return {
+                price: data.USD,
+                source: 'CryptoCompare'
+            };
+        }
+        return null;
+    } catch (err) {
+        return null;
+    }
+};
+
+/**
+ * V5.8: Optimized Price Racer
+ * Races multiple high-speed sources to find the true live price.
+ * Prioritizes Binance -> CryptoCompare -> Yahoo -> CoinGecko.
+ */
+export const getOptimizedPrice = async (ticker) => {
+    if (!ticker) return null;
+
+    // 1. Check if it's a known crypto (Binance is fastest)
+    const isCrypto = COIN_MAP[ticker] || isValidTicker(ticker);
+
+    if (isCrypto && !STOCK_MAP[ticker]) {
+        // Parallel Race: Binance vs CryptoCompare
+        const [binance, cc] = await Promise.allSettled([
+            fetchBinancePrice(ticker),
+            fetchCryptoComparePrice(ticker)
+        ]);
+
+        if (binance.status === 'fulfilled' && binance.value) return binance.value;
+        if (cc.status === 'fulfilled' && cc.value) return cc.value;
+    }
+
+    // 2. Fallback to Yahoo (Stocks + Crypto backup)
+    const yahoo = await fetchYahooData(ticker);
+    if (yahoo?.marketStats?.price) {
+        return {
+            price: yahoo.marketStats.price,
+            source: 'Yahoo Finance'
+        };
+    }
+
+    // 3. Fallback to CoinGecko / Finnhub
+    const gecko = await fetchMarketData(ticker);
+    if (gecko?.price) return { price: gecko.price, source: 'CoinGecko' };
+
+    return null;
+};
+
 // Yahoo Finance Proxy (No Auth Required)
 export const fetchYahooData = async (ticker) => {
     // Standardize ticker for Yahoo

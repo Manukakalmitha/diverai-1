@@ -7,7 +7,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import Tesseract from 'tesseract.js';
-import { detectTicker, detectPrice, fetchMarketData, fetchHistoricalData, COIN_MAP, STOCK_MAP, fetchStockData, fetchStockHistory, fetchYahooData, fetchMacroHistory, calculateMacroSentiment, fetchTickerData, isValidTicker, detectTimeframe } from '../lib/marketData';
+import { detectTicker, detectPrice, fetchMarketData, fetchHistoricalData, COIN_MAP, STOCK_MAP, fetchStockData, fetchStockHistory, fetchYahooData, fetchMacroHistory, calculateMacroSentiment, fetchTickerData, isValidTicker, detectTimeframe, getOptimizedPrice } from '../lib/marketData';
 import { useAppContext } from '../context/AppContext';
 import AuthModal from '../components/AuthModal';
 import { calculateRSI as calcRSI, calculateMACD, calculateBollingerBands, detectPatterns } from '../lib/technicalAnalysis';
@@ -1609,6 +1609,52 @@ export default function Terminal() {
                 alert("Safety Check Triggered:\nNo valid ticker or chart pattern detected.");
                 setIsAnalyzing(false);
                 return;
+            }
+
+            // V5.8: Hybrid Price Validation (Live API + Visual)
+            // Race the Live Price against OCR to fix scaling errors (e.g. 92.72 vs 92720)
+            if (ticker && ticker !== "VISUAL-SCAN") {
+                setStatusMessage(`Verifying Scale for ${ticker}...`);
+                try {
+                    const optimizedPrice = await getOptimizedPrice(ticker);
+
+                    if (optimizedPrice && optimizedPrice.price > 0) {
+                        const livePrice = optimizedPrice.price;
+                        console.log(`[Hybrid Validation] Live Price: ${livePrice} (${optimizedPrice.source}) | OCR Anchor: ${anchorPrice}`);
+
+                        if (!anchorPrice || isNaN(anchorPrice)) {
+                            // Case 1: OCR failed to read price -> Use Live Price
+                            console.warn("[Hybrid Validation] OCR Price missing. Defaulting to Live Price.");
+                            anchorPrice = livePrice;
+                        } else {
+                            // Case 2: Compare and Auto-Scale
+                            const ratio = livePrice / anchorPrice;
+
+                            // Check for common scaling errors (10x, 100x, 1000x, 0.01x etc)
+                            // Allow 15% variance for market moves
+                            const isScaleError = (factor) => Math.abs(ratio - factor) < (factor * 0.15);
+
+                            if (isScaleError(10)) anchorPrice *= 10;
+                            else if (isScaleError(100)) anchorPrice *= 100;
+                            else if (isScaleError(1000)) anchorPrice *= 1000;
+                            else if (isScaleError(10000)) anchorPrice *= 10000;
+                            else if (isScaleError(0.1)) anchorPrice *= 0.1;
+                            else if (isScaleError(0.01)) anchorPrice *= 0.01;
+                            else if (Math.abs(ratio - 1) > 0.2) {
+                                // Case 3: Major Divergence (>20%) not explained by scale
+                                // Trust Live Price for anchoring as OCR likely read a different number (e.g. volume)
+                                console.warn(`[Hybrid Validation] Major divergence detected (Live: ${livePrice} vs OCR: ${anchorPrice}). Overriding.`);
+                                anchorPrice = livePrice;
+                            } else {
+                                // Case 4: Close enough (<20% variance), use OCR for chart consistency
+                                // But maybe nudge it closer if needed? No, chart relative scale matters most.
+                                console.log("[Hybrid Validation] Price verified. Scale matches.");
+                            }
+                        }
+                    }
+                } catch (valErr) {
+                    console.warn("[Hybrid Validation] Live fetch failed, relying on OCR.", valErr);
+                }
             }
 
             // Fallback for visual data if ticker is missing
