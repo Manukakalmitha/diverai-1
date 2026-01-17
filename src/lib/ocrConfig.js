@@ -120,9 +120,14 @@ export const filterByConfidence = (ocrResult, minWordConfidence = 60, minAvgConf
 
     const { words, confidence } = ocrResult.data;
 
+    // V5.3 Improvement: If we found a very high confidence word that looks like a ticker, 
+    // we can be more lenient on the overall average confidence.
+    const potentialTicker = words?.find(w => /^[A-Z]{2,10}$/.test(w.text) && w.confidence > 85);
+    const effectiveMinAvg = potentialTicker ? Math.min(minAvgConfidence, 50) : minAvgConfidence;
+
     // Check average confidence
-    if (confidence < minAvgConfidence) {
-        console.log(`[OCR] Result rejected: avg confidence ${confidence}% < ${minAvgConfidence}%`);
+    if (confidence < effectiveMinAvg) {
+        console.log(`[OCR] Result rejected: avg confidence ${confidence}% < ${effectiveMinAvg}%`);
         return null;
     }
 

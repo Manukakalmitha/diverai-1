@@ -1296,7 +1296,22 @@ export default function Terminal() {
                     } catch (cloudErr) {
                         const status = cloudErr.status || cloudErr.context?.status || (cloudErr.message?.includes("401") ? 401 : null);
                         if (status === 401) {
-                            console.info("Cloud OCR unavailable (Session Stale/Unauthorized). Switching to local engine.");
+                            console.info("Cloud OCR 401 detected. Attempting session refresh and retry...");
+                            try {
+                                const { error: refreshError } = await supabase.auth.refreshSession();
+                                if (!refreshError) {
+                                    const { data: retryData, error: retryError } = await supabase.functions.invoke('detect_ticker', {
+                                        body: { image: originalFileSrc }
+                                    });
+                                    if (!retryError && retryData?.text) {
+                                        console.info("Retry successful.");
+                                        return { text: retryData.text, ticker: detectTicker(retryData.text) };
+                                    }
+                                }
+                            } catch (refreshErr) {
+                                console.warn("Session refresh or retry failed:", refreshErr);
+                            }
+                            console.info("Cloud OCR still unavailable. Switching to local engine.");
                         } else {
                             console.warn("Cloud OCR Failed, reverting to local:", cloudErr);
                         }
