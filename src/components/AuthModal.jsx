@@ -24,14 +24,22 @@ const AuthModal = ({ onClose, onSuccess }) => {
                     // Try to sync with extension if we have an ID from URL
                     const params = new URLSearchParams(window.location.search);
                     const extId = params.get('extId');
-                    if (extId) {
-                        chrome.runtime.sendMessage(extId, {
-                            type: 'AUTH_SYNC',
-                            session: {
-                                access_token: data.session.access_token,
-                                refresh_token: data.session.refresh_token
-                            }
-                        });
+                    if (extId && chrome?.runtime?.sendMessage) {
+                        try {
+                            chrome.runtime.sendMessage(extId, {
+                                type: 'AUTH_SYNC',
+                                session: {
+                                    access_token: data.session.access_token,
+                                    refresh_token: data.session.refresh_token
+                                }
+                            }, (response) => {
+                                if (chrome.runtime.lastError) {
+                                    console.info("Extension sync skipped: Connection could not be established.");
+                                }
+                            });
+                        } catch (err) {
+                            console.warn("Auth sync error:", err);
+                        }
                     }
                 }
                 onSuccess();
@@ -115,14 +123,20 @@ const AuthModal = ({ onClose, onSuccess }) => {
                     if (window.chrome && chrome.runtime && chrome.runtime.sendMessage) {
                         const params = new URLSearchParams(window.location.search);
                         const extId = params.get('extId');
-                        if (extId) {
-                            chrome.runtime.sendMessage(extId, {
-                                type: 'AUTH_SYNC',
-                                session: {
-                                    access_token: session.access_token,
-                                    refresh_token: session.refresh_token
-                                }
-                            });
+                        if (extId && chrome?.runtime?.sendMessage) {
+                            try {
+                                chrome.runtime.sendMessage(extId, {
+                                    type: 'AUTH_SYNC',
+                                    session: {
+                                        access_token: session.access_token,
+                                        refresh_token: session.refresh_token
+                                    }
+                                }, () => {
+                                    if (chrome.runtime.lastError) {
+                                        // Silent fail - extension might not be ready
+                                    }
+                                });
+                            } catch (e) { }
                         }
                     }
 
@@ -143,14 +157,20 @@ const AuthModal = ({ onClose, onSuccess }) => {
                 if (window.chrome && chrome.runtime && chrome.runtime.sendMessage) {
                     const params = new URLSearchParams(window.location.search);
                     const extId = params.get('extId');
-                    if (extId) {
-                        chrome.runtime.sendMessage(extId, {
-                            type: 'AUTH_SYNC',
-                            session: {
-                                access_token: session.access_token,
-                                refresh_token: session.refresh_token
-                            }
-                        });
+                    if (extId && chrome?.runtime?.sendMessage) {
+                        try {
+                            chrome.runtime.sendMessage(extId, {
+                                type: 'AUTH_SYNC',
+                                session: {
+                                    access_token: session.access_token,
+                                    refresh_token: session.refresh_token
+                                }
+                            }, () => {
+                                if (chrome.runtime.lastError) {
+                                    // Silent fail
+                                }
+                            });
+                        } catch (e) { }
                     }
                 }
                 onSuccess();

@@ -1340,8 +1340,12 @@ export default function Terminal() {
                     try {
                         setStatusMessage("Deep Scan (Cloud OCR)...");
 
+                        const { data: { session } } = await supabase.auth.getSession();
                         const { data, error } = await supabase.functions.invoke('detect_ticker', {
-                            body: { image: originalFileSrc }
+                            body: { image: originalFileSrc },
+                            headers: {
+                                Authorization: `Bearer ${session?.access_token}`
+                            }
                         });
 
                         if (error) throw error;
@@ -1355,8 +1359,12 @@ export default function Terminal() {
                             try {
                                 const { error: refreshError } = await supabase.auth.refreshSession();
                                 if (!refreshError) {
+                                    const { data: { session: freshSession } } = await supabase.auth.getSession();
                                     const { data: retryData, error: retryError } = await supabase.functions.invoke('detect_ticker', {
-                                        body: { image: originalFileSrc }
+                                        body: { image: originalFileSrc },
+                                        headers: {
+                                            Authorization: `Bearer ${freshSession?.access_token}`
+                                        }
                                     });
                                     if (!retryError && retryData?.text) {
                                         console.info("Retry successful.");

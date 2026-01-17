@@ -38,14 +38,20 @@ const AuthPage = ({ initialMode = 'login' }) => {
             const { data: { session } } = await supabase.auth.getSession();
             if (session && source === 'extension' && extId) {
                 // Sync session to extension
-                if (window.chrome && chrome.runtime && chrome.runtime.sendMessage) {
-                    chrome.runtime.sendMessage(extId, {
-                        type: 'AUTH_SYNC',
-                        session: {
-                            access_token: session.access_token,
-                            refresh_token: session.refresh_token
-                        }
-                    });
+                if (window.chrome && chrome.runtime?.sendMessage) {
+                    try {
+                        chrome.runtime.sendMessage(extId, {
+                            type: 'AUTH_SYNC',
+                            session: {
+                                access_token: session.access_token,
+                                refresh_token: session.refresh_token
+                            }
+                        }, () => {
+                            if (chrome.runtime.lastError) {
+                                // Silent fail
+                            }
+                        });
+                    } catch (e) { }
                 }
                 setIsExtAuthSuccess(true);
             }
@@ -65,16 +71,22 @@ const AuthPage = ({ initialMode = 'login' }) => {
 
                 if (source === 'extension' && extId && data.session) {
                     // Sync session to extension
-                    if (window.chrome && chrome.runtime && chrome.runtime.sendMessage) {
-                        chrome.runtime.sendMessage(extId, {
-                            type: 'AUTH_SYNC',
-                            session: {
-                                access_token: data.session.access_token,
-                                refresh_token: data.session.refresh_token
-                            }
-                        }, (response) => {
-                            console.log("Extension auth sync response:", response);
-                        });
+                    if (window.chrome && chrome.runtime?.sendMessage) {
+                        try {
+                            chrome.runtime.sendMessage(extId, {
+                                type: 'AUTH_SYNC',
+                                session: {
+                                    access_token: data.session.access_token,
+                                    refresh_token: data.session.refresh_token
+                                }
+                            }, (response) => {
+                                if (chrome.runtime.lastError) {
+                                    console.info("Extension auth sync skipped.");
+                                } else {
+                                    console.log("Extension auth sync response:", response);
+                                }
+                            });
+                        } catch (e) { }
                     }
                     setIsExtAuthSuccess(true);
                 } else {
@@ -187,14 +199,20 @@ const AuthPage = ({ initialMode = 'login' }) => {
                     clearInterval(interval);
                     if (source === 'extension' && extId) {
                         // Sync session
-                        if (window.chrome && chrome.runtime && chrome.runtime.sendMessage) {
-                            chrome.runtime.sendMessage(extId, {
-                                type: 'AUTH_SYNC',
-                                session: {
-                                    access_token: session.access_token,
-                                    refresh_token: session.refresh_token
-                                }
-                            });
+                        if (window.chrome && chrome.runtime?.sendMessage) {
+                            try {
+                                chrome.runtime.sendMessage(extId, {
+                                    type: 'AUTH_SYNC',
+                                    session: {
+                                        access_token: session.access_token,
+                                        refresh_token: session.refresh_token
+                                    }
+                                }, () => {
+                                    if (chrome.runtime.lastError) {
+                                        // Silent fail
+                                    }
+                                });
+                            } catch (e) { }
                         }
                         setIsExtAuthSuccess(true);
                         setIsEmailSent(false); // Stop showing magic link view
@@ -215,14 +233,20 @@ const AuthPage = ({ initialMode = 'login' }) => {
             if (session) {
                 if (source === 'extension' && extId) {
                     // Sync session
-                    if (window.chrome && chrome.runtime && chrome.runtime.sendMessage) {
-                        chrome.runtime.sendMessage(extId, {
-                            type: 'AUTH_SYNC',
-                            session: {
-                                access_token: session.access_token,
-                                refresh_token: session.refresh_token
-                            }
-                        });
+                    if (window.chrome && chrome.runtime?.sendMessage) {
+                        try {
+                            chrome.runtime.sendMessage(extId, {
+                                type: 'AUTH_SYNC',
+                                session: {
+                                    access_token: session.access_token,
+                                    refresh_token: session.refresh_token
+                                }
+                            }, () => {
+                                if (chrome.runtime.lastError) {
+                                    // Silent fail
+                                }
+                            });
+                        } catch (e) { }
                     }
                     setIsExtAuthSuccess(true);
                     setIsEmailSent(false);
