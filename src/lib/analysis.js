@@ -179,33 +179,35 @@ export const runRealAnalysis = async (ticker, marketStats, historicalData, user,
                 }
 
                 if (!model) {
-                    setStatusMessage("Training Deep LSTM V4 (Parallel Core)...");
-                    const rocTrain = calculateROC(closes, 10);
-                    const volTrain = calculateRollingVolatility(closes, 20);
-                    const workerResult = await runBackgroundTraining({
+                    // V5.9: ASYNC FIRE-AND-FORGET TRAINING
+                    // Don't block the user. Return Rapid Heuristic immediately, train in background.
+
+                    // 1. Calculate Rapid Heuristic (Instant)
+                    const lastClose = closes[closes.length - 1];
+                    const prevClose = closes[closes.length - 15] || closes[0];
+                    const mom = (lastClose - prevClose) / prevClose;
+                    // Volatility-Adjusted Neural Heuristic
+                    neuralProb = 0.5 + Math.min(0.45, Math.max(-0.45, (mom / (volatilityRatio * 5))));
+                    setStatusMessage("Rapid Precision Heuristic Applied (Training in Background)...");
+
+                    // 2. Launch Background Training (Silent) - FIRE AND FORGET
+                    runBackgroundTraining({
                         ticker,
                         historicalPrices: closes,
                         rsi,
                         macdHist,
                         atr,
-                        roc: rocTrain,
-                        vol: volTrain,
+                        roc: calculateROC(closes, 10),
+                        vol: calculateRollingVolatility(closes, 20),
                         emaRatio,
                         bPercent
-                    });
-
-                    if (workerResult) {
-                        // V4: Multiplier-Adjusted Intelligence (VAM)
-                        const vam = 1.0 / (volatilityRatio * 10 || 1);
-                        neuralProb = 0.5 + ((workerResult.predictedPrice - currentPrice) / currentPrice * vam);
-                        neuralProb = Math.max(0.02, Math.min(0.98, neuralProb));
-                        statsFactors = workerResult.stats;
-
-                        if (user && workerResult.modelArtifacts) {
-                            setStatusMessage("Syncing V4 Brain to Cloud...");
+                    }).then(async (workerResult) => {
+                        if (workerResult && user && workerResult.modelArtifacts) {
+                            console.log(`[Neural Core] Background Training Complete for ${ticker}. Syncing to Global Master Model...`);
                             await saveGlobalModelArtifacts(user, workerResult.modelArtifacts, `lstm_v4_${ticker}`, 0.99);
                         }
-                    }
+                    }).catch(err => console.warn("[Neural Core] Background Training Error:", err));
+
                 } else {
                     setStatusMessage("Calibrating Cloud Intelligence V4...");
                     statsFactors = calculateStats(dataSeries);
