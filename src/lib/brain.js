@@ -1,6 +1,7 @@
 import * as tf from '@tensorflow/tfjs';
 import { supabase } from './supabase.js';
 import { calculateRSI, calculateMACD, detectPatterns, calculateATR } from './technicalAnalysis.js';
+import { calculateROC, calculateRollingVolatility } from './featureEngineering.js';
 
 // Explicitly set backend
 const initTf = async () => {
@@ -20,7 +21,7 @@ const TRAINING_TIMEOUT_MS = 300000;
 
 export const runBackgroundTraining = (data) => {
     return new Promise((resolve, reject) => {
-        const worker = new Worker(new URL('./brain.worker.js', import.meta.url), { type: "module" });
+        const worker = new Worker(new URL('./brain.worker.js', import.meta.url), { type: 'module' });
         let isSettled = false;
 
         // Timeout handler to prevent indefinite hangs on slow devices
@@ -72,7 +73,7 @@ export const runBackgroundTraining = (data) => {
 
 export const runBackgroundAssessment = (fullPrices, onProgress) => {
     return new Promise((resolve, reject) => {
-        const worker = new Worker(new URL('./brain.worker.js', import.meta.url), { type: "module" });
+        const worker = new Worker(new URL('./brain.worker.js', import.meta.url), { type: 'module' });
         let isSettled = false;
 
         // Assessment timeout: 5 minutes
@@ -124,7 +125,7 @@ export const runBackgroundAssessment = (fullPrices, onProgress) => {
 export const WINDOW_SIZE = 45;
 const EPOCHS = 35;
 const BATCH_SIZE = 32;
-const FEATURES = 4; // Price, RSI, MACD Histogram, ATR
+const FEATURES = 6; // Price, RSI, MACD Histogram, ATR, ROC, Volatility
 
 /**
  * Normalizes a pattern using "Zero-Base" (first candle as 0)
@@ -140,9 +141,21 @@ const zeroBaseNormalize = (arr, baseVal) => {
 const zScoreNormalize = (val, mean, std) => (val - mean) / (std || 1);
 
 /**
- * Synthetic Data Augmentation
- * Simulates variations to reach "1M patterns" robustiness
+ * Robust Scaling (Median/IQR) for outlier-prone features (Vol, ROC)
  */
+const robustNormalize = (val, median, iqr) => (val - median) / (iqr || 1);
+
+/**
+ * Calculate Robust Stats (Median, IQR)
+ */
+export const calculateRobustStats = (arr) => {
+    const sorted = [...arr].sort((a, b) => a - b);
+    const median = sorted[Math.floor(sorted.length / 2)];
+    const q1 = sorted[Math.floor(sorted.length * 0.25)];
+    const q3 = sorted[Math.floor(sorted.length * 0.75)];
+    const iqr = q3 - q1 || 1;
+    return { median, iqr };
+};
 export const augmentPattern = (patternVector) => {
     // patternVector is [WINDOW_SIZE][FEATURES]
     return patternVector.map(step => {
@@ -152,7 +165,9 @@ export const augmentPattern = (patternVector) => {
             step[0] * scale + noise,
             step[1] * scale + noise,
             step[2] * scale + noise,
-            step[3] * scale + noise
+            step[3] * scale + noise,
+            step[4] * scale + noise,
+            step[5] * scale + noise
         ];
     });
 };
@@ -161,32 +176,49 @@ export const augmentPattern = (patternVector) => {
  * Calculate stats for Z-Score normalization WITHOUT creating tensors
  */
 export const calculateStats = (dataSeries) => {
-    const { prices, rsi, macd, atr } = dataSeries;
-    const minLen = Math.min(prices.length, rsi.length, macd.length, (atr?.length || 0));
+    const { prices, rsi, macd, atr, roc, vol } = dataSeries;
+    const minLen = Math.min(prices.length, rsi.length, macd.length, (atr?.length || 0), (roc?.length || 0), (vol?.length || 0));
+
     const p = prices.slice(-minLen);
     const r = rsi.slice(-minLen);
     const m = macd.slice(-minLen);
     const a = atr.slice(-minLen);
+    const ro = roc.slice(-minLen);
+    const v = vol.slice(-minLen);
 
-    return [p, r, m, a].map(arr => {
+    // [0-Price (Base Only), 1-RSI (Z), 2-MACD (Z), 3-ATR (Z), 4-ROC (Robust), 5-Vol (Robust)]
+    const stats = [];
+
+    // Z-Score for 1-3
+    [r, m, a].forEach(arr => {
         const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
         const std = Math.sqrt(arr.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / arr.length) || 1;
-        return { mean, std };
+        stats.push({ mean, std });
     });
+
+    // Robust for 4-5
+    [ro, v].forEach(arr => {
+        const { median, iqr } = calculateRobustStats(arr);
+        stats.push({ median, iqr });
+    });
+
+    return [{ base: p[0] }, ...stats];
 };
 
 /**
  * Multivariate Data Preparation with Z-Score Normalization
  */
 export const prepareData = (dataSeries, windowSize) => {
-    const { prices, rsi, macd, atr } = dataSeries;
-    const minLen = Math.min(prices.length, rsi.length, macd.length, (atr?.length || 0));
+    const { prices, rsi, macd, atr, roc, vol } = dataSeries;
+    const minLen = Math.min(prices.length, rsi.length, macd.length, (atr?.length || 0), (roc?.length || 0), (vol?.length || 0));
     const stats = calculateStats(dataSeries);
 
     const p = prices.slice(-minLen);
     const r = rsi.slice(-minLen);
     const m = macd.slice(-minLen);
     const a = atr.slice(-minLen);
+    const ro = roc.slice(-minLen);
+    const v = vol.slice(-minLen);
 
     const count = minLen - windowSize;
     if (count <= 0) return { xs: tf.tensor3d([], [0, windowSize, FEATURES]), ys: tf.tensor2d([], [0, 1]), stats };
@@ -200,10 +232,12 @@ export const prepareData = (dataSeries, windowSize) => {
 
         for (let j = 0; j < windowSize; j++) {
             pattern.push([
-                (p[i + j] - windowBasePrice) / (windowBasePrice || 1), // Zero-base price
+                (p[i + j] - windowBasePrice) / (windowBasePrice || 1),
                 zScoreNormalize(r[i + j], stats[1].mean, stats[1].std),
                 zScoreNormalize(m[i + j], stats[2].mean, stats[2].std),
-                zScoreNormalize(a[i + j], stats[3].mean, stats[3].std)
+                zScoreNormalize(a[i + j], stats[3].mean, stats[3].std),
+                robustNormalize(ro[i + j], stats[4].median, stats[4].iqr), // Robust
+                robustNormalize(v[i + j], stats[5].median, stats[5].iqr)   // Robust
             ]);
         }
 
@@ -223,44 +257,60 @@ export const prepareData = (dataSeries, windowSize) => {
 };
 
 export const createModel = () => {
-    const model = tf.sequential();
+    const input = tf.input({ shape: [WINDOW_SIZE, FEATURES] });
 
-    // Layer 1: LSTM (Temporal Feature Extraction)
-    model.add(tf.layers.lstm({
+    // Layer 1: LSTM (Temporal Feature Extraction) - Return sequences for Attention
+    const lstm1 = tf.layers.lstm({
         units: 64,
-        inputShape: [WINDOW_SIZE, FEATURES],
         returnSequences: true,
         recurrentInitializer: 'glorotUniform',
         kernelRegularizer: tf.regularizers.l2({ l2: 0.005 })
-    }));
+    }).apply(input);
 
-    model.add(tf.layers.dropout({ rate: 0.2 }));
+    const dropout1 = tf.layers.dropout({ rate: 0.2 }).apply(lstm1);
 
-    // Layer 2: LSTM (Deep Pattern Detection)
-    model.add(tf.layers.lstm({
-        units: 32,
-        returnSequences: false,
-        recurrentInitializer: 'glorotUniform'
-    }));
+    // --- ATTENTION MECHANISM ---
+    // 1. Calculate energy/alignment scores
+    const attentionEnergy = tf.layers.dense({
+        units: 64,
+        activation: 'tanh',
+        name: 'attention_energy'
+    }).apply(dropout1);
 
-    model.add(tf.layers.batchNormalization());
+    // 2. Calculate attention weights (Softmax over time)
+    const attentionWeights = tf.layers.dense({
+        units: 1,
+        activation: 'softmax',
+        name: 'attention_weights'
+    }).apply(attentionEnergy);
+
+    // 3. Apply weights to sequence
+    const weightedSequence = tf.layers.multiply().apply([dropout1, attentionWeights]);
+
+    // 4. Global Average Pooling (Context Vector)
+    const contextVector = tf.layers.globalAveragePooling1d().apply(weightedSequence);
+    // ---------------------------
+
+    const batchNorm1 = tf.layers.batchNormalization().apply(contextVector);
 
     // Layer 3: Interpretation
-    model.add(tf.layers.dense({
+    const dense1 = tf.layers.dense({
         units: 32,
         activation: 'relu',
         kernelRegularizer: tf.regularizers.l2({ l2: 0.005 })
-    }));
+    }).apply(batchNorm1);
 
-    model.add(tf.layers.dense({
+    const dense2 = tf.layers.dense({
         units: 16,
         activation: 'relu'
-    }));
+    }).apply(dense1);
 
-    model.add(tf.layers.dense({ units: 1, activation: 'linear' }));
+    const output = tf.layers.dense({ units: 1, activation: 'linear' }).apply(dense2);
+
+    const model = tf.model({ inputs: input, outputs: output });
 
     model.compile({
-        optimizer: tf.train.adam(0.002),
+        optimizer: tf.train.adam(0.0015), // Slightly lower LR for attention stability
         loss: 'meanSquaredError'
     });
 
@@ -294,7 +344,9 @@ export const predictNextPrice = (model, lastWindowSeries, stats) => {
             (lastWindowSeries.prices[i] - basePrice) / (basePrice || 1),
             zScoreNormalize(lastWindowSeries.rsi[i], stats[1].mean, stats[1].std),
             zScoreNormalize(lastWindowSeries.macd[i], stats[2].mean, stats[2].std),
-            zScoreNormalize(lastWindowSeries.atr[i], stats[3].mean, stats[3].std)
+            zScoreNormalize(lastWindowSeries.atr[i], stats[3].mean, stats[3].std),
+            zScoreNormalize(lastWindowSeries.roc[i], stats[4].mean, stats[4].std),
+            zScoreNormalize(lastWindowSeries.vol[i], stats[5].mean, stats[5].std)
         ]);
     }
 
@@ -324,12 +376,16 @@ export const assessModelAccuracy = async (fullPrices, onProgress) => {
     const rsi = calculateRSI(fullPrices, 14);
     const macd = calculateMACD(fullPrices).histogram;
     const atr = calculateATR(fullPrices, null, fullPrices, 14);
+    const roc = calculateROC(fullPrices, 10);
+    const vol = calculateRollingVolatility(fullPrices, 20);
 
-    const minLen = Math.min(fullPrices.length, rsi.length, macd.length, atr.length);
+    const minLen = Math.min(fullPrices.length, rsi.length, macd.length, atr.length, roc.length, vol.length);
     const prices = fullPrices.slice(-minLen);
     const r = rsi.slice(-minLen);
     const m = macd.slice(-minLen);
     const a = atr.slice(-minLen);
+    const ro = roc.slice(-minLen);
+    const v = vol.slice(-minLen);
 
     const TEST_POINTS = 10;
     if (minLen < WINDOW_SIZE + TEST_POINTS + 10) {
@@ -347,7 +403,9 @@ export const assessModelAccuracy = async (fullPrices, onProgress) => {
         prices: prices.slice(0, baseIdx),
         rsi: r.slice(0, baseIdx),
         macd: m.slice(0, baseIdx),
-        atr: a.slice(0, baseIdx)
+        atr: a.slice(0, baseIdx),
+        roc: ro.slice(0, baseIdx),
+        vol: v.slice(0, baseIdx)
     };
 
     if (onProgress) onProgress(10);
@@ -367,7 +425,9 @@ export const assessModelAccuracy = async (fullPrices, onProgress) => {
                 prices: prices.slice(targetIdx - WINDOW_SIZE, targetIdx),
                 rsi: r.slice(targetIdx - WINDOW_SIZE, targetIdx),
                 macd: m.slice(targetIdx - WINDOW_SIZE, targetIdx),
-                atr: a.slice(targetIdx - WINDOW_SIZE, targetIdx)
+                atr: a.slice(targetIdx - WINDOW_SIZE, targetIdx),
+                roc: ro.slice(targetIdx - WINDOW_SIZE, targetIdx),
+                vol: v.slice(targetIdx - WINDOW_SIZE, targetIdx)
             };
             return predictNextPrice(model, lastWindowSeries, stats);
         });
@@ -401,7 +461,9 @@ export const assessModelAccuracy = async (fullPrices, onProgress) => {
                     (prices[idx] - basePrice) / (basePrice || 1),
                     zScoreNormalize(r[idx], stats[1].mean, stats[1].std),
                     zScoreNormalize(m[idx], stats[2].mean, stats[2].std),
-                    zScoreNormalize(a[idx], stats[3].mean, stats[3].std)
+                    zScoreNormalize(a[idx], stats[3].mean, stats[3].std),
+                    zScoreNormalize(ro[idx], stats[4].mean, stats[4].std),
+                    zScoreNormalize(v[idx], stats[5].mean, stats[5].std)
                 ]);
             }
             const xt = tf.tensor3d([x], [1, WINDOW_SIZE, FEATURES]);

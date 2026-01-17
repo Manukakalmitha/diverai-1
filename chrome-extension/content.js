@@ -155,8 +155,10 @@ function injectRROverlay(targets, ticker) {
 // Listen for messages from sidebar
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'DRAW_RR_OVERLAY') {
+    console.log('[Content Script] Received DRAW_RR_OVERLAY request:', request);
     injectRROverlay(request.targets, request.ticker);
     sendResponse({ success: true });
+    return true; // Keep message channel open
   }
 });
 

@@ -50,7 +50,8 @@ const OrderBookDepth = ({ ticker }) => {
         setLoading(true);
         try {
             // Simplified order book fetch (Binance for Crypto, fallback for others)
-            const symbol = ticker.replace('/', '').toUpperCase();
+            let symbol = ticker.replace('/', '').toUpperCase();
+            if (symbol === 'BTC' || symbol === 'ETH' || symbol === 'SOL' || symbol === 'XRP') symbol += 'USDT';
             const res = await fetch(`https://api.binance.com/api/v3/depth?symbol=${symbol}&limit=5`);
             if (res.ok) {
                 const data = await res.json();
@@ -241,18 +242,30 @@ const Sidebar = () => {
 
                     if (response.ok) {
                         success = true;
-                    } else if (response.status === 401 && retryCount === 0) {
-                        const { data: { session: newSession }, error: refreshError } = await supabase.auth.refreshSession();
-                        if (refreshError || !newSession) throw new Error("Refresh Failed");
-                        currentToken = newSession.access_token;
-                        retryCount++;
-                    } else if (response.status === 401 && retryCount === 1) {
-                        retryCount++;
+                    } else if (response.status === 401 && retryCount === 0 && session) {
+                        console.info("[Sidebar] Auth 401. Attempting session refresh...");
+                        try {
+                            const { data: { session: newSession }, error: refreshError } = await supabase.auth.refreshSession();
+                            if (refreshError || !newSession) {
+                                console.warn("[Sidebar] Refresh failed, switching to Anon-Key fallback.");
+                                retryCount = 2; // Jump to anon
+                            } else {
+                                currentToken = newSession.access_token;
+                                retryCount++;
+                            }
+                        } catch (err) {
+                            retryCount = 2;
+                        }
+                    } else if (response.status === 401 && retryCount < 2) {
+                        console.info("[Sidebar] Auth 401 (No Session/Expired). Using Anon-Key fallback.");
+                        retryCount = 2;
+                        // Small delay to prevent tight loop
+                        await new Promise(r => setTimeout(r, 500));
                     } else {
                         throw new Error(`Service Error (${response.status})`);
                     }
                 } catch (err) {
-                    if (retryCount === 2) throw err;
+                    if (retryCount >= 2) throw err;
                     retryCount++;
                 }
             }
@@ -306,15 +319,49 @@ const Sidebar = () => {
     };
 
     const handleDrawOverlay = () => {
-        if (!analysisResult) return;
+        if (!analysisResult) {
+            console.warn('[Overlay] No analysis result available to draw overlay.');
+            return;
+        }
+
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            if (tabs[0]?.id) {
-                chrome.tabs.sendMessage(tabs[0].id, {
-                    action: 'DRAW_RR_OVERLAY',
-                    targets: analysisResult.targets,
-                    ticker: analysisResult.ticker
-                });
+            const activeTab = tabs[0];
+
+            if (!activeTab) {
+                console.warn('[Overlay] No active tab found.');
+                return;
             }
+
+            if (!activeTab.url) {
+                console.warn('[Overlay] Unable to determine current page URL.');
+                return;
+            }
+
+            // Check if on a supported trading platform
+            const supportedDomains = ['tradingview.com', 'yahoo.com', 'coingecko.com', 'coinmarketcap.com', 'binance.com', 'google.com/finance'];
+            const isSupported = supportedDomains.some(domain => activeTab.url.includes(domain));
+
+            if (!isSupported) {
+                console.info(`[Overlay] Skipped - Not on a supported trading page. Current URL: ${activeTab.url}`);
+                alert('Please navigate to a trading chart (e.g., TradingView) to draw the R/R overlay.');
+                return;
+            }
+
+            // Send message to content script
+            chrome.tabs.sendMessage(activeTab.id, {
+                action: 'DRAW_RR_OVERLAY',
+                targets: analysisResult.targets,
+                ticker: analysisResult.ticker
+            }, (response) => {
+                if (chrome.runtime.lastError) {
+                    console.error('[Overlay] Failed:', chrome.runtime.lastError.message);
+                    alert(`Overlay failed: Content script not ready. Try refreshing the trading page.`);
+                } else if (response?.success) {
+                    console.log('[Overlay] Successfully drawn on chart.');
+                } else {
+                    console.warn('[Overlay] Message sent, but no confirmation received.');
+                }
+            });
         });
     };
 

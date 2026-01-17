@@ -1,0 +1,14 @@
+[
+    {
+        "relation": [
+            "delegate_permission/common.handle_all_urls"
+        ],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "com.diverai.app",
+            "sha256_cert_fingerprints": [
+                "SHA256: F5:DC:84:D6:BC:5A:C7:4A:7C:2A:1D:0E:E7:33:D0:00:8A:71:8E:56:65:4C:3D:F3:CD:BA:0E:B7:52:31:FA:13"
+            ]
+        }
+    }
+]

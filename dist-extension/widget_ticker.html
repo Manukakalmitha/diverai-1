@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DiverAI Ticker</title>
+    <style>
+        body { margin: 0; padding: 16px; background: #020617; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; height: 100vh; box-sizing: border-box; }
+        .ticker { font-size: 14px; opacity: 0.8; font-weight: bold; }
+        .price { font-size: 28px; font-weight: bold; color: #4ade80; margin: 4px 0; }
+        .brand { font-size: 10px; opacity: 0.5; position: absolute; bottom: 8px; right: 12px; }
+    </style>
+</head>
+<body>
+    <div class="ticker">BTC/USD</div>
+    <div class="price" id="price">loading...</div>
+    <div class="brand">DIVER AI</div>
+    <script>
+        async function fetchPrice() {
+            try {
+                const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
+                const data = await res.json();
+                const price = data.bitcoin.usd;
+                document.getElementById('price').textContent = '$' + price.toLocaleString();
+            } catch (e) {
+                document.getElementById('price').textContent = 'Error';
+            }
+        }
+        fetchPrice();
+        setInterval(fetchPrice, 60000); // Update every minute
+        
+        // Handle widget click to open main app
+        document.body.addEventListener('click', () => {
+             window.open('/', '_blank');
+        });
+    </script>
+</body>
+</html>

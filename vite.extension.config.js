@@ -64,6 +64,7 @@ export default defineConfig(({ mode }) => {
                     }
                 }
             },
+            /*
             obfuscator({
                 compact: true,
                 controlFlowFlattening: true,
@@ -78,6 +79,7 @@ export default defineConfig(({ mode }) => {
                 splitStringsChunkLength: 10,
                 target: 'browser'
             }),
+            */
         ],
         build: {
             outDir: 'dist-extension',
@@ -99,10 +101,11 @@ export default defineConfig(({ mode }) => {
             alias: {
                 '@': resolve(__dirname, './src'),
                 // Force extension build to use the extension-specific supabase client
+                '/src/lib/supabase.js': resolve(__dirname, './src/lib/supabase-extension.js'),
+                '/src/lib/supabase': resolve(__dirname, './src/lib/supabase-extension.js'),
                 '../lib/supabase': resolve(__dirname, './src/lib/supabase-extension.js'),
                 './supabase': resolve(__dirname, './src/lib/supabase-extension.js'),
-                '/src/lib/supabase': resolve(__dirname, './src/lib/supabase-extension.js'),
-                '../src/lib/supabase': resolve(__dirname, './src/lib/supabase-extension.js')
+                './supabase.js': resolve(__dirname, './src/lib/supabase-extension.js'),
             },
         },
     };

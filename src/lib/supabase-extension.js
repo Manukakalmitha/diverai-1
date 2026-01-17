@@ -4,7 +4,8 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-    console.error('Missing Supabase Environment Variables!');
+    console.error('[SupabaseExtension] Missing Environment Variables!');
+    console.debug('[SupabaseExtension] URL:', !!supabaseUrl, 'Key:', !!supabaseAnonKey);
 }
 
 // Custom storage handler for Chrome Extensions to ensure persistence
@@ -38,7 +39,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
         storage: customStorage,
         autoRefreshToken: true,
         persistSession: true,
-        detectSessionInUrl: true
+        detectSessionInUrl: false // Extensions should handle redirect sync manually
     }
 });
 

@@ -12,6 +12,13 @@ import {
 import { calculateStats, predictNextPrice, runBackgroundTraining, loadGlobalModel, saveGlobalModelArtifacts, disposeModel, WINDOW_SIZE } from './brain.js';
 import { fetchMacroHistory, calculateMacroSentiment } from './marketData.js';
 import { supabase } from './supabase.js';
+import {
+    calculateSharpeRatio,
+    calculateSortinoRatio,
+    calculateMaxDrawdown,
+    calculateVolatilityRatio,
+    calculateNetReturns
+} from './featureEngineering.js';
 
 /**
  * Advanced Hybrid Fusion Logic (RMSE-Calibrated Form V4)
@@ -130,6 +137,7 @@ export const runRealAnalysis = async (ticker, marketStats, historicalData, user,
 
     // currentPrice is already defined and auto-corrected above
     const currentATR = atr[atr.length - 1] || (currentPrice * 0.02);
+    const volRatio = calculateVolatilityRatio(closes);
     const volatilityRatio = currentATR / currentPrice;
 
     if (closes.length >= WINDOW_SIZE) {
@@ -143,7 +151,9 @@ export const runRealAnalysis = async (ticker, marketStats, historicalData, user,
         } else {
             let model = null;
             try {
-                const dataSeries = { prices: closes, rsi, macd: macdHist, atr };
+                const roc = calculateROC(closes, 10);
+                const vol = calculateRollingVolatility(closes, 20);
+                const dataSeries = { prices: closes, rsi, macd: macdHist, atr, roc, vol };
 
                 if (user) {
                     model = await loadGlobalModel(user, `lstm_v4_${ticker}`);
@@ -151,12 +161,16 @@ export const runRealAnalysis = async (ticker, marketStats, historicalData, user,
 
                 if (!model) {
                     setStatusMessage("Training Deep LSTM V4 (Parallel Core)...");
+                    const rocTrain = calculateROC(closes, 10);
+                    const volTrain = calculateRollingVolatility(closes, 20);
                     const workerResult = await runBackgroundTraining({
                         ticker,
                         historicalPrices: closes,
                         rsi,
                         macdHist,
-                        atr
+                        atr,
+                        roc: rocTrain,
+                        vol: volTrain
                     });
 
                     if (workerResult) {
@@ -204,8 +218,10 @@ export const runRealAnalysis = async (ticker, marketStats, historicalData, user,
     // D. Order Book Sentiment (Institutional Walls)
     let obBias = 0.5;
     try {
-        if (ticker.includes('BTC') || ticker.includes('ETH')) {
-            const obRes = await fetch(`https://api.binance.com/api/v3/depth?symbol=${ticker.replace('/', '').toUpperCase()}&limit=20`);
+        if (ticker.includes('BTC') || ticker.includes('ETH') || ticker.includes('SOL')) {
+            let symbol = ticker.replace('/', '').toUpperCase();
+            if (symbol === 'BTC' || symbol === 'ETH' || symbol === 'SOL') symbol += 'USDT';
+            const obRes = await fetch(`https://api.binance.com/api/v3/depth?symbol=${symbol}&limit=20`);
             if (obRes.ok) {
                 const obData = await obRes.json();
                 const bidVol = obData.bids.reduce((acc, [p, q]) => acc + Number(q), 0);
@@ -249,28 +265,67 @@ export const runRealAnalysis = async (ticker, marketStats, historicalData, user,
     else if (finalProb < 0.32) direction = 'Strong Bearish';
     else if (finalProb < 0.45) direction = 'Moderate Bearish';
 
-    // --- TRADE BLUEPRINT V4 (PRECISION PRICING) ---
-    const isBull = direction.includes('Bullish');
+    // --- TRADE BLUEPRINT V5 (MARKET STRUCTURE-BASED) ---
+    // For neutral signals, use probability bias to determine position direction
+    const isBull = direction.includes('Bullish') || (direction === 'Neutral' && finalProb >= 0.5);
+    const isBear = direction.includes('Bearish') || (direction === 'Neutral' && finalProb < 0.5);
     const tick = currentPrice < 1.0 ? 5 : (currentPrice < 100 ? 3 : 2);
 
-    // Dynamic Risk Factor based on Level Strength
+    // Calculate Risk Unit based on ATR and market structure
+    // Use 1.2-1.8x ATR for stop loss distance (tighter for strong levels)
     const slStrength = isBull ? srLevels.strength.s : srLevels.strength.r;
-    const riskMultiplier = 1.8 - (slStrength * 0.1); // Stronger levels allow tighter SL
+    const atrMultiplier = slStrength > 3 ? 1.2 : (slStrength > 1 ? 1.5 : 1.8);
+    const riskUnit = Math.max(currentPrice * 0.008, currentATR * atrMultiplier);
 
-    const riskUnit = Math.max(currentPrice * 0.005, currentATR * riskMultiplier);
-    const rr = 2.0 + (weights.iterations * 0.02);
+    // Practical Risk/Reward ratios based on signal strength and confidence
+    // Strong signals with high confidence get higher R:R targets
+    const baseRR = direction.includes('Strong') ? 2.2 : 1.8;
+    const confidenceMultiplier = Math.min(1.3, Math.max(0.8, parseFloat(confidence) / 60));
+    const rr = Math.min(3.0, baseRR * confidenceMultiplier); // Cap at 3:1 R:R
 
     let slPrice, tp1Price, tp2Price;
+
     if (isBull) {
-        slPrice = Math.min(currentPrice * 0.99, currentPrice - riskUnit);
-        if (srLevels.support < currentPrice && srLevels.support > slPrice) slPrice = srLevels.support * 0.998;
-        tp1Price = currentPrice + (riskUnit * rr);
-        tp2Price = currentPrice + (riskUnit * rr * 1.6);
+        // LONG POSITION: SL below entry, TP above entry
+        // Stop Loss: Use nearest support or entry - riskUnit
+        slPrice = currentPrice - riskUnit;
+        if (srLevels.support < currentPrice && srLevels.support > slPrice && slStrength > 1) {
+            // Place SL just below strong support (0.3% buffer)
+            slPrice = srLevels.support * 0.997;
+        }
+
+        // Take Profit 1: Conservative target using R:R ratio
+        tp1Price = currentPrice + (riskUnit * Math.min(rr, 2.0));
+
+        // Take Profit 2: Extended target, but respect resistance levels
+        tp2Price = currentPrice + (riskUnit * rr);
+        if (srLevels.resistance > currentPrice && srLevels.resistance < tp2Price * 1.1) {
+            // If strong resistance exists near TP2, use it as magnetic target (0.3% below)
+            if (srLevels.strength.r > 2) {
+                tp2Price = srLevels.resistance * 0.997;
+            }
+        }
+
     } else {
-        slPrice = Math.max(currentPrice * 1.01, currentPrice + riskUnit);
-        if (srLevels.resistance > currentPrice && srLevels.resistance < slPrice) slPrice = srLevels.resistance * 1.002;
-        tp1Price = Math.max(0, currentPrice - (riskUnit * rr));
-        tp2Price = Math.max(0, currentPrice - (riskUnit * rr * 1.6));
+        // SHORT POSITION: SL above entry, TP below entry
+        // Stop Loss: Use nearest resistance or entry + riskUnit
+        slPrice = currentPrice + riskUnit;
+        if (srLevels.resistance > currentPrice && srLevels.resistance < slPrice && slStrength > 1) {
+            // Place SL just above strong resistance (0.3% buffer)
+            slPrice = srLevels.resistance * 1.003;
+        }
+
+        // Take Profit 1: Conservative target using R:R ratio
+        tp1Price = Math.max(currentPrice * 0.1, currentPrice - (riskUnit * Math.min(rr, 2.0)));
+
+        // Take Profit 2: Extended target, but respect support levels
+        tp2Price = Math.max(currentPrice * 0.05, currentPrice - (riskUnit * rr));
+        if (srLevels.support < currentPrice && srLevels.support > tp2Price * 0.9) {
+            // If strong support exists near TP2, use it as magnetic target (0.3% above)
+            if (srLevels.strength.s > 2) {
+                tp2Price = srLevels.support * 1.003;
+            }
+        }
     }
 
     const targets = {
@@ -304,10 +359,18 @@ export const runRealAnalysis = async (ticker, marketStats, historicalData, user,
         return narrative;
     };
 
+    const rawReturns = closes.slice(1).map((p, i) => (p - closes[i]) / closes[i]);
+    const returns = calculateNetReturns(rawReturns); // APPLY PHASE 3 COSTS
+    const sharpe = calculateSharpeRatio(returns);
+    const sortino = calculateSortinoRatio(returns);
+    const maxDD = calculateMaxDrawdown(closes);
+
     const riskMetrics = {
         volatility: (volatilityRatio * 100).toFixed(2),
-        sharpeRatio: ((((currentPrice - closes[0]) / closes[0] * 100) * (252 / closes.length) - 4.5) / (volatilityRatio * Math.sqrt(252) * 100 || 1)).toFixed(2),
-        maxDrawdown: ((Math.min(...closes.slice(-90)) - Math.max(...closes.slice(-90))) / Math.max(...closes.slice(-90)) * 100).toFixed(2),
+        volRatio: volRatio.toFixed(2),
+        sharpeRatio: sharpe.toFixed(2),
+        sortinoRatio: sortino.toFixed(2),
+        maxDrawdown: maxDD.toFixed(2),
         calibration: {
             rmse: (Math.sqrt(Math.pow(1 - finalProb, 2)) * 0.08).toFixed(4),
             brier: (Math.pow(finalProb - (isBull ? 1 : 0), 2)).toFixed(4)

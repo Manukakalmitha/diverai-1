@@ -279,6 +279,7 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                                     <button onClick={onOpenDocs} className="px-8 py-4 bg-transparent border border-slate-700 text-slate-300 font-semibold rounded-lg hover:bg-slate-900/50 transition-colors text-sm uppercase tracking-wider">
                                         View Documentation
                                     </button>
+                                    {/*
                                     <a
                                         href="/diverai-quant-whitepaper.pdf"
                                         target="_blank"
@@ -287,6 +288,7 @@ const LandingPage = ({ onStart, onOpenInfo, onOpenDocs, onOpenPricing }) => {
                                     >
                                         <FileText className="w-4 h-4" /> White Paper
                                     </a>
+                                    */}
                                 </motion.div>
 
                                 <div className="pt-4 flex items-center justify-center lg:justify-start gap-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
