@@ -4,6 +4,10 @@
 
 export const extractChartData = (imageSrc) => {
     return new Promise((resolve, reject) => {
+        if (!imageSrc) {
+            resolve(null);
+            return;
+        }
         const img = new Image();
         img.crossOrigin = "Anonymous";
         img.onload = () => {

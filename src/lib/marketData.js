@@ -177,20 +177,58 @@ export const detectPrice = (text) => {
     return sorted[0];
 };
 
+/**
+ * isValidTicker (V5.5)
+ * Filters out garbage OCR strings like tNAML71W
+ */
+export const isValidTicker = (t) => {
+    if (!t || typeof t !== 'string') return false;
+    const upper = t.toUpperCase();
+    if (upper.length < 2 || upper.length > 8) return false;
+
+    // Explicit whitelist checks
+    if (COIN_MAP[upper] || STOCK_MAP[upper]) return true;
+
+    // Rule 1: No mixed-numeric prefixes unless "1000"
+    if (/^\d/.test(upper) && !upper.startsWith('1000')) return false;
+
+    // Rule 2: Reject common misdetected timeframe strings
+    if (/^\d+[DMHW]$/.test(upper)) return false;
+
+    // Rule 3: Blacklist (V5.6 Expanded)
+    const blacklist = ['VOL', 'USD', 'USDT', 'UTC', 'CRYPTO', 'CRYPTOCURRENCY', 'PRICE', 'MARKET', 'CHANGE', 'TIME', 'TOTAL', 'LOW', 'HIGH', 'OPEN', 'CLOSE', 'DAILY', 'WEEKLY', 'INDEX', 'CHART', 'LINK', 'NAV', 'SCAN', 'IMAGE', 'SHARE'];
+    if (blacklist.includes(upper)) return false;
+
+    // Rule 4: Structural Integrity
+    // Tickers are usually pure alpha (BTC) or alpha-numeric (1000SHIB)
+    // Pure alpha 2-6 chars OR 5-8 chars (likely standard pairs like BTCUSDT)
+    const isPureAlpha = /^[A-Z]{2,6}$/.test(upper);
+    const isStandardPair = /^[A-Z]{2,5}(USD[TC]?|BUSD|EUR|GBP)$/.test(upper);
+    const isSpecialNumeric = /^1000[A-Z]{2,4}$/.test(upper);
+
+    if (!isPureAlpha && !isStandardPair && !isSpecialNumeric) return false;
+
+    // Rule 5: Vowel Check (Entropy)
+    const hasVowel = /[AEIOUY]/.test(upper);
+    if (!hasVowel && upper.length > 4) return false;
+
+    return true;
+};
+
 export const detectTicker = (text) => {
     if (!text) return null;
     const upper = text.toUpperCase();
     const blacklist = ['VOL', 'USD', 'USDT', 'UTC', 'CRYPTO', 'CRYPTOCURRENCY', 'PRICE', 'MARKET', 'CHANGE', 'TIME', 'TOTAL', 'LOW', 'HIGH', 'OPEN', 'CLOSE', 'DAILY', 'WEEKLY'];
 
-    // 0. URL Extraction Strategy (V5.4)
-    // Matches TradingView symbold URLs: tradingview.com/symbols/BTCUSD/ or tradingview.com/chart/XYZ/?symbol=BINANCE:BTCUSDT
+    // Matches TradingView symbol URLs: tradingview.com/symbols/BTCUSD/ or /chart/XYZ/?symbol=...
     const urlMatch = text.match(/tradingview\.com\/(?:symbols|chart)\/([A-Z0-9:]+)/i) ||
         text.match(/[?&]symbol=([A-Z0-9:]+)/i);
     if (urlMatch) {
         let t = urlMatch[1].split(':').pop(); // Handle BINANCE:BTCUSDT -> BTCUSDT
         const cleanTicker = t.replace(/(USD[TC]?|BUSD|EUR|GBP)$/, ''); // Strip quote currency
-        if (COIN_MAP[cleanTicker] || STOCK_MAP[cleanTicker]) return cleanTicker;
-        if (cleanTicker.length >= 2 && !blacklist.includes(cleanTicker)) return cleanTicker;
+
+        // V5.6 Fix: If it's a clear symbol from a URL, be more lenient than raw OCR
+        if (cleanTicker && cleanTicker.length >= 2) return cleanTicker;
     }
 
     // 1. Explicit Ticker Dictionary Strategy
@@ -203,8 +241,7 @@ export const detectTicker = (text) => {
     const pairMatch = upper.match(/\b([A-Z0-9]{2,10})[\/\-\\]?(?:USDT|USD|BUSD|USDC|PERP|FRAX|DAI)\b/);
     if (pairMatch) {
         const t = pairMatch[1];
-        if (COIN_MAP[t] || STOCK_MAP[t]) return t;
-        if (t.length >= 2 && !blacklist.includes(t)) return t;
+        if (isValidTicker(t)) return t;
     }
 
     // 3. Contextual Pattern: CRYPTO O H L (Common TV/IBKR header) followed by Price
@@ -232,8 +269,7 @@ export const detectTicker = (text) => {
     const titleMatch = upper.match(/\(([A-Z0-9]{2,6})\)[ -]|^([A-Z0-9]{2,6})\s+\d/);
     if (titleMatch) {
         const t = titleMatch[1] || titleMatch[2];
-        if (COIN_MAP[t] || STOCK_MAP[t]) return t;
-        if (t.length >= 2 && !blacklist.includes(t)) return t;
+        if (isValidTicker(t)) return t;
     }
 
     return null;
@@ -380,17 +416,20 @@ export const fetchYahooData = async (ticker) => {
             } catch (pErr) { continue; }
         }
 
-        if (!data) throw new Error("All proxies failed");
+        if (!data?.chart?.result?.[0]) throw new Error("Invalid Yahoo response");
         const result = data.chart.result[0];
 
-        const closes = result.indicators.quote[0].close.filter(c => c !== null);
-        const highs = result.indicators.quote[0].high.filter(h => h !== null);
-        const lows = result.indicators.quote[0].low.filter(l => l !== null);
-        const volumes = result.indicators.quote[0].volume.filter(v => v !== null);
+        const indicators = result.indicators?.quote?.[0];
+        if (!indicators) throw new Error("No indicators in Yahoo data");
 
-        const price = result.meta.regularMarketPrice;
-        const prevClose = result.meta.previousClose;
-        const change = ((price - prevClose) / prevClose) * 100;
+        const closes = (indicators.close || []).filter(c => c !== null);
+        const highs = (indicators.high || []).filter(h => h !== null);
+        const lows = (indicators.low || []).filter(l => l !== null);
+        const volumes = (indicators.volume || []).filter(v => v !== null);
+
+        const price = result.meta?.regularMarketPrice;
+        const prevClose = result.meta?.previousClose;
+        const change = prevClose ? ((price - prevClose) / prevClose) * 100 : 0;
 
         return {
             marketStats: {
@@ -494,10 +533,11 @@ export const fetchTickerData = async (symbols) => {
             const result = data?.chart?.result?.[0];
 
             if (result) {
-                const prices = result.indicators.quote[0].close.filter(p => p !== null);
-                const price = result.meta.regularMarketPrice;
-                const prevClose = result.meta.previousClose;
-                const change = ((price - prevClose) / prevClose) * 100;
+                const quote = result.indicators?.quote?.[0];
+                const prices = (quote?.close || []).filter(p => p !== null);
+                const price = result.meta?.regularMarketPrice;
+                const prevClose = result.meta?.previousClose;
+                const change = prevClose ? ((price - prevClose) / prevClose) * 100 : 0;
 
                 return {
                     ticker,

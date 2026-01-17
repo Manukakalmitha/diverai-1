@@ -7,7 +7,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import Tesseract from 'tesseract.js';
-import { detectTicker, detectPrice, fetchMarketData, fetchHistoricalData, COIN_MAP, STOCK_MAP, fetchStockData, fetchStockHistory, fetchYahooData, fetchMacroHistory, calculateMacroSentiment, fetchTickerData } from '../lib/marketData';
+import { detectTicker, detectPrice, fetchMarketData, fetchHistoricalData, COIN_MAP, STOCK_MAP, fetchStockData, fetchStockHistory, fetchYahooData, fetchMacroHistory, calculateMacroSentiment, fetchTickerData, isValidTicker, detectTimeframe } from '../lib/marketData';
 import { useAppContext } from '../context/AppContext';
 import AuthModal from '../components/AuthModal';
 import { calculateRSI as calcRSI, calculateMACD, calculateBollingerBands, detectPatterns } from '../lib/technicalAnalysis';
@@ -442,8 +442,27 @@ const FileUpload = ({ onFileSelect, isAnalyzing, statusMessage }) => {
                 <>
                     <div className="w-24 h-24 bg-brand rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-2xl shadow-brand/20"><ShieldCheck className="w-12 h-12 text-slate-950" /></div>
                     <h3 className="text-3xl font-black text-white mb-3 tracking-tighter uppercase">Ready for Analysis</h3>
-                    <p className="text-slate-500 max-w-sm text-center mb-10 leading-relaxed font-bold text-sm">Drag & drop your chart, paste from clipboard, or click to browse local files.</p>
-                    <div className="btn-flame px-8 !py-4">Execute Neural Analysis</div>
+                    <p className="text-slate-500 max-w-sm text-center mb-10 leading-relaxed font-bold text-sm">Drag & drop your chart, paste a TradingView link, or click to browse files.</p>
+
+                    <div className="flex flex-col gap-4 w-full max-w-sm items-center z-20">
+                        <div className="relative w-full">
+                            <input
+                                type="text"
+                                placeholder="Paste TradingView URL..."
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (val.includes('tradingview.com')) {
+                                        onFileSelect(val); // Passing string triggers URL workflow
+                                    }
+                                }}
+                                className="w-full bg-ash/80 border border-ash/50 rounded-2xl px-6 py-4 text-white text-sm focus:outline-none focus:border-brand/50 transition-all text-center placeholder:text-slate-600"
+                            />
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                                <Zap className="w-4 h-4 text-brand/30" />
+                            </div>
+                        </div>
+                        <div className="btn-flame px-8 !py-4 w-full text-center">Execute Neural Analysis</div>
+                    </div>
                 </>
             )}
         </div>
@@ -923,6 +942,12 @@ export default function Terminal() {
                     const file = item.getAsFile();
                     if (file) handleFileSelect(file);
                     break;
+                } else if (item.type === "text/plain") {
+                    item.getAsString((text) => {
+                        if (text.includes('tradingview.com')) {
+                            handleFileSelect(text); // Pass string to trigger URL logic
+                        }
+                    });
                 }
             }
         };
@@ -1227,9 +1252,30 @@ export default function Terminal() {
         return { visualSrc, ocrSrc };
     };
 
-    const handleFileSelect = (file) => {
+    const handleFileSelect = (input) => {
         if (!checkLimits()) return;
-        if (!file) return;
+        if (!input) return;
+
+        if (typeof input === 'string') {
+            // It's a URL
+            setImagePreview(null);
+
+            // Handle TradingView Snapshots specifically
+            if (input.includes('tradingview.com/x/')) {
+                alert("Snapshot Link Detected:\nTradingView snapshot links (/x/) don't contain symbol data. To analyze this, please:\n1. Save the image to your device\n2. Upload it here as a file");
+                return;
+            }
+
+            const ticker = detectTicker(input);
+            if (ticker) {
+                runAnalysisWorkflow(null, null, null, ticker);
+            } else {
+                alert("URL Recognition Failed:\nThis doesn't look like a valid TradingView chart or symbol link.");
+            }
+            return;
+        }
+
+        const file = input;
         tempFileRef.current = file;
 
         const reader = new FileReader();
@@ -1290,12 +1336,9 @@ export default function Terminal() {
                 if (manualTicker) return manualTicker;
 
                 // Server-Side OCR for Pro Users (Offload & Deep Scan)
-                if (profile?.subscription_tier === 'pro' && user) {
+                if (profile?.subscription_tier === 'pro' && user && originalFileSrc) {
                     try {
                         setStatusMessage("Deep Scan (Cloud OCR)...");
-
-                        // Supabase client handles session refreshing automatically. 
-                        // Manual refreshSession() can cause clock-skew "Session issued in the future" errors.
 
                         const { data, error } = await supabase.functions.invoke('detect_ticker', {
                             body: { image: originalFileSrc }
@@ -1340,6 +1383,8 @@ export default function Terminal() {
                     const { getMultiPassConfigs, filterByConfidence } = await import('../lib/ocrConfig');
 
                     // Create image element from ocrImage data URL
+                    if (!ocrImage) return { text: "", ticker: null };
+
                     const img = new Image();
                     await new Promise((resolve, reject) => {
                         img.onload = resolve;
@@ -1347,9 +1392,14 @@ export default function Terminal() {
                         img.src = ocrImage;
                     });
 
+                    // Helper to yield main thread
+                    const yieldToMain = () => new Promise(resolve => setTimeout(resolve, 10));
+
                     // Generate preprocessed variants
                     setStatusMessage("Preprocessing Image (4 variants)...");
+                    await yieldToMain(); // Yield to allow HUD to update
                     const allVariants = generatePreprocessedVariants(img);
+                    await yieldToMain();
 
                     // V5.3 Update: Allow ROI extraction for all users to improve terminal reliability
                     const variants = allVariants;
@@ -1467,6 +1517,13 @@ export default function Terminal() {
             // But for now, let's just use the detected one or manual.
 
             ticker = detectedTicker || manualTicker;
+
+            // V5.6: Mandatory validation guard
+            if (ticker && ticker !== "VISUAL-SCAN" && !isValidTicker(ticker)) {
+                console.warn(`[Neural Core] Rejected invalid ticker: ${ticker}`);
+                ticker = null;
+            }
+
             const hasVisual = visualData && visualData.points.length > 20;
 
             if (!ticker && !hasVisual) {
@@ -1513,13 +1570,12 @@ export default function Terminal() {
                             console.warn("Yahoo Finance unavailable. Requesting Institutional Access...");
                             let apiKey = manualApiKey || localStorage.getItem('finnhub_key');
 
-                            if (!apiKey) {
+                            if (!apiKey && isValidTicker(ticker)) {
                                 setStatusMessage("Institutional Access Required. Verifying Credentials...");
                                 setPendingTicker(ticker);
                                 setShowApiKeyInput(true);
                                 setIsAnalyzing(false);
-                                // No worker to terminate here; cleanup handled later
-                                return; // PAUSE for API Key
+                                return;
                             }
 
                             setStatusMessage(`Authenticating with Finnhub for ${ticker}...`);
