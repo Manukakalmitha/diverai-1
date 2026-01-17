@@ -1386,11 +1386,15 @@ export default function Terminal() {
                     try {
                         setStatusMessage("Deep Scan (Cloud OCR)...");
 
-                        const { data: { session } } = await supabase.auth.getSession();
+                        // V5.9 Fix: Use ANON KEY for Cloud OCR to prevent 401 errors
+                        // The function is public/stateless, so we don't need the user session here.
+                        // This bypasses any clock skew or session sync issues.
+                        const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
                         const { data, error } = await supabase.functions.invoke('detect_ticker', {
                             body: { image: originalFileSrc },
                             headers: {
-                                Authorization: `Bearer ${session?.access_token}`
+                                Authorization: `Bearer ${anonKey}`
                             }
                         });
 
@@ -1399,41 +1403,8 @@ export default function Terminal() {
                             return { text: data.text, ticker: detectTicker(data.text) };
                         }
                     } catch (cloudErr) {
-                        const status = cloudErr.status || cloudErr.context?.status || (cloudErr.message?.includes("401") ? 401 : null);
-                        if (status === 401) {
-                            console.info("Cloud OCR 401 detected. Attempting session refresh and retry...");
-                            try {
-                                const { error: refreshError } = await supabase.auth.refreshSession();
-                                if (!refreshError) {
-                                    // Small delay to allow session propagation
-                                    await new Promise(r => setTimeout(r, 800));
-                                    const { data: { session: freshSession } } = await supabase.auth.getSession();
-
-                                    if (freshSession?.access_token) {
-                                        const { data: retryData, error: retryError } = await supabase.functions.invoke('detect_ticker', {
-                                            body: { image: originalFileSrc },
-                                            headers: {
-                                                Authorization: `Bearer ${freshSession.access_token}`
-                                            }
-                                        });
-                                        if (!retryError && retryData?.text) {
-                                            console.info("Retry successful.");
-                                            return { text: retryData.text, ticker: detectTicker(retryData.text) };
-                                        }
-                                    }
-                                }
-                            } catch (refreshErr) {
-                                console.warn("Session refresh or retry failed:", refreshErr);
-                            }
-                            const isSkew = localStorage.getItem('supabase.auth.token')?.includes('"future"'); // Heuristic check
-                            if (isSkew) {
-                                console.warn("CRITICAL: Clock Skew detected. Cloud OCR will fail until device time is corrected.");
-                                setStatusMessage("CLOCK SKEW DETECTED: Your device clock is out of sync. Please check system time or use local OCR.");
-                            }
-                            console.info("Cloud OCR still unavailable. Switching to local engine.");
-                        } else {
-                            console.warn("Cloud OCR Failed, reverting to local:", cloudErr);
-                        }
+                        console.warn("Cloud OCR unavailable, using fallback:", cloudErr);
+                        setStatusMessage("Cloud OCR unavailable. Switching to Local Neural Engine...");
                     }
                 }
 

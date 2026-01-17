@@ -48,21 +48,17 @@ serve(async (req) => {
             try {
                 const { data, error: authError } = await supabaseClient.auth.getUser();
                 if (authError) {
-                    console.warn("[Auth] Verification Failed:", authError.message);
-                    // If it's a Malformed JWT or similar, we might still allow it if it matches ANON_KEY
-                    if (token === Deno.env.get('SUPABASE_ANON_KEY')) {
-                        isGuest = true;
-                    } else {
-                        return new Response(JSON.stringify({ error: 'Unauthorized', details: authError.message }), {
-                            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                            status: 401,
-                        });
-                    }
+                    console.warn("[Auth] Verification Failed (Soft Fail):", authError.message);
+                    // V5.9: Downgrade to Guest instead of blocking (High Availability)
+                    isGuest = true;
                 } else {
                     user = data?.user;
+                    // Critical Fix: If user is missing despite no error, force Guest
+                    if (!user) isGuest = true;
                 }
             } catch (err) {
-                console.error("[Auth] Critical Failure:", err);
+                console.error("[Auth] Soft Failure:", err);
+                isGuest = true;
             }
         } else {
             isGuest = true;
