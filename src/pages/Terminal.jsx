@@ -1339,10 +1339,8 @@ export default function Terminal() {
                     setStatusMessage("Preprocessing Image (4 variants)...");
                     const allVariants = generatePreprocessedVariants(img);
 
-                    // PRO FEATURE: ROI extraction exclusive to Pro users
-                    const variants = isPro
-                        ? allVariants
-                        : allVariants.filter(v => v.name !== 'roi_top_left');
+                    // V5.3 Update: Allow ROI extraction for all users to improve terminal reliability
+                    const variants = allVariants;
 
                     console.log(`[OCR] Generated ${variants.length} preprocessed variants ${isPro ? '(Pro: includes ROI)' : '(Free: ROI excluded)'}`);
 

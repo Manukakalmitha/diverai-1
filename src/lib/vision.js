@@ -53,7 +53,8 @@ export const extractChartData = (imageSrc) => {
                             if (r < 100) isSignal = true;
                         } else {
                             // Dark Background -> Look for Bright pixels
-                            if (r > 155) isSignal = true;
+                            // V5.3 Update: Lower threshold from 155 to 80 to capture red/green candles
+                            if (r > 80) isSignal = true;
                         }
 
                         if (isSignal) {
