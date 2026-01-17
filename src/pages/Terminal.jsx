@@ -998,10 +998,22 @@ export default function Terminal() {
                         if (isUrl) {
                             setStatusMessage("Fetching Shared Link Data...");
                             const sharedUrl = await response.text();
-                            // For now, we just log it and show an alert if we can't handle it
-                            // In the future, we could try to scrape/fetch the image from TradingView URL
-                            alert(`Shared Link Received: ${sharedUrl}\n\nNote: For instant analysis, please use 'Share Image' from TradingView instead of 'Share Link'.`);
-                            throw new Error("Link sharing not fully supported yet - Use Image Share");
+
+                            // V5.4: Extract ticker from URL directly
+                            const urlTicker = detectTicker(sharedUrl);
+                            const urlTimeframe = detectTimeframe(sharedUrl);
+
+                            if (urlTicker) {
+                                setStatusMessage(`Neural Link Active: ${urlTicker}...`);
+                                // Since we don't have an image, we'll trigger a fetch-based workflow
+                                runAnalysisWorkflow(null, null, null, urlTicker);
+                                await cache.delete(cacheKey);
+                                navigate(location.pathname, { replace: true });
+                                return;
+                            } else {
+                                alert(`Shared Link Received: ${sharedUrl}\n\nNote: For instant analysis, please use 'Share Image' from TradingView instead of 'Share Link'.`);
+                                throw new Error("Link sharing not fully supported yet - Use Image Share");
+                            }
                         }
 
                         setStatusMessage("Processing Neural Input...");
@@ -1406,7 +1418,12 @@ export default function Terminal() {
                         console.log(`[OCR] Best result: ${bestResult.confidence}% (${bestResult.variant} + ${bestResult.config})`);
                         setStatusMessage(`OCR Complete: ${bestResult.confidence}% confidence`);
 
-                        return { text: bestResult.text, ticker: detectTicker(bestResult.text) };
+                        // V5.4: Return both best text and all variant results for deeper inspection (e.g. Price Axis)
+                        return {
+                            text: bestResult.text,
+                            ticker: detectTicker(bestResult.text),
+                            variants: results
+                        };
                     } else {
                         console.warn("[OCR] All passes failed confidence threshold");
                         setStatusMessage("OCR: Low confidence, using fallback...");
@@ -1434,6 +1451,16 @@ export default function Terminal() {
                 const fullText = ocrRawResult.text || "";
                 detectedTicker = detectTicker(fullText);
                 anchorPrice = detectPrice(fullText);
+
+                // V5.4: Use Right-Axis for price anchor if available
+                const rightAxisResult = ocrRawResult.variants?.find(v => v.variant === 'roi_right_axis');
+                if (rightAxisResult) {
+                    const rightPrice = detectPrice(rightAxisResult.text);
+                    if (rightPrice) {
+                        console.info("[OCR] Anchor Price verified via Right Axis ROI");
+                        anchorPrice = rightPrice;
+                    }
+                }
             }
 
             // If we have multiple potential tickers or low confidence, we can add a step here.

@@ -144,6 +144,10 @@ export const extractROI = (canvas, ctx, region = 'top-left') => {
         case 'left-axis':
             w = Math.floor(width * 0.1);
             break;
+        case 'right-axis':
+            x = Math.floor(width * 0.88);
+            w = Math.floor(width * 0.12);
+            break;
         default:
             return canvas.toDataURL('image/png');
     }
@@ -241,12 +245,18 @@ export const generatePreprocessedVariants = (imageElement) => {
         description: 'Sharpened + Denoised High Contrast'
     });
 
-    // Variant 4: ROI - Top Left (where ticker usually is)
-    const roiDataUrl = extractROI(canvas1, ctx1, 'top-left');
     variants.push({
         name: 'roi_top_left',
         dataUrl: roiDataUrl,
         description: 'Top-left region extraction'
+    });
+
+    // Variant 5: ROI - Right Axis (Price scale)
+    const roiRightDataUrl = extractROI(canvas3, ctx3, 'right-axis');
+    variants.push({
+        name: 'roi_right_axis',
+        dataUrl: roiRightDataUrl,
+        description: 'Right-axis price extraction'
     });
 
     return variants;

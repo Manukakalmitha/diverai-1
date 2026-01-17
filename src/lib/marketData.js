@@ -182,6 +182,17 @@ export const detectTicker = (text) => {
     const upper = text.toUpperCase();
     const blacklist = ['VOL', 'USD', 'USDT', 'UTC', 'CRYPTO', 'CRYPTOCURRENCY', 'PRICE', 'MARKET', 'CHANGE', 'TIME', 'TOTAL', 'LOW', 'HIGH', 'OPEN', 'CLOSE', 'DAILY', 'WEEKLY'];
 
+    // 0. URL Extraction Strategy (V5.4)
+    // Matches TradingView symbold URLs: tradingview.com/symbols/BTCUSD/ or tradingview.com/chart/XYZ/?symbol=BINANCE:BTCUSDT
+    const urlMatch = text.match(/tradingview\.com\/(?:symbols|chart)\/([A-Z0-9:]+)/i) ||
+        text.match(/[?&]symbol=([A-Z0-9:]+)/i);
+    if (urlMatch) {
+        let t = urlMatch[1].split(':').pop(); // Handle BINANCE:BTCUSDT -> BTCUSDT
+        const cleanTicker = t.replace(/(USD[TC]?|BUSD|EUR|GBP)$/, ''); // Strip quote currency
+        if (COIN_MAP[cleanTicker] || STOCK_MAP[cleanTicker]) return cleanTicker;
+        if (cleanTicker.length >= 2 && !blacklist.includes(cleanTicker)) return cleanTicker;
+    }
+
     // 1. Explicit Ticker Dictionary Strategy
     const words = upper.split(/[^A-Z0-9]/).filter(w => w.length >= 2);
     for (const ticker of Object.keys(COIN_MAP)) {
@@ -226,6 +237,34 @@ export const detectTicker = (text) => {
     }
 
     return null;
+};
+
+/**
+ * Detect Timeframe (V5.4)
+ * Extracts 1m, 5m, 1h, 4h, 1D, 1W etc from OCR text
+ */
+export const detectTimeframe = (text) => {
+    if (!text) return '1D'; // Default to Daily
+    const upper = text.toUpperCase();
+
+    // Patterns for TradingView style timeframe labels
+    const patterns = [
+        { regex: /\b1M\b/, value: '1m' },
+        { regex: /\b[35]M\b/, value: '5m' },
+        { regex: /\b15M\b/, value: '15m' },
+        { regex: /\b30M\b/, value: '30m' },
+        { regex: /\b1H\b/, value: '1h' },
+        { regex: /\b4H\b/, value: '4h' },
+        { regex: /\b1D\b/, value: '1D' },
+        { regex: /\b1W\b/, value: '1W' },
+        { regex: /\b1MONTH\b/, value: '1M' }
+    ];
+
+    for (const p of patterns) {
+        if (p.regex.test(upper)) return p.value;
+    }
+
+    return '1D';
 };
 
 // ... REST OF FILE (FETCHERS) ...
