@@ -175,7 +175,7 @@ const createModel = () => {
 };
 
 const trainModel = async (model, dataSeries, epochsOverride = null) => {
-    if (dataSeries.prices.length < WINDOW_SIZE + 20) return null;
+    if (dataSeries.prices.length < WINDOW_SIZE + 10) return null;
     const { xs, ys, stats } = prepareData(dataSeries, WINDOW_SIZE);
     await model.fit(xs, ys, {
         epochs: epochsOverride || EPOCHS,

@@ -1359,6 +1359,8 @@ export default function Terminal() {
                             try {
                                 const { error: refreshError } = await supabase.auth.refreshSession();
                                 if (!refreshError) {
+                                    // Small delay to allow session propagation
+                                    await new Promise(r => setTimeout(r, 500));
                                     const { data: { session: freshSession } } = await supabase.auth.getSession();
                                     const { data: retryData, error: retryError } = await supabase.functions.invoke('detect_ticker', {
                                         body: { image: originalFileSrc },
@@ -1373,6 +1375,11 @@ export default function Terminal() {
                                 }
                             } catch (refreshErr) {
                                 console.warn("Session refresh or retry failed:", refreshErr);
+                            }
+                            const isSkew = localStorage.getItem('supabase.auth.token')?.includes('"future"'); // Heuristic check
+                            if (isSkew) {
+                                console.warn("CRITICAL: Clock Skew detected. Cloud OCR will fail until device time is corrected.");
+                                setStatusMessage("Clock Skew Detected: Correct device time to enable Cloud OCR.");
                             }
                             console.info("Cloud OCR still unavailable. Switching to local engine.");
                         } else {
