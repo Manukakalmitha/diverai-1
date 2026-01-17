@@ -61,9 +61,9 @@ export const runBackgroundTraining = (data) => {
             }
         };
 
-        if (data.historicalPrices?.length < WINDOW_SIZE + 20) {
+        if (data.historicalPrices?.length < WINDOW_SIZE + 10) {
             clearTimeout(timeoutId);
-            reject(new Error(`Insufficient price history for neural training. Got ${data.historicalPrices?.length || 0} bars, need ${WINDOW_SIZE + 20}.`));
+            reject(new Error(`Insufficient price history for neural training. Got ${data.historicalPrices?.length || 0} bars, need ${WINDOW_SIZE + 10}.`));
             return;
         }
 
@@ -318,7 +318,7 @@ export const createModel = () => {
 };
 
 export const trainModel = async (model, dataSeries, epochsOverride = null) => {
-    if (dataSeries.prices.length < WINDOW_SIZE + 20) return null;
+    if (dataSeries.prices.length < WINDOW_SIZE + 10) return null;
 
     const { xs, ys, stats } = prepareData(dataSeries, WINDOW_SIZE);
 

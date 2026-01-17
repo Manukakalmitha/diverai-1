@@ -377,7 +377,7 @@ export const fetchStockData = async (ticker, apiKey) => {
 
 export const fetchStockHistory = async (ticker, apiKey) => {
     const end = Math.floor(Date.now() / 1000);
-    const start = end - (90 * 24 * 60 * 60);
+    const start = end - (180 * 24 * 60 * 60);
     try {
         const response = await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${ticker}&resolution=D&from=${start}&to=${end}&token=${apiKey}`);
         const data = await response.json();
@@ -400,7 +400,7 @@ export const fetchYahooData = async (ticker) => {
 
     try {
         // V5.2 CORS Hotfix: Prefer corsproxy.io as it is more stable than allorigins
-        const baseUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${yTicker}?interval=1d&range=3mo`;
+        const baseUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${yTicker}?interval=1d&range=6mo`;
         const proxies = [
             `https://corsproxy.io/?${encodeURIComponent(baseUrl)}`,
             `https://api.allorigins.win/raw?url=${encodeURIComponent(baseUrl)}`
