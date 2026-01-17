@@ -3,6 +3,7 @@ import {
     calculateRSI as calcRSI,
     calculateMACD,
     calculateBollingerBands,
+    calculateEMA,
     detectPatterns,
     calculateATR,
     findSupportResistance,
