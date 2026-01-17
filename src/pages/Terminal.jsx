@@ -1282,8 +1282,8 @@ export default function Terminal() {
                     try {
                         setStatusMessage("Deep Scan (Cloud OCR)...");
 
-                        // Ensure session is fresh before invoking
-                        await supabase.auth.refreshSession();
+                        // Supabase client handles session refreshing automatically. 
+                        // Manual refreshSession() can cause clock-skew "Session issued in the future" errors.
 
                         const { data, error } = await supabase.functions.invoke('detect_ticker', {
                             body: { image: originalFileSrc }
@@ -1294,9 +1294,9 @@ export default function Terminal() {
                             return { text: data.text, ticker: detectTicker(data.text) };
                         }
                     } catch (cloudErr) {
-                        const status = cloudErr.status || (cloudErr.message?.includes("401") ? 401 : null);
+                        const status = cloudErr.status || cloudErr.context?.status || (cloudErr.message?.includes("401") ? 401 : null);
                         if (status === 401) {
-                            console.info("Cloud OCR unavailable (Guest/Session Stale). Switching to local engine.");
+                            console.info("Cloud OCR unavailable (Session Stale/Unauthorized). Switching to local engine.");
                         } else {
                             console.warn("Cloud OCR Failed, reverting to local:", cloudErr);
                         }

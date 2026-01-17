@@ -156,6 +156,13 @@ export const extractROI = (canvas, ctx, region = 'top-left') => {
     const imageData = ctx.getImageData(x, y, w, h);
     roiCtx.putImageData(imageData, 0, 0);
 
+    // V5.2 Fix: Prevent "too small to scale" errors by ensuring minimum dimensions
+    // Tesseract.js WASM engine often fails on images smaller than 3-5px in any dimension.
+    if (w < 10 || h < 10) {
+        console.warn(`[OCR] ROI too small (${w}x${h}), skipping region extraction`);
+        return canvas.toDataURL('image/png');
+    }
+
     return roiCanvas.toDataURL('image/png');
 };
 
