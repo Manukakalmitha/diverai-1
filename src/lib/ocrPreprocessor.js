@@ -148,10 +148,9 @@ export const extractROI = (canvas, ctx, region = 'top-left') => {
             return canvas.toDataURL('image/png');
     }
 
-    // V5.3 Fix: Enforce strictly larger minimum dimensions for Tesseract WASM stability.
-    // Minimum width/height of 3 is the hard limit, but 20 is safer for OCR quality.
-    if (w < 20 || h < 20) {
-        console.warn(`[OCR] ROI too small (${w}x${h}), skipping region extraction to avoid scaling errors.`);
+    // V5.3 Diagnostic: Track down why ultra-small ROIs are being passed
+    if (w < 40 || h < 40) {
+        console.warn(`[OCR] ROI suspected too small (${w}x${h}) from region ${region}. Input canvas size: ${width}x${height}. Skipping to avoid Tesseract WASM errors.`);
         return canvas.toDataURL('image/png');
     }
 

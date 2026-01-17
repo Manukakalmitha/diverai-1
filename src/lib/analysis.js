@@ -17,7 +17,9 @@ import {
     calculateSortinoRatio,
     calculateMaxDrawdown,
     calculateVolatilityRatio,
-    calculateNetReturns
+    calculateNetReturns,
+    calculateROC,
+    calculateRollingVolatility
 } from './featureEngineering.js';
 
 /**
