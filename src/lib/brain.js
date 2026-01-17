@@ -125,7 +125,7 @@ export const runBackgroundAssessment = (fullPrices, onProgress) => {
 export const WINDOW_SIZE = 45;
 const EPOCHS = 35;
 const BATCH_SIZE = 32;
-const FEATURES = 6; // Price, RSI, MACD Histogram, ATR, ROC, Volatility
+const FEATURES = 8; // Price, RSI, MACD, ATR, ROC, Vol, EMA Ratio, BB %B
 
 /**
  * Normalizes a pattern using "Zero-Base" (first candle as 0)
@@ -159,15 +159,17 @@ export const calculateRobustStats = (arr) => {
 export const augmentPattern = (patternVector) => {
     // patternVector is [WINDOW_SIZE][FEATURES]
     return patternVector.map(step => {
-        const noise = (Math.random() - 0.5) * 0.0005; // lower noise
-        const scale = 0.999 + (Math.random() * 0.002); // tighter scale
+        const noise = (Math.random() - 0.5) * 0.0004; // even lower noise
+        const scale = 0.9992 + (Math.random() * 0.0016); // even tighter scale
         return [
             step[0] * scale + noise,
             step[1] * scale + noise,
             step[2] * scale + noise,
             step[3] * scale + noise,
             step[4] * scale + noise,
-            step[5] * scale + noise
+            step[5] * scale + noise,
+            step[6] * scale + noise,
+            step[7] * scale + noise
         ];
     });
 };
@@ -176,8 +178,12 @@ export const augmentPattern = (patternVector) => {
  * Calculate stats for Z-Score normalization WITHOUT creating tensors
  */
 export const calculateStats = (dataSeries) => {
-    const { prices, rsi, macd, atr, roc, vol } = dataSeries;
-    const minLen = Math.min(prices.length, rsi.length, macd.length, (atr?.length || 0), (roc?.length || 0), (vol?.length || 0));
+    const { prices, rsi, macd, atr, roc, vol, emaRatio, bPercent } = dataSeries;
+    const minLen = Math.min(
+        prices.length, rsi.length, macd.length,
+        (atr?.length || 0), (roc?.length || 0), (vol?.length || 0),
+        (emaRatio?.length || 0), (bPercent?.length || 0)
+    );
 
     const p = prices.slice(-minLen);
     const r = rsi.slice(-minLen);
@@ -185,14 +191,16 @@ export const calculateStats = (dataSeries) => {
     const a = atr.slice(-minLen);
     const ro = roc.slice(-minLen);
     const v = vol.slice(-minLen);
+    const er = emaRatio.slice(-minLen);
+    const bp = bPercent.slice(-minLen);
 
-    // [0-Price (Base Only), 1-RSI (Z), 2-MACD (Z), 3-ATR (Z), 4-ROC (Robust), 5-Vol (Robust)]
+    // [0-Price, 1-RSI(Z), 2-MACD(Z), 3-ATR(Z), 4-ROC(Robust), 5-Vol(Robust), 6-EMA(Z), 7-BB(Z)]
     const stats = [];
 
     // Z-Score for 1-3
     [r, m, a].forEach(arr => {
-        const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
-        const std = Math.sqrt(arr.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / arr.length) || 1;
+        const mean = arr.reduce((a, b) => a + b, 0) / (arr.length || 1);
+        const std = Math.sqrt(arr.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (arr.length || 1)) || 1;
         stats.push({ mean, std });
     });
 
@@ -202,6 +210,13 @@ export const calculateStats = (dataSeries) => {
         stats.push({ median, iqr });
     });
 
+    // Z-Score for 6-7
+    [er, bp].forEach(arr => {
+        const mean = arr.reduce((a, b) => a + b, 0) / (arr.length || 1);
+        const std = Math.sqrt(arr.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (arr.length || 1)) || 1;
+        stats.push({ mean, std });
+    });
+
     return [{ base: p[0] }, ...stats];
 };
 
@@ -209,8 +224,12 @@ export const calculateStats = (dataSeries) => {
  * Multivariate Data Preparation with Z-Score Normalization
  */
 export const prepareData = (dataSeries, windowSize) => {
-    const { prices, rsi, macd, atr, roc, vol } = dataSeries;
-    const minLen = Math.min(prices.length, rsi.length, macd.length, (atr?.length || 0), (roc?.length || 0), (vol?.length || 0));
+    const { prices, rsi, macd, atr, roc, vol, emaRatio, bPercent } = dataSeries;
+    const minLen = Math.min(
+        prices.length, rsi.length, macd.length,
+        (atr?.length || 0), (roc?.length || 0), (vol?.length || 0),
+        (emaRatio?.length || 0), (bPercent?.length || 0)
+    );
     const stats = calculateStats(dataSeries);
 
     const p = prices.slice(-minLen);
@@ -236,8 +255,10 @@ export const prepareData = (dataSeries, windowSize) => {
                 zScoreNormalize(r[i + j], stats[1].mean, stats[1].std),
                 zScoreNormalize(m[i + j], stats[2].mean, stats[2].std),
                 zScoreNormalize(a[i + j], stats[3].mean, stats[3].std),
-                robustNormalize(ro[i + j], stats[4].median, stats[4].iqr), // Robust
-                robustNormalize(v[i + j], stats[5].median, stats[5].iqr)   // Robust
+                robustNormalize(ro[i + j], stats[4].median, stats[4].iqr),
+                robustNormalize(v[i + j], stats[5].median, stats[5].iqr),
+                zScoreNormalize(er[i + j], stats[6].mean, stats[6].std),
+                zScoreNormalize(bp[i + j], stats[7].mean, stats[7].std)
             ]);
         }
 
@@ -259,45 +280,42 @@ export const prepareData = (dataSeries, windowSize) => {
 export const createModel = () => {
     const input = tf.input({ shape: [WINDOW_SIZE, FEATURES] });
 
-    // Layer 1: LSTM (Temporal Feature Extraction) - Return sequences for Attention
+    // Layer 1: Stacked LSTM (Deeper Pattern Recognition)
     const lstm1 = tf.layers.lstm({
         units: 64,
         returnSequences: true,
         recurrentInitializer: 'glorotUniform',
-        kernelRegularizer: tf.regularizers.l2({ l2: 0.005 })
+        kernelRegularizer: tf.regularizers.l2({ l2: 0.001 })
     }).apply(input);
 
-    const dropout1 = tf.layers.dropout({ rate: 0.2 }).apply(lstm1);
+    const lstm2 = tf.layers.lstm({
+        units: 32,
+        returnSequences: true,
+        recurrentInitializer: 'glorotUniform'
+    }).apply(lstm1);
 
-    // --- ATTENTION MECHANISM ---
-    // 1. Calculate energy/alignment scores
+    const dropout2 = tf.layers.dropout({ rate: 0.25 }).apply(lstm2);
+
+    // --- ENHANCED ATTENTION ---
     const attentionEnergy = tf.layers.dense({
-        units: 64,
-        activation: 'tanh',
-        name: 'attention_energy'
-    }).apply(dropout1);
+        units: 32,
+        activation: 'tanh'
+    }).apply(dropout2);
 
-    // 2. Calculate attention weights (Softmax over time)
     const attentionWeights = tf.layers.dense({
         units: 1,
-        activation: 'softmax',
-        name: 'attention_weights'
+        activation: 'softmax'
     }).apply(attentionEnergy);
 
-    // 3. Apply weights to sequence
-    const weightedSequence = tf.layers.multiply().apply([dropout1, attentionWeights]);
-
-    // 4. Global Average Pooling (Context Vector)
+    const weightedSequence = tf.layers.multiply().apply([dropout2, attentionWeights]);
     const contextVector = tf.layers.globalAveragePooling1d().apply(weightedSequence);
-    // ---------------------------
 
     const batchNorm1 = tf.layers.batchNormalization().apply(contextVector);
 
-    // Layer 3: Interpretation
+    // Layer 3: Residual-style Interpretation
     const dense1 = tf.layers.dense({
         units: 32,
-        activation: 'relu',
-        kernelRegularizer: tf.regularizers.l2({ l2: 0.005 })
+        activation: 'relu'
     }).apply(batchNorm1);
 
     const dense2 = tf.layers.dense({
@@ -306,11 +324,10 @@ export const createModel = () => {
     }).apply(dense1);
 
     const output = tf.layers.dense({ units: 1, activation: 'linear' }).apply(dense2);
-
     const model = tf.model({ inputs: input, outputs: output });
 
     model.compile({
-        optimizer: tf.train.adam(0.0015), // Slightly lower LR for attention stability
+        optimizer: tf.train.adam(0.001),
         loss: 'meanSquaredError'
     });
 
@@ -346,7 +363,9 @@ export const predictNextPrice = (model, lastWindowSeries, stats) => {
             zScoreNormalize(lastWindowSeries.macd[i], stats[2].mean, stats[2].std),
             zScoreNormalize(lastWindowSeries.atr[i], stats[3].mean, stats[3].std),
             robustNormalize(lastWindowSeries.roc[i], stats[4].median, stats[4].iqr),
-            robustNormalize(lastWindowSeries.vol[i], stats[5].median, stats[5].iqr)
+            robustNormalize(lastWindowSeries.vol[i], stats[5].median, stats[5].iqr),
+            zScoreNormalize(lastWindowSeries.emaRatio[i], stats[6].mean, stats[6].std),
+            zScoreNormalize(lastWindowSeries.bPercent[i], stats[7].mean, stats[7].std)
         ]);
     }
 

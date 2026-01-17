@@ -10,7 +10,7 @@ const initTf = async () => {
     }
 };
 initTf();
-import { calculateRSI, calculateMACD, detectPatterns, calculateATR } from './technicalAnalysis.js';
+import { calculateRSI, calculateMACD, detectPatterns, calculateATR, calculateEMA, calculateBollingerBands } from './technicalAnalysis.js';
 import { calculateROC, calculateRollingVolatility } from './featureEngineering.js';
 
 // Hyperparameters (Industry Upgraded - V4 Precision)
@@ -18,7 +18,7 @@ import { calculateROC, calculateRollingVolatility } from './featureEngineering.j
 const WINDOW_SIZE = 45;
 const EPOCHS = 25;
 const BATCH_SIZE = 32;
-const FEATURES = 6; // Price, RSI, MACD Histogram, ATR, ROC, Volatility
+const FEATURES = 8; // V5: Price, RSI, MACD, ATR, ROC, Vol, EMA Ratio, BB %B
 
 const zScoreNormalize = (val, mean, std) => (val - mean) / (std || 1);
 
@@ -35,15 +35,17 @@ const calculateRobustStats = (arr) => {
 
 const augmentPattern = (patternVector) => {
     return patternVector.map(step => {
-        const noise = (Math.random() - 0.5) * 0.0005; // Slightly lower noise for more precision
-        const scale = 0.999 + (Math.random() * 0.002);
+        const noise = (Math.random() - 0.5) * 0.0004;
+        const scale = 0.9992 + (Math.random() * 0.0016);
         return [
             step[0] * scale + noise,
             step[1] * scale + noise,
             step[2] * scale + noise,
             step[3] * scale + noise,
             step[4] * scale + noise,
-            step[5] * scale + noise
+            step[5] * scale + noise,
+            step[6] * scale + noise,
+            step[7] * scale + noise
         ];
     });
 };
@@ -52,24 +54,32 @@ const augmentPattern = (patternVector) => {
  * Calculate stats for Z-Score normalization WITHOUT creating tensors
  */
 const calculateStats = (dataSeries) => {
-    const { prices, rsi, macd, atr, roc, vol } = dataSeries;
-    const minLen = Math.min(prices.length, rsi.length, macd.length, (atr?.length || 0), (roc?.length || 0), (vol?.length || 0));
+    const { prices, rsi, macd, atr, roc, vol, emaRatio, bPercent } = dataSeries;
+    const minLen = Math.min(prices.length, rsi.length, macd.length, (atr?.length || 0), (roc?.length || 0), (vol?.length || 0), (emaRatio?.length || 0), (bPercent?.length || 0));
+
     const p = prices.slice(-minLen);
     const r = rsi.slice(-minLen);
     const m = macd.slice(-minLen);
     const a = atr.slice(-minLen);
     const ro = roc.slice(-minLen);
     const v = vol.slice(-minLen);
+    const er = emaRatio.slice(-minLen);
+    const bp = bPercent.slice(-minLen);
 
     const stats = [];
     [r, m, a].forEach(arr => {
-        const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
-        const std = Math.sqrt(arr.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / arr.length) || 1;
+        const mean = arr.reduce((a, b) => a + b, 0) / (arr.length || 1);
+        const std = Math.sqrt(arr.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (arr.length || 1)) || 1;
         stats.push({ mean, std });
     });
     [ro, v].forEach(arr => {
         const rs = calculateRobustStats(arr);
         stats.push(rs);
+    });
+    [er, bp].forEach(arr => {
+        const mean = arr.reduce((a, b) => a + b, 0) / (arr.length || 1);
+        const std = Math.sqrt(arr.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (arr.length || 1)) || 1;
+        stats.push({ mean, std });
     });
 
     return [{ base: p[0] }, ...stats];
@@ -79,8 +89,8 @@ const calculateStats = (dataSeries) => {
  * Multivariate Data Preparation with Z-Score Normalization
  */
 const prepareData = (dataSeries, windowSize) => {
-    const { prices, rsi, macd, atr, roc, vol } = dataSeries;
-    const minLen = Math.min(prices.length, rsi.length, macd.length, (atr?.length || 0), (roc?.length || 0), (vol?.length || 0));
+    const { prices, rsi, macd, atr, roc, vol, emaRatio, bPercent } = dataSeries;
+    const minLen = Math.min(prices.length, rsi.length, macd.length, (atr?.length || 0), (roc?.length || 0), (vol?.length || 0), (emaRatio?.length || 0), (bPercent?.length || 0));
     const stats = calculateStats(dataSeries);
 
     const p = prices.slice(-minLen);
@@ -89,6 +99,8 @@ const prepareData = (dataSeries, windowSize) => {
     const a = atr.slice(-minLen);
     const ro = roc.slice(-minLen);
     const v = vol.slice(-minLen);
+    const er = emaRatio.slice(-minLen);
+    const bp = bPercent.slice(-minLen);
 
     const count = minLen - windowSize;
     if (count <= 0) return { xs: tf.tensor3d([], [0, windowSize, FEATURES]), ys: tf.tensor2d([], [0, 1]), stats };
@@ -107,7 +119,9 @@ const prepareData = (dataSeries, windowSize) => {
                 zScoreNormalize(m[i + j], stats[2].mean, stats[2].std),
                 zScoreNormalize(a[i + j], stats[3].mean, stats[3].std),
                 robustNormalize(ro[i + j], stats[4].median, stats[4].iqr),
-                robustNormalize(v[i + j], stats[5].median, stats[5].iqr)
+                robustNormalize(v[i + j], stats[5].median, stats[5].iqr),
+                zScoreNormalize(er[i + j], stats[6].mean, stats[6].std),
+                zScoreNormalize(bp[i + j], stats[7].mean, stats[7].std)
             ]);
         }
 
@@ -129,50 +143,36 @@ const prepareData = (dataSeries, windowSize) => {
 const createModel = () => {
     const input = tf.input({ shape: [WINDOW_SIZE, FEATURES] });
 
-    // Layer 1: LSTM (Temporal Feature Extraction)
     const lstm1 = tf.layers.lstm({
         units: 64,
         returnSequences: true,
         recurrentInitializer: 'glorotUniform',
-        kernelRegularizer: tf.regularizers.l2({ l2: 0.005 })
+        kernelRegularizer: tf.regularizers.l2({ l2: 0.001 })
     }).apply(input);
 
-    const dropout1 = tf.layers.dropout({ rate: 0.2 }).apply(lstm1);
+    const lstm2 = tf.layers.lstm({
+        units: 32,
+        returnSequences: true,
+        recurrentInitializer: 'glorotUniform'
+    }).apply(lstm1);
 
-    // Attention Mechanism
-    const attentionEnergy = tf.layers.dense({
-        units: 64,
-        activation: 'tanh'
-    }).apply(dropout1);
+    const dropout2 = tf.layers.dropout({ rate: 0.25 }).apply(lstm2);
 
-    const attentionWeights = tf.layers.dense({
-        units: 1,
-        activation: 'softmax'
-    }).apply(attentionEnergy);
-
-    const weightedSequence = tf.layers.multiply().apply([dropout1, attentionWeights]);
+    const attentionEnergy = tf.layers.dense({ units: 32, activation: 'tanh' }).apply(dropout2);
+    const attentionWeights = tf.layers.dense({ units: 1, activation: 'softmax' }).apply(attentionEnergy);
+    const weightedSequence = tf.layers.multiply().apply([dropout2, attentionWeights]);
     const contextVector = tf.layers.globalAveragePooling1d().apply(weightedSequence);
 
     const batchNorm1 = tf.layers.batchNormalization().apply(contextVector);
 
-    // Interpretation Layers
-    const dense1 = tf.layers.dense({
-        units: 32,
-        activation: 'relu',
-        kernelRegularizer: tf.regularizers.l2({ l2: 0.005 })
-    }).apply(batchNorm1);
-
-    const dense2 = tf.layers.dense({
-        units: 16,
-        activation: 'relu'
-    }).apply(dense1);
-
+    const dense1 = tf.layers.dense({ units: 32, activation: 'relu' }).apply(batchNorm1);
+    const dense2 = tf.layers.dense({ units: 16, activation: 'relu' }).apply(dense1);
     const output = tf.layers.dense({ units: 1, activation: 'linear' }).apply(dense2);
 
     const model = tf.model({ inputs: input, outputs: output });
 
     model.compile({
-        optimizer: tf.train.adam(0.0015),
+        optimizer: tf.train.adam(0.001),
         loss: 'meanSquaredError'
     });
 
@@ -204,7 +204,9 @@ const predictNextPrice = (model, lastWindowSeries, stats) => {
             zScoreNormalize(lastWindowSeries.macd[i], stats[2].mean, stats[2].std),
             zScoreNormalize(lastWindowSeries.atr[i], stats[3].mean, stats[3].std),
             robustNormalize(lastWindowSeries.roc[i], stats[4].median, stats[4].iqr),
-            robustNormalize(lastWindowSeries.vol[i], stats[5].median, stats[5].iqr)
+            robustNormalize(lastWindowSeries.vol[i], stats[5].median, stats[5].iqr),
+            zScoreNormalize(lastWindowSeries.emaRatio[i], stats[6].mean, stats[6].std),
+            zScoreNormalize(lastWindowSeries.bPercent[i], stats[7].mean, stats[7].std)
         ]);
     }
 
@@ -225,14 +227,25 @@ const assessModelAccuracy = async (fullPrices, reportProgress) => {
     const atr = calculateATR(fullPrices, null, fullPrices, 14);
     const roc = calculateROC(fullPrices, 10);
     const vol = calculateRollingVolatility(fullPrices, 20);
+    const ema8 = calculateEMA(fullPrices, 8);
+    const ema21 = calculateEMA(fullPrices, 21);
+    const emaRatio = ema8.map((v, i) => v / (ema21[i] || 1));
+    const { upper, lower } = calculateBollingerBands(fullPrices, 20);
+    const bPercent = fullPrices.slice(-(upper.length)).map((c, i) => (c - lower[i]) / (upper[i] - lower[i] || 1));
 
-    const minLen = Math.min(fullPrices.length, rsi.length, macdHist.length, (atr?.length || 0), (roc?.length || 0), (vol?.length || 0));
-    const prices = fullPrices.slice(-minLen);
+    const minLen = Math.min(
+        fullPrices.length, rsi.length, macdHist.length,
+        (atr?.length || 0), (roc?.length || 0), (vol?.length || 0),
+        (emaRatio?.length || 0), (bPercent?.length || 0)
+    );
+    const p = fullPrices.slice(-minLen);
     const r = rsi.slice(-minLen);
     const m = macdHist.slice(-minLen);
     const a = atr.slice(-minLen);
     const ro = roc.slice(-minLen);
     const v = vol.slice(-minLen);
+    const er = emaRatio.slice(-minLen);
+    const bp = bPercent.slice(-minLen);
 
     const TEST_POINTS = 10;
     if (minLen < WINDOW_SIZE + TEST_POINTS + 10) {
@@ -250,12 +263,14 @@ const assessModelAccuracy = async (fullPrices, reportProgress) => {
 
     const baseIdx = minLen - TEST_POINTS;
     const baseSeries = {
-        prices: prices.slice(0, baseIdx),
+        prices: p.slice(0, baseIdx),
         rsi: r.slice(0, baseIdx),
         macd: m.slice(0, baseIdx),
         atr: a.slice(0, baseIdx),
         roc: ro.slice(0, baseIdx),
-        vol: v.slice(0, baseIdx)
+        vol: v.slice(0, baseIdx),
+        emaRatio: er.slice(0, baseIdx),
+        bPercent: bp.slice(0, baseIdx)
     };
 
     if (reportProgress) reportProgress(10);
@@ -270,12 +285,14 @@ const assessModelAccuracy = async (fullPrices, reportProgress) => {
 
         const predicted = tf.tidy(() => {
             const lastWindowSeries = {
-                prices: prices.slice(targetIdx - WINDOW_SIZE, targetIdx),
+                prices: p.slice(targetIdx - WINDOW_SIZE, targetIdx),
                 rsi: r.slice(targetIdx - WINDOW_SIZE, targetIdx),
                 macd: m.slice(targetIdx - WINDOW_SIZE, targetIdx),
                 atr: a.slice(targetIdx - WINDOW_SIZE, targetIdx),
                 roc: ro.slice(targetIdx - WINDOW_SIZE, targetIdx),
-                vol: v.slice(targetIdx - WINDOW_SIZE, targetIdx)
+                vol: v.slice(targetIdx - WINDOW_SIZE, targetIdx),
+                emaRatio: er.slice(targetIdx - WINDOW_SIZE, targetIdx),
+                bPercent: bp.slice(targetIdx - WINDOW_SIZE, targetIdx)
             };
             return predictNextPrice(model, lastWindowSeries, stats);
         });
@@ -302,12 +319,14 @@ const assessModelAccuracy = async (fullPrices, reportProgress) => {
             for (let j = 0; j < WINDOW_SIZE; j++) {
                 const idx = (targetIdx - WINDOW_SIZE) + j;
                 x.push([
-                    (prices[idx] - basePrice) / (basePrice || 1),
+                    (p[idx] - basePrice) / (basePrice || 1),
                     zScoreNormalize(r[idx], stats[1].mean, stats[1].std),
                     zScoreNormalize(m[idx], stats[2].mean, stats[2].std),
                     zScoreNormalize(a[idx], stats[3].mean, stats[3].std),
                     robustNormalize(ro[idx], stats[4].median, stats[4].iqr),
-                    robustNormalize(v[idx], stats[5].median, stats[5].iqr)
+                    robustNormalize(v[idx], stats[5].median, stats[5].iqr),
+                    zScoreNormalize(er[idx], stats[6].mean, stats[6].std),
+                    zScoreNormalize(bp[idx], stats[7].mean, stats[7].std)
                 ]);
             }
             const xt = tf.tensor3d([x], [1, WINDOW_SIZE, FEATURES]);
@@ -353,9 +372,9 @@ self.onmessage = async (e) => {
 
     try {
         if (type === 'TRAIN_AND_PREDICT') {
-            const { ticker, historicalPrices, rsi, macdHist, atr, roc, vol } = data;
+            const { ticker, historicalPrices, rsi, macdHist, atr, roc, vol, emaRatio, bPercent } = data;
             const model = createModel();
-            const dataSeries = { prices: historicalPrices, rsi, macd: macdHist, atr, roc, vol };
+            const dataSeries = { prices: historicalPrices, rsi, macd: macdHist, atr, roc, vol, emaRatio, bPercent };
 
             const trainResult = await trainModel(model, dataSeries);
             if (!trainResult) throw new Error(`Neural core training rejected: Insufficient data (${historicalPrices.length} bars)`);
@@ -366,7 +385,9 @@ self.onmessage = async (e) => {
                 macd: macdHist.slice(-WINDOW_SIZE),
                 atr: atr.slice(-WINDOW_SIZE),
                 roc: roc.slice(-WINDOW_SIZE),
-                vol: vol.slice(-WINDOW_SIZE)
+                vol: vol.slice(-WINDOW_SIZE),
+                emaRatio: emaRatio.slice(-WINDOW_SIZE),
+                bPercent: bPercent.slice(-WINDOW_SIZE)
             };
 
             const predictedPrice = predictNextPrice(model, lastWindow, trainResult.stats);

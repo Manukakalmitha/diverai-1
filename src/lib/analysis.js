@@ -77,6 +77,13 @@ export const calculateHybridProbability = (neuralProb, patternSentiment, indicat
     }, (1 - P0));
 
     const finalProb = 1 - product;
+
+    // V5.8: NaN Sanitation Guard
+    if (isNaN(finalProb) || !isFinite(finalProb)) {
+        console.warn("[Neural Core] NaN detected in Engine Fusion. Reverting to Baseline.");
+        return 0.5;
+    }
+
     return Math.min(0.995, Math.max(0.005, finalProb));
 };
 
@@ -121,6 +128,15 @@ export const runRealAnalysis = async (ticker, marketStats, historicalData, user,
         ? calculateVWAP(highs, lows, closes, historicalData.volumes)
         : closes;
 
+    // V5.8: Advanced Feature Engineering (EMA Cross & BB %B)
+    const ema8 = calculateEMA(closes, 8);
+    const ema21 = calculateEMA(closes, 21);
+    const emaRatio = ema8.map((v, i) => v / (ema21[i] || 1));
+    const { upper, lower } = calculateBollingerBands(closes, 20);
+    const bbLen = upper?.length || 0;
+    const bPercentRaw = closes.slice(-bbLen).map((c, i) => (c - lower[i]) / (upper[i] - lower[i] || 1));
+    const bPercent = [...new Array(closes.length - bbLen).fill(0.5), ...bPercentRaw];
+
     // C. Multi-Timeframe Alignment
     let mtfBias = 0.5;
     try {
@@ -142,7 +158,7 @@ export const runRealAnalysis = async (ticker, marketStats, historicalData, user,
     const volRatio = calculateVolatilityRatio(closes);
     const volatilityRatio = currentATR / currentPrice;
 
-    if (closes.length >= WINDOW_SIZE) {
+    if (closes.length >= WINDOW_SIZE + 15) {
         if (fastMode) {
             const lastClose = closes[closes.length - 1];
             const prevClose = closes[closes.length - 15];
@@ -155,7 +171,7 @@ export const runRealAnalysis = async (ticker, marketStats, historicalData, user,
             try {
                 const roc = calculateROC(closes, 10);
                 const vol = calculateRollingVolatility(closes, 20);
-                const dataSeries = { prices: closes, rsi, macd: macdHist, atr, roc, vol };
+                const dataSeries = { prices: closes, rsi, macd: macdHist, atr, roc, vol, emaRatio, bPercent };
 
                 if (user) {
                     model = await loadGlobalModel(user, `lstm_v4_${ticker}`);
@@ -172,7 +188,9 @@ export const runRealAnalysis = async (ticker, marketStats, historicalData, user,
                         macdHist,
                         atr,
                         roc: rocTrain,
-                        vol: volTrain
+                        vol: volTrain,
+                        emaRatio,
+                        bPercent
                     });
 
                     if (workerResult) {
@@ -199,12 +217,17 @@ export const runRealAnalysis = async (ticker, marketStats, historicalData, user,
                             macd: macdHist.slice(-WINDOW_SIZE),
                             atr: atr.slice(-WINDOW_SIZE),
                             roc: roc.slice(-WINDOW_SIZE),
-                            vol: vol.slice(-WINDOW_SIZE)
+                            vol: vol.slice(-WINDOW_SIZE),
+                            emaRatio: emaRatio.slice(-WINDOW_SIZE),
+                            bPercent: bPercent.slice(-WINDOW_SIZE)
                         };
                         const predictedPrice = predictNextPrice(model, lastWindow, statsFactors);
 
                         const vam = 1.0 / (volatilityRatio * 10 || 1);
                         neuralProb = 0.5 + ((predictedPrice - currentPrice) / currentPrice * vam);
+
+                        // V5.8: Sanitization
+                        if (isNaN(neuralProb) || !isFinite(neuralProb)) neuralProb = 0.5;
                         neuralProb = Math.max(0.02, Math.min(0.98, neuralProb));
                     }
                 }
@@ -394,10 +417,10 @@ export const runRealAnalysis = async (ticker, marketStats, historicalData, user,
         factors,
         targets,
         riskMetrics,
-        macroTrend: { ...macroData, source: macroData?.source || 'Internal V4 Engine' },
+        macroTrend: { ...macroData, source: macroData?.source || 'Internal V5 Neural Core' },
         overview: generateStrategicOutlook(),
         ticker: ticker || "UNKNOWN",
-        version: `V4-RMSE-PRECISION (Iter: ${weights.iterations})`,
+        version: `V5-NEURAL-EDGE (Iter: ${weights.iterations})`,
         raw_prices: closes
     };
 };

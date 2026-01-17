@@ -131,11 +131,13 @@ export const detectPrice = (text) => {
     const decimalMatches = text.match(/\b\d{1,3}(?:[.,]\d{3})*[.,]\d{1,8}\b/g);
     const complexIntMatches = text.match(/\b\d{1,3}(?:,\d{3})+\b/g);
     const simpleIntMatches = text.match(/\b\d{4,7}\b/g);
+    const messyCommaMatches = text.match(/\b\d{1,3},\d{2,3}(?!,\d)\b/g); // Handles 92,72
 
     const allMatches = [
         ...(decimalMatches || []),
         ...(complexIntMatches || []),
-        ...(simpleIntMatches || [])
+        ...(simpleIntMatches || []),
+        ...(messyCommaMatches || [])
     ];
 
     const candidates = allMatches

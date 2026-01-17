@@ -175,7 +175,7 @@ export const extractROI = (canvas, ctx, region = 'top-left') => {
     }
 
     // V5.3 Diagnostic: Track down why ultra-small ROIs are being passed
-    if (w < 40 || h < 40) {
+    if (w < 50 || h < 30) {
         console.warn(`[OCR] ROI suspected too small (${w}x${h}) from region ${region}. Input canvas size: ${width}x${height}. Skipping to avoid Tesseract WASM errors.`);
         return canvas.toDataURL('image/png');
     }

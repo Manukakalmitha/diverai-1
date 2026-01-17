@@ -1406,17 +1406,20 @@ export default function Terminal() {
                                 const { error: refreshError } = await supabase.auth.refreshSession();
                                 if (!refreshError) {
                                     // Small delay to allow session propagation
-                                    await new Promise(r => setTimeout(r, 500));
+                                    await new Promise(r => setTimeout(r, 800));
                                     const { data: { session: freshSession } } = await supabase.auth.getSession();
-                                    const { data: retryData, error: retryError } = await supabase.functions.invoke('detect_ticker', {
-                                        body: { image: originalFileSrc },
-                                        headers: {
-                                            Authorization: `Bearer ${freshSession?.access_token}`
+
+                                    if (freshSession?.access_token) {
+                                        const { data: retryData, error: retryError } = await supabase.functions.invoke('detect_ticker', {
+                                            body: { image: originalFileSrc },
+                                            headers: {
+                                                Authorization: `Bearer ${freshSession.access_token}`
+                                            }
+                                        });
+                                        if (!retryError && retryData?.text) {
+                                            console.info("Retry successful.");
+                                            return { text: retryData.text, ticker: detectTicker(retryData.text) };
                                         }
-                                    });
-                                    if (!retryError && retryData?.text) {
-                                        console.info("Retry successful.");
-                                        return { text: retryData.text, ticker: detectTicker(retryData.text) };
                                     }
                                 }
                             } catch (refreshErr) {
