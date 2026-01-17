@@ -54,7 +54,6 @@ const AuthModal = ({ onClose, onSuccess }) => {
         }
     };
 
-    /*
     const handleGoogleLogin = async () => {
         setLoading(true);
         setError(null);
@@ -71,7 +70,6 @@ const AuthModal = ({ onClose, onSuccess }) => {
             setLoading(false);
         }
     };
-    */
 
     const handleResend = async () => {
         if (resendCooldown > 0) return;
