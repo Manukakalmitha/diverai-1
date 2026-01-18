@@ -1426,19 +1426,73 @@ export default function Terminal() {
                         // This prevents massive Egress usage from sending 4K screenshots
                         const compressedImage = await resizeImageForCloud(originalFileSrc);
 
-                        const { data, error } = await supabase.functions.invoke('detect_ticker', {
-                            body: { image: compressedImage },
-                        });
+                        // Ensure session is fresh before calling Edge Function
+                        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-                        if (error) throw error;
-                        if (data?.text) {
-                            return { text: data.text, ticker: detectTicker(data.text) };
+                        if (sessionError || !session) {
+                            console.warn("[Cloud OCR] No valid session found, attempting refresh...");
+                            const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+
+                            if (refreshError) {
+                                console.error("[Cloud OCR] Session refresh failed:", refreshError);
+                                throw new Error("Session expired. Please log in again.");
+                            }
+
+                            console.log("[Cloud OCR] Session refreshed successfully");
                         }
+
+                        // Invoke Edge Function with retry on 401
+                        let attempt = 0;
+                        let lastError = null;
+
+                        while (attempt < 2) {
+                            attempt++;
+                            console.log(`[Cloud OCR] Attempt ${attempt}/2`);
+
+                            const { data, error } = await supabase.functions.invoke('detect_ticker', {
+                                body: { image: compressedImage },
+                            });
+
+                            // Check for 401 specifically
+                            if (error) {
+                                console.error(`[Cloud OCR] Error on attempt ${attempt}:`, error);
+
+                                // If 401 and first attempt, refresh session and retry
+                                if (error.message?.includes('401') && attempt === 1) {
+                                    console.warn("[Cloud OCR] 401 detected, refreshing session and retrying...");
+                                    await supabase.auth.refreshSession();
+                                    lastError = error;
+                                    continue; // Retry
+                                }
+
+                                lastError = error;
+                                break; // Non-401 error or second attempt failed
+                            }
+
+                            // Success
+                            if (data?.text) {
+                                console.log("[Cloud OCR] Success:", data);
+                                return { text: data.text, ticker: detectTicker(data.text) };
+                            } else {
+                                console.warn("[Cloud OCR] No text in response:", data);
+                                break; // No data, don't retry
+                            }
+                        }
+
+                        // If we get here, all attempts failed
+                        throw lastError || new Error("Cloud OCR returned no data");
+
                     } catch (cloudErr) {
                         console.warn("Cloud OCR unavailable, using fallback:", cloudErr);
+                        console.error("[Cloud OCR] Full error details:", {
+                            message: cloudErr?.message,
+                            status: cloudErr?.status,
+                            details: cloudErr?.details
+                        });
                         setStatusMessage("Cloud OCR unavailable. Switching to Local Neural Engine...");
                     }
                 }
+
 
                 // Multi-Pass OCR with Advanced Preprocessing
                 try {

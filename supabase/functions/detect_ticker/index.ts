@@ -41,13 +41,22 @@ serve(async (req) => {
 
         if (authError || !user) {
             console.error("[Access] Blocked: Unauthorized");
-            return new Response(JSON.stringify({ error: 'Unauthorized', code: 'AUTH_REQUIRED' }), {
+            console.error("[Auth Debug] Error details:", authError);
+            console.error("[Auth Debug] Token present:", !!token);
+            console.error("[Auth Debug] Auth header:", authHeader ? 'present' : 'missing');
+            console.error("[Auth Debug] API key header:", apiKeyHeader ? 'present' : 'missing');
+
+            return new Response(JSON.stringify({
+                error: 'Authentication required. Please ensure you are logged in.',
+                code: 'AUTH_REQUIRED',
+                details: authError?.message || 'No user session found'
+            }), {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                 status: 401,
             });
         }
 
-        console.log(`[Flow] User Authenticated: ${user.email}`);
+        console.log(`[Flow] User Authenticated: ${user.email} (ID: ${user.id})`);
 
         // 3. Restriction Check (Soft Device Limit)
         const { data: profile } = await supabaseClient
