@@ -1426,61 +1426,36 @@ export default function Terminal() {
                         // This prevents massive Egress usage from sending 4K screenshots
                         const compressedImage = await resizeImageForCloud(originalFileSrc);
 
-                        // Ensure session is fresh before calling Edge Function
-                        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+                        // PRE-EMPTIVE SESSION REFRESH: Always refresh before Edge Function call
+                        // This guarantees a fresh JWT token and eliminates 401 errors
+                        console.log("[Cloud OCR] Refreshing session for fresh JWT...");
+                        const { data: { session }, error: refreshError } = await supabase.auth.refreshSession();
 
-                        if (sessionError || !session) {
-                            console.warn("[Cloud OCR] No valid session found, attempting refresh...");
-                            const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-
-                            if (refreshError) {
-                                console.error("[Cloud OCR] Session refresh failed:", refreshError);
-                                throw new Error("Session expired. Please log in again.");
-                            }
-
-                            console.log("[Cloud OCR] Session refreshed successfully");
+                        if (refreshError || !session) {
+                            console.error("[Cloud OCR] Session refresh failed:", refreshError);
+                            throw new Error("Session expired. Please log in again.");
                         }
 
-                        // Invoke Edge Function with retry on 401
-                        let attempt = 0;
-                        let lastError = null;
+                        console.log("[Cloud OCR] Session refreshed successfully");
 
-                        while (attempt < 2) {
-                            attempt++;
-                            console.log(`[Cloud OCR] Attempt ${attempt}/2`);
+                        // Invoke Edge Function with fresh token
+                        const { data, error } = await supabase.functions.invoke('detect_ticker', {
+                            body: { image: compressedImage }
+                        });
 
-                            const { data, error } = await supabase.functions.invoke('detect_ticker', {
-                                body: { image: compressedImage },
-                            });
-
-                            // Check for 401 specifically
-                            if (error) {
-                                console.error(`[Cloud OCR] Error on attempt ${attempt}:`, error);
-
-                                // If 401 and first attempt, refresh session and retry
-                                if (error.message?.includes('401') && attempt === 1) {
-                                    console.warn("[Cloud OCR] 401 detected, refreshing session and retrying...");
-                                    await supabase.auth.refreshSession();
-                                    lastError = error;
-                                    continue; // Retry
-                                }
-
-                                lastError = error;
-                                break; // Non-401 error or second attempt failed
-                            }
-
-                            // Success
-                            if (data?.text) {
-                                console.log("[Cloud OCR] Success:", data);
-                                return { text: data.text, ticker: detectTicker(data.text) };
-                            } else {
-                                console.warn("[Cloud OCR] No text in response:", data);
-                                break; // No data, don't retry
-                            }
+                        if (error) {
+                            console.error("[Cloud OCR] Edge Function error:", error);
+                            throw error;
                         }
 
-                        // If we get here, all attempts failed
-                        throw lastError || new Error("Cloud OCR returned no data");
+                        // Success
+                        if (data?.text) {
+                            console.log("[Cloud OCR] Success:", data);
+                            return { text: data.text, ticker: detectTicker(data.text) };
+                        } else {
+                            console.warn("[Cloud OCR] No text in response:", data);
+                            throw new Error("Cloud OCR returned no data");
+                        }
 
                     } catch (cloudErr) {
                         console.warn("Cloud OCR unavailable, using fallback:", cloudErr);

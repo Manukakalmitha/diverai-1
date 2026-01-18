@@ -40,11 +40,17 @@ serve(async (req) => {
         const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
 
         if (authError || !user) {
+            const debugInfo = {
+                timestamp: new Date().toISOString(),
+                error: authError?.message || 'No user session found',
+                hasToken: !!token,
+                hasAuthHeader: !!authHeader,
+                hasApiKeyHeader: !!apiKeyHeader,
+                tokenPrefix: token ? token.substring(0, 20) + '...' : 'none'
+            };
+
             console.error("[Access] Blocked: Unauthorized");
-            console.error("[Auth Debug] Error details:", authError);
-            console.error("[Auth Debug] Token present:", !!token);
-            console.error("[Auth Debug] Auth header:", authHeader ? 'present' : 'missing');
-            console.error("[Auth Debug] API key header:", apiKeyHeader ? 'present' : 'missing');
+            console.error("[Auth Debug] Full context:", JSON.stringify(debugInfo));
 
             return new Response(JSON.stringify({
                 error: 'Authentication required. Please ensure you are logged in.',
