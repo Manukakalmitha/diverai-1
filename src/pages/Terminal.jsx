@@ -1422,20 +1422,12 @@ export default function Terminal() {
                     try {
                         setStatusMessage("Deep Scan (Cloud OCR)...");
 
-                        // V5.9 Fix: Use ANON KEY for Cloud OCR to prevent 401 errors
-                        // The function is public/stateless, so we don't need the user session here.
-                        // This bypasses any clock skew or session sync issues.
-                        const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
                         // OPTIMIZATION: Resize image before sending to Edge Function
                         // This prevents massive Egress usage from sending 4K screenshots
                         const compressedImage = await resizeImageForCloud(originalFileSrc);
 
                         const { data, error } = await supabase.functions.invoke('detect_ticker', {
                             body: { image: compressedImage },
-                            headers: {
-                                Authorization: `Bearer ${anonKey}`
-                            }
                         });
 
                         if (error) throw error;
