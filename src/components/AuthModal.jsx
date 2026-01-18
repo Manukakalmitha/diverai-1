@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Mail, Lock, Loader2, X, AlertCircle } from 'lucide-react';
+import { getThumbmark } from '@thumbmarkjs/thumbmarkjs';
 
 const AuthModal = ({ onClose, onSuccess }) => {
     const [isLogin, setIsLogin] = useState(true);
@@ -10,6 +11,11 @@ const AuthModal = ({ onClose, onSuccess }) => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState(null);
     const [resendCooldown, setResendCooldown] = useState(0);
+    const [fingerprint, setFingerprint] = useState(null);
+
+    React.useEffect(() => {
+        getThumbmark().then(fp => setFingerprint(fp));
+    }, []);
 
     const handleAuth = async (e) => {
         e.preventDefault();
@@ -49,6 +55,9 @@ const AuthModal = ({ onClose, onSuccess }) => {
                     email,
                     password,
                     options: {
+                        data: {
+                            device_fingerprint: fingerprint
+                        },
                         emailRedirectTo: `${window.location.origin}/analysis`
                     }
                 });

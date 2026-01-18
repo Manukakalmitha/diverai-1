@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { Mail, Lock, Loader2, AlertCircle, ArrowLeft, Activity, CheckCircle2, Chrome } from 'lucide-react';
+import { getThumbmark } from '@thumbmarkjs/thumbmarkjs';
 import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 
@@ -19,6 +20,11 @@ const AuthPage = ({ initialMode = 'login' }) => {
     const extId = queryParams.get('extId');
     const [isExtAuthSuccess, setIsExtAuthSuccess] = useState(false);
     const [referralCode, setReferralCode] = useState(localStorage.getItem('referral_code') || '');
+    const [fingerprint, setFingerprint] = useState(null);
+
+    useEffect(() => {
+        getThumbmark().then(fp => setFingerprint(fp));
+    }, []);
 
     useEffect(() => {
         const ref = queryParams.get('ref');
@@ -98,7 +104,8 @@ const AuthPage = ({ initialMode = 'login' }) => {
                     password,
                     options: {
                         data: {
-                            referred_by: referralCode || undefined
+                            referred_by: referralCode || undefined,
+                            device_fingerprint: fingerprint
                         },
                         emailRedirectTo: source === 'extension'
                             ? `${window.location.origin}/login?source=extension&extId=${extId}`
