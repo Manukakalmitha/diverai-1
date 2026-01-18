@@ -10,13 +10,10 @@
         "unlimitedStorage"
     ],
     "host_permissions": [
-        "<all_urls>",
         "https://www.tradingview.com/*",
         "https://finance.yahoo.com/*",
         "https://*.coingecko.com/*",
-        "https://coinmarketcap.com/*",
-        "https://*.binance.com/*",
-        "https://*.google.com/finance*",
+        "https://robinhood.com/*",
         "https://api.ipify.org/*",
         "https://brrjoheinakfhohesogc.supabase.co/*",
         "https://finnhub.io/*"
@@ -69,9 +66,7 @@
                 "https://www.tradingview.com/chart/*",
                 "https://finance.yahoo.com/*",
                 "https://*.coingecko.com/*",
-                "https://coinmarketcap.com/*",
-                "https://*.binance.com/*",
-                "https://*.google.com/finance*"
+                "https://robinhood.com/*"
             ],
             "js": [
                 "content.js"
