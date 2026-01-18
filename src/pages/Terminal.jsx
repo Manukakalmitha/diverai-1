@@ -33,6 +33,42 @@ import CandlestickVisual from '../components/CandlestickVisuals';
 // runRealAnalysis moved to ../lib/analysis.js
 
 // --- Child Components ---
+// --- Helper Utils ---
+const resizeImageForCloud = (dataUrl) => {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+            try {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 1200; // Optimal for OCR while reducing size
+                let width = img.width;
+                let height = img.height;
+
+                if (width > MAX_WIDTH) {
+                    height = height * (MAX_WIDTH / width);
+                    width = MAX_WIDTH;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                // Use JPEG with 0.8 quality for good compression/quality ratio
+                resolve(canvas.toDataURL('image/jpeg', 0.8));
+            } catch (e) {
+                // If anything fails (e.g. canvas error), fallback to original
+                console.warn("Resize failed, using original", e);
+                resolve(dataUrl);
+            }
+        };
+        img.onerror = (e) => {
+            console.warn("Image load failed during resize", e);
+            resolve(dataUrl);
+        };
+        img.src = dataUrl;
+    });
+};
+
 const Sparkline = ({ data, color = 'emerald' }) => {
     if (!data || data.length < 2) return <div className="w-12 h-4 bg-black-ash/50 rounded animate-pulse" />;
     const min = Math.min(...data);
@@ -1391,8 +1427,12 @@ export default function Terminal() {
                         // This bypasses any clock skew or session sync issues.
                         const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+                        // OPTIMIZATION: Resize image before sending to Edge Function
+                        // This prevents massive Egress usage from sending 4K screenshots
+                        const compressedImage = await resizeImageForCloud(originalFileSrc);
+
                         const { data, error } = await supabase.functions.invoke('detect_ticker', {
-                            body: { image: originalFileSrc },
+                            body: { image: compressedImage },
                             headers: {
                                 Authorization: `Bearer ${anonKey}`
                             }
