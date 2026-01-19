@@ -37,25 +37,46 @@ serve(async (req) => {
         )
 
         // 2. Authentication (STRICT: No Guest Access)
-        const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+        // CRITICAL FIX: Use explicit token validation instead of header-based auth
+        // This resolves persistent 401 errors caused by getUser() not reading headers correctly
+        if (!token) {
+            console.error("[Access] Blocked: No token provided");
+            return new Response(JSON.stringify({
+                error: 'Authentication required. No authorization token provided.',
+                code: 'AUTH_REQUIRED',
+                details: 'Authorization header missing or malformed'
+            }), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 401,
+            });
+        }
+
+        const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
 
         if (authError || !user) {
             const debugInfo = {
                 timestamp: new Date().toISOString(),
                 error: authError?.message || 'No user session found',
                 hasToken: !!token,
+                tokenLength: token?.length || 0,
                 hasAuthHeader: !!authHeader,
                 hasApiKeyHeader: !!apiKeyHeader,
-                tokenPrefix: token ? token.substring(0, 20) + '...' : 'none'
+                tokenPrefix: token ? token.substring(0, 30) + '...' : 'none',
+                authErrorName: authError?.name,
+                authErrorStatus: authError?.status,
+                // Additional diagnostics
+                authHeaderPrefix: authHeader ? authHeader.substring(0, 30) + '...' : 'none',
+                supabaseUrl: Deno.env.get('SUPABASE_URL')?.substring(0, 30) + '...'
             };
 
             console.error("[Access] Blocked: Unauthorized");
-            console.error("[Auth Debug] Full context:", JSON.stringify(debugInfo));
+            console.error("[Auth Debug] Full context:", JSON.stringify(debugInfo, null, 2));
 
             return new Response(JSON.stringify({
                 error: 'Authentication required. Please ensure you are logged in.',
                 code: 'AUTH_REQUIRED',
-                details: authError?.message || 'No user session found'
+                details: authError?.message || 'No user session found',
+                debug: process.env.NODE_ENV === 'development' ? debugInfo : undefined
             }), {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                 status: 401,

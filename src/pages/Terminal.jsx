@@ -1426,27 +1426,58 @@ export default function Terminal() {
                         // This prevents massive Egress usage from sending 4K screenshots
                         const compressedImage = await resizeImageForCloud(originalFileSrc);
 
-                        // PRE-EMPTIVE SESSION REFRESH: Always refresh before Edge Function call
-                        // This guarantees a fresh JWT token and eliminates 401 errors
-                        console.log("[Cloud OCR] Refreshing session for fresh JWT...");
-                        const { data: { session }, error: refreshError } = await supabase.auth.refreshSession();
+                        // Helper function to invoke with retry logic
+                        const invokeWithRetry = async (attempt = 1) => {
+                            try {
+                                console.log(`[Cloud OCR] Attempt ${attempt}/2: Invoking detect_ticker...`);
 
-                        if (refreshError || !session) {
-                            console.error("[Cloud OCR] Session refresh failed:", refreshError);
-                            throw new Error("Session expired. Please log in again.");
-                        }
+                                const { data, error } = await supabase.functions.invoke('detect_ticker', {
+                                    body: { image: compressedImage }
+                                });
 
-                        console.log("[Cloud OCR] Session refreshed successfully");
+                                // Check for 401 specifically
+                                if (error) {
+                                    // FunctionsHttpError doesn't always expose status directly
+                                    // Check the error message or context
+                                    const is401 = error.message?.includes('401') ||
+                                        error.message?.includes('unauthorized') ||
+                                        error.message?.includes('Authentication required') ||
+                                        error.context?.status === 401;
 
-                        // Invoke Edge Function with fresh token
-                        const { data, error } = await supabase.functions.invoke('detect_ticker', {
-                            body: { image: compressedImage }
-                        });
+                                    if (is401 && attempt === 1) {
+                                        console.warn("[Cloud OCR] 401 error detected, refreshing session and retrying...");
 
-                        if (error) {
-                            console.error("[Cloud OCR] Edge Function error:", error);
-                            throw error;
-                        }
+                                        // Refresh session and retry
+                                        const { data: { session }, error: refreshError } = await supabase.auth.refreshSession();
+
+                                        if (refreshError || !session) {
+                                            console.error("[Cloud OCR] Session refresh failed:", refreshError);
+                                            throw new Error("Session expired. Please log in again.");
+                                        }
+
+                                        console.log("[Cloud OCR] Session refreshed, retrying...");
+
+                                        // Wait briefly for session to propagate
+                                        await new Promise(resolve => setTimeout(resolve, 500));
+
+                                        // Retry once
+                                        return await invokeWithRetry(2);
+                                    }
+
+                                    // Non-401 error or retry exhausted
+                                    throw error;
+                                }
+
+                                return data;
+
+                            } catch (err) {
+                                // Re-throw to outer catch
+                                throw err;
+                            }
+                        };
+
+                        // Execute with retry logic
+                        const data = await invokeWithRetry();
 
                         // Success
                         if (data?.text) {
@@ -1462,7 +1493,8 @@ export default function Terminal() {
                         console.error("[Cloud OCR] Full error details:", {
                             message: cloudErr?.message,
                             status: cloudErr?.status,
-                            details: cloudErr?.details
+                            details: cloudErr?.details,
+                            context: cloudErr?.context
                         });
                         setStatusMessage("Cloud OCR unavailable. Switching to Local Neural Engine...");
                     }
